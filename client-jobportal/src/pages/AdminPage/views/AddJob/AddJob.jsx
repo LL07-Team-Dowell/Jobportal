@@ -10,6 +10,7 @@ import { useCurrentUserContext } from "../../../../contexts/CurrentUserContext";
 import { useJobContext } from "../../../../contexts/Jobs";
 
 import { Link, useNavigate } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
 
 import "./style.css";
 import StaffJobLandingLayout from "../../../../layouts/StaffJobLandingLayout/StaffJobLandingLayout";
@@ -23,6 +24,7 @@ const AddJob = () => {
     job_number: crypto.randomUUID(),
     job_title: "",
     skills: "",
+    qualifications: "",
     job_category: "",
     type_of_job: "",
     time_interval: "",
@@ -164,6 +166,7 @@ const AddJob = () => {
       showAnotherBtn={true}
       btnIcon={<MdArrowBackIos size="1.5rem" />}
       handleNavIcon={() => navigate(-1)}
+      subAdminView={true}
     >
       <div className="job_container">
         {/*<Link to="/" className="navLink">
@@ -200,7 +203,15 @@ const AddJob = () => {
                 placeholder={"Enter Skills"}
                 required
               />
-
+              <label htmlFor="qualifications">Qualifications</label>
+              <input
+                type={"text"}
+                name={"qualifications"}
+                value={newJob.qualifications}
+                onChange={(e) => handleChange(e.target.value, e.target.name)}
+                placeholder={"Enter Qualifications"}
+                required
+              />
               <h3>Job Category</h3>
               <div className="job_category">
                 <label htmlFor="freelancer" className="radio">
@@ -235,8 +246,8 @@ const AddJob = () => {
                     type={"radio"}
                     id={"employee"}
                     name="options"
-                    value={"employee"}
-                    checked={selectedOption === "employee"}
+                    value={"Employee"}
+                    checked={selectedOption === "Employee"}
                     onChange={handleOptionChange}
                   />
                   <div className="radio__radio"></div>
@@ -368,16 +379,18 @@ const AddJob = () => {
 
               <div className="state_of_job">
                 <label htmlFor="is_active">State of Job</label>
-                <input
-                  className="active_checkbox"
-                  type="checkbox"
-                  name={"is_active"}
-                  checked={newJob.is_active}
-                  onChange={(e) =>
-                    handleChange(e.target.checked, e.target.name)
-                  }
-                  required
-                />
+                <div className="is_active">
+                  <input
+                    className="active_checkbox"
+                    type="checkbox"
+                    name={"is_active"}
+                    checked={newJob.is_active}
+                    onChange={(e) =>
+                      handleChange(e.target.checked, e.target.name)
+                    }
+                    required
+                  />
+                </div>
               </div>
 
               <label htmlFor="payment">Payment</label>
@@ -434,11 +447,18 @@ const AddJob = () => {
                 <button
                   className="terms_button"
                   onClick={() => handleAddTerms("general_terms")}
+                  id="addTermsBtn"
                 >
                   <span>
                     <MdOutlineAddCircle size="2.6rem" color="#005734" />
-                  </span>{" "}
-                  Add General Terms
+                    <Tooltip
+                      anchorId="addTermsBtn"
+                      place="top"
+                      content="Add General Terms"
+                      className="tooltip"
+                    />
+                  </span>
+                  <span className="terms_text">Add General Terms</span>
                 </button>
 
                 <h3>Technical Specifications</h3>
@@ -476,11 +496,18 @@ const AddJob = () => {
                 <button
                   className="terms_button"
                   onClick={() => handleAddTerms("technical_specification")}
+                  id="addSpecBtn"
                 >
                   <span>
                     <MdOutlineAddCircle size="2.6rem" color="#005734" />
-                  </span>{" "}
-                  Add Specifications
+                    <Tooltip
+                      anchorId="addSpecBtn"
+                      place="top"
+                      content="Add Specifications"
+                      className="tooltip"
+                    />
+                  </span>
+                  <span className="terms_text">Add Specifications</span>
                 </button>
 
                 <h3>Payment Terms</h3>
@@ -516,11 +543,18 @@ const AddJob = () => {
                 <button
                   className="terms_button"
                   onClick={() => handleAddTerms("payment_terms")}
+                  id="addPayBtn"
                 >
                   <span>
                     <MdOutlineAddCircle size="2.6rem" color="#005734" />
-                  </span>{" "}
-                  Add Payment Terms
+                    <Tooltip
+                      anchorId="addPayBtn"
+                      place="top"
+                      content="Add Payment Terms"
+                      className="tooltip"
+                    />
+                  </span>
+                  <span className="terms_text">Add Payment Terms</span>
                 </button>
 
                 <h3>Workflow</h3>
@@ -556,11 +590,18 @@ const AddJob = () => {
                 <button
                   className="terms_button"
                   onClick={() => handleAddTerms("workflow_terms")}
+                  id="addWorkBtn"
                 >
                   <span>
                     <MdOutlineAddCircle size="2.6rem" color="#005734" />
-                  </span>{" "}
-                  Add Workflow
+                    <Tooltip
+                      anchorId="addWorkBtn"
+                      place="top"
+                      content="Add Workflow"
+                      className="tooltip"
+                    />
+                  </span>
+                  <span className="terms_text">Add Workflow</span>
                 </button>
 
                 <h3>Others</h3>
@@ -596,11 +637,18 @@ const AddJob = () => {
                 <button
                   className="terms_button"
                   onClick={() => handleAddTerms("other_info")}
+                  id="addOthersBtn"
                 >
                   <span>
                     <MdOutlineAddCircle size="2.6rem" color="#005734" />
-                  </span>{" "}
-                  Add Others
+                    <Tooltip
+                      anchorId="addOthersBtn"
+                      place="top"
+                      content="Add Others"
+                      className="tooltip"
+                    />
+                  </span>
+                  <span className="terms_text">Add Others</span>
                 </button>
               </div>
 
