@@ -8,7 +8,7 @@ import "./EditJob.css";
 import Loading from '../../../../components/LoadingSpinner/LoadingSpinner';
 import StaffJobLandingLayout from '../../../../layouts/StaffJobLandingLayout/StaffJobLandingLayout';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { MdArrowBackIos } from 'react-icons/md';
+import { MdArrowBackIos, MdOutlineAddCircle } from 'react-icons/md';
 import { useJobContext } from '../../../../contexts/Jobs';
 import { getJobs } from '../../../../services/candidateServices';
 import { useCurrentUserContext } from '../../../../contexts/CurrentUserContext';
@@ -16,9 +16,10 @@ import LoadingSpinner from '../../../../components/LoadingSpinner/LoadingSpinner
 import LittleLoading from '../../../CandidatePage/views/ResearchAssociatePage/littleLoading';
 import { updateJob } from '../../../../services/adminServices';
 import { toast } from 'react-toastify';
+import { Tooltip } from "react-tooltip";
 
 
-function EditJob({subAdminView}) {
+function EditJob({ subAdminView }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -58,23 +59,35 @@ function EditJob({subAdminView}) {
   const [selectedOption, setSelectedOption] = useState(job_category || "");
   const [active, setActive] = useState(is_active);
   const [typeofOption, setTypeofOption] = useState(type_of_job || "");
-  console.log(typeofOption);
+
+  // jobs.map(singleJob => {
+  //   if (singleJob.id !== id) return singleJob
+  //   return {…singleJob,//things u edit}
+
   useEffect(() => {
     setSelectedOption(job_category);
     setActive(is_active);
-    setTypeofOption(type_of_job)
-  }, [singleJob]);
+    setTypeofOption(type_of_job);
+  }, [job_category]);
 
 
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setUpdateLoading(true);
-    setLoading(false)
+    // setLoading(false)
     console.log(formData);
-    updateJob(formData)
+    await updateJob(formData)
       .then(response => {
         console.log(response)
         if (response.status === 200) {
+          console.log(formData);
+          setJobs(jobs.map((job) => {
+            if (job._id === _id) {
+              return { ...job, ...formData }
+            } else {
+              return job
+            }
+          }))
           navigate(-1);
           toast.success("Job updation successfully");
         }
@@ -82,12 +95,11 @@ function EditJob({subAdminView}) {
       .catch(error => console.log(error));
 
     setUpdateLoading(false);
-
   }
 
   useEffect(() => {
     if (jobs.length > 0) return setLoading(false);
-    setLoading(true);
+    // setLoading(true);
     const datass = currentUser.portfolio_info[0].org_id;
     getJobs(datass).then(res => {
       setJobs(res.data.response.data.filter(job => job.data_type === currentUser?.portfolio_info[0]?.data_type));
@@ -106,7 +118,7 @@ function EditJob({subAdminView}) {
         formDataUpdates.job_title = job_title;
         formDataUpdates.description = description;
         formDataUpdates.skills = skills;
-        formDataUpdates.job_category = selectedOption;
+        formDataUpdates.job_category = job_category;
         formDataUpdates.time_interval = time_interval;
         formDataUpdates.payment = payment;
         formDataUpdates.type_of_job = typeofOption;
@@ -131,12 +143,13 @@ function EditJob({subAdminView}) {
       default:
         break;
     }
+
     setFormData(prevState => ({
       ...prevState,
       ...formDataUpdates
     }));
 
-  }, [payment_terms, data_type, description, general_terms, is_active, selectedOption, job_number, job_title, other_info, payment, qualification, skills, technical_specification, time_interval, type_of_job, workflow_terms, _id, document_id]);
+  }, []);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -225,45 +238,6 @@ function EditJob({subAdminView}) {
   }
 
 
-  // const handleSubmit = async (event) => {
-  //   // event.preventDeafult();
-  //   setUpdateLoading(true);
-  //   alert("clicked")
-  //   // try {
-  //   //   fetch('https://100098.pythonanywhere.com/admin_management/update_jobs/', {
-  //   //     method: 'POST',
-  //   //     headers: {
-  //   //       'Content-Type': 'application/json',
-  //   //     },
-  //   //     body: JSON.stringify(formData),
-  //   //   })
-  //   //     .then((res) => res.json())
-  //   //     .then((data) => {
-  //   //       console.log(data);
-  //   //     });
-  //   // } catch (e) {
-  //   //   setError(e)
-  //   // }
-  //   console.log(formData);
-  //   try {
-  //     const response = await updateJob(formData);
-  //     console.log(formData);
-  //     console.log(response);
-
-  //     // if (response.status === 200) {
-  //     //   formData((prevValue) => [formData, ...prevValue]);
-  //     //   toast.success("Job updation successfully");
-  //     //   navigate("/");
-  //     // } else {
-  //     //   toast.info("Something went wrong");
-  //     // }
-  //   } catch (error) {
-  //     toast.error("Something went wrong");
-  //   }
-
-  //   setUpdateLoading(false);
-  // };
-
 
   if (loading) return <LoadingSpinner />
 
@@ -284,7 +258,7 @@ function EditJob({subAdminView}) {
                 <h3>Job Details</h3>
               </div>
 
-              <form onSubmit={handleSubmit}>
+              <form>
                 <div className='input__data'>
                   <label htmlFor="job_title">Name of Job</label>
                   <input
@@ -520,8 +494,14 @@ function EditJob({subAdminView}) {
                     }
                   </div>
 
-                  <div className="add__item">
+                  <div className="add__item" id='addGerarelTerm'>
                     <AiFillPlusCircle onClick={() => handleAddTerm("general_terms")} />
+                    <Tooltip
+                      anchorId="addGerarelTerm"
+                      place="top"
+                      content="Add General Terms"
+                      className="tooltip"
+                    />
                     <label>Add General Terms</label>
                   </div>
                 </div>
@@ -539,8 +519,14 @@ function EditJob({subAdminView}) {
                       }))
                     }
                   </div>
-                  <div className="add__item">
+                  <div className="add__item" id='addSpecifications'>
                     <AiFillPlusCircle onClick={() => handleAddTerm("technical_specification")} />
+                    <Tooltip
+                      anchorId="addSpecifications"
+                      place="top"
+                      content="Add Technical Specifications"
+                      className="tooltip"
+                    />
                     <label>Add Specifications</label>
                   </div>
                 </div>
@@ -559,8 +545,14 @@ function EditJob({subAdminView}) {
                       }))
                     }
                   </div>
-                  <div className="add__item">
+                  <div className="add__item" id='addPayment'>
                     <AiFillPlusCircle onClick={() => handleAddTerm("payment_terms")} />
+                    <Tooltip
+                      anchorId="addPayment"
+                      place="top"
+                      content="Add Payment Terms"
+                      className="tooltip"
+                    />
                     <label>Add Payment Terms</label>
                   </div>
                 </div>
@@ -577,10 +569,19 @@ function EditJob({subAdminView}) {
                       }))
                     }
                   </div>
-                  <div className="add__item">
-                    <AiFillPlusCircle onClick={() => handleAddTerm("workflow_terms")} />
-                    <label>Add Workflow</label>
+                  <div>
+                    <div className="add__item" id='addWorkflow'>
+                      <AiFillPlusCircle onClick={() => handleAddTerm("workflow_terms")} />
+                      <Tooltip
+                        anchorId="addWorkflow"
+                        place="top"
+                        content="Add Workflow"
+                        className="tooltip"
+                      />
+                      <label>Add Workflow</label>
+                    </div>
                   </div>
+
                 </div>
 
                 <div className="gernaral__term">
@@ -595,12 +596,19 @@ function EditJob({subAdminView}) {
                       }))
                     }
                   </div>
-                  <div className="add__item">
+                  <div className="add__item" id='addOthersBtn'>
                     <AiFillPlusCircle onClick={() => handleAddTerm("other_info")} />
+                    <Tooltip
+                      anchorId="addOthersBtn"
+                      place="top"
+                      content="Add Others"
+                      className="tooltip"
+                    />
                     <label>Add Others</label>
                   </div>
+
                 </div>
-                <button type="submit" className="save__button" disabled={updateLoading}>
+                <button onClick={handleSubmit} className="save__button" disabled={updateLoading}>
                   {updateLoading ? <LittleLoading /> : `Save`}
                 </button>
               </form>

@@ -58,9 +58,21 @@ const Teamlead = () => {
   const [filteredTasks, setFilteredTasks] = useState(userTasks);
 
   const handleSearch = (value) => {
+    const toAnagram = (word) => {
+      return word.toLowerCase().split("").reverse().join("");
+    };
+
+    const isAnagram = (word) => {
+      const anagram = toAnagram(word);
+      return jobs.some(
+        (job) => toAnagram(job.job_title || job.applicant) === anagram
+      );
+    };
+
     console.log("value", value);
     setSearchValue(value);
     console.log("value", candidatesData.selectedCandidates);
+    console.log("section", section);
     if ((section === "home" || section == undefined) && selectedTabActive) {
       setFilteredJobs(
         candidatesData.selectedCandidates.filter(
@@ -77,7 +89,7 @@ const Teamlead = () => {
       console.log("filteredJobs", filteredJobs);
     } else if (section === "rehire" && rehireTabActive) {
       setFilteredJobs(
-        candidatesData.selectedCandidates.filter(
+        candidatesData.candidatesToRehire.filter(
           (job) =>
             job.job_title
               .toLocaleLowerCase()
@@ -89,16 +101,10 @@ const Teamlead = () => {
       );
 
       console.log("filteredJobs", filteredJobs);
-    } else if (section === "tasks") {
+    } else if (section === "task") {
       setFilteredTasks(
-        userTasks.filter(
-          (task) =>
-            task.applicant
-              .toLocaleLowerCase()
-              .includes(value.toLocaleLowerCase()) ||
-            task.task_title
-              .toLocaleLowerCase()
-              .includes(value.toLocaleLowerCase())
+        userTasks.filter((task) =>
+          task.applicant.toLocaleLowerCase().includes(value.toLocaleLowerCase())
         )
       );
 
@@ -123,21 +129,22 @@ const Teamlead = () => {
       company_id: currentUser?.portfolio_info[0].org_id,
     };
 
-    getJobs2(requestData)
+    Promise.all([
+      getJobs2(requestData),
+      getCandidateApplicationsForTeamLead(requestData),
+      getCandidateTaskForTeamLead({
+        company_id: currentUser?.portfolio_info[0].org_id,
+      }),
+    ])
       .then((res) => {
-        const jobsMatchingCurrentCompany = res.data.response.data.filter(
+        console.log("res", res);
+        const jobsMatchingCurrentCompany = res[0].data.response.data.filter(
           (job) => job.data_type === currentUser?.portfolio_info[0].data_type
         );
         console.log(jobsMatchingCurrentCompany);
         setJobs(jobsMatchingCurrentCompany);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
 
-    getCandidateApplicationsForTeamLead(requestData)
-      .then((res) => {
-        const applicationForMatching = res.data.response.data.filter(
+        const applicationForMatching = res[1].data.response.data.filter(
           (application) =>
             application.data_type === currentUser?.portfolio_info[0].data_type
         );
@@ -150,7 +157,6 @@ const Teamlead = () => {
         const onboardingCandidates = applicationForMatching.filter(
           (application) => application.status === candidateStatuses.ONBOARDING
         );
-
         dispatchToCandidatesData({
           type: candidateDataReducerActions.UPDATE_SELECTED_CANDIDATES,
           payload: {
@@ -158,7 +164,6 @@ const Teamlead = () => {
             value: selectedCandidates,
           },
         });
-
         dispatchToCandidatesData({
           type: candidateDataReducerActions.UPDATE_REHIRED_CANDIDATES,
           payload: {
@@ -166,7 +171,6 @@ const Teamlead = () => {
             value: candidatesToRehire,
           },
         });
-
         dispatchToCandidatesData({
           type: candidateDataReducerActions.UPDATE_ONBOARDING_CANDIDATES,
           payload: {
@@ -174,31 +178,10 @@ const Teamlead = () => {
             value: onboardingCandidates,
           },
         });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
 
-    // fetchCandidateTasks()
-    //   .then((res) => {
-    //     const usersWithTasks = [
-    //       ...new Map(res.data.map((task) => [task.user, task])).values(),
-    //     ];
-    //     setAllTasks(usersWithTasks.reverse());
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+        if (userTasks.length > 0) return;
 
-    if (userTasks.length > 0) return;
-
-    getCandidateTaskForTeamLead({
-      company_id: currentUser?.portfolio_info[0].org_id,
-    })
-      .then((res) => {
-        console.log(res.data.response.data);
-        console.log(currentUser?.settings_for_profile_info);
-        const tasksToDisplay = res.data.response.data
+        const tasksToDisplay = res[2].data.response.data
           .filter(
             (task) =>
               task.data_type === currentUser?.portfolio_info[0].data_type
@@ -208,8 +191,7 @@ const Teamlead = () => {
               task.project ===
               currentUser?.settings_for_profile_info.profile_info[0].project
           );
-
-        console.log(tasksToDisplay);
+        console.log("tasksToDisplay", tasksToDisplay);
 
         const usersWithTasks = [
           ...new Map(
@@ -223,6 +205,107 @@ const Teamlead = () => {
       .catch((err) => {
         console.log(err);
       });
+
+    // getJobs2(requestData)
+    //   .then((res) => {
+    //     const jobsMatchingCurrentCompany = res.data.response.data.filter(
+    //       (job) => job.data_type === currentUser?.portfolio_info[0].data_type
+    //     );
+    //     console.log(jobsMatchingCurrentCompany);
+    //     setJobs(jobsMatchingCurrentCompany);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
+
+    // getCandidateApplicationsForTeamLead(requestData)
+    //   .then((res) => {
+    //     const applicationForMatching = res.data.response.data.filter(
+    //       (application) =>
+    //         application.data_type === currentUser?.portfolio_info[0].data_type
+    //     );
+    //     const selectedCandidates = applicationForMatching.filter(
+    //       (application) => application.status === candidateStatuses.SELECTED
+    //     );
+    //     const candidatesToRehire = applicationForMatching.filter(
+    //       (application) => application.status === candidateStatuses.TO_REHIRE
+    //     );
+    //     const onboardingCandidates = applicationForMatching.filter(
+    //       (application) => application.status === candidateStatuses.ONBOARDING
+    //     );
+
+    //     dispatchToCandidatesData({
+    //       type: candidateDataReducerActions.UPDATE_SELECTED_CANDIDATES,
+    //       payload: {
+    //         stateToChange: initialCandidatesDataStateNames.selectedCandidates,
+    //         value: selectedCandidates,
+    //       },
+    //     });
+
+    //     dispatchToCandidatesData({
+    //       type: candidateDataReducerActions.UPDATE_REHIRED_CANDIDATES,
+    //       payload: {
+    //         stateToChange: initialCandidatesDataStateNames.candidatesToRehire,
+    //         value: candidatesToRehire,
+    //       },
+    //     });
+
+    //     dispatchToCandidatesData({
+    //       type: candidateDataReducerActions.UPDATE_ONBOARDING_CANDIDATES,
+    //       payload: {
+    //         stateToChange: initialCandidatesDataStateNames.onboardingCandidates,
+    //         value: onboardingCandidates,
+    //       },
+    //     });
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
+
+    //   // fetchCandidateTasks()
+    //   //   .then((res) => {
+    //   //     const usersWithTasks = [
+    //   //       ...new Map(res.data.map((task) => [task.user, task])).values(),
+    //   //     ];
+    //   //     setAllTasks(usersWithTasks.reverse());
+    //   //   })
+    //   //   .catch((err) => {
+    //   //     console.log(err);
+    //   //   });
+
+    // if (userTasks.length > 0) return;
+
+    // getCandidateTaskForTeamLead({
+    //   company_id: currentUser?.portfolio_info[0].org_id,
+    // })
+    //   .then((res) => {
+    //     console.log(res.data.response.data);
+    //     console.log(currentUser?.settings_for_profile_info);
+    //     const tasksToDisplay = res.data.response.data
+    // .filter(
+    //   (task) =>
+    //     task.data_type === currentUser?.portfolio_info[0].data_type
+    // )
+    // .filter(
+    //   (task) =>
+    //     task.project ===
+    //     currentUser?.settings_for_profile_info.profile_info[0].project
+    // );
+
+    //     console.log(tasksToDisplay);
+
+    // const usersWithTasks = [
+    //   ...new Map(
+    //     tasksToDisplay.map((task) => [task.applicant, task])
+    //   ).values(),
+    // ];
+    // console.log(usersWithTasks);
+    // // console.log(res.data.response.data);
+    // setUserTasks(usersWithTasks.reverse());
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   }, []);
 
   useEffect(() => {
@@ -299,6 +382,15 @@ const Teamlead = () => {
         hideSideBar={showAddTaskModal}
         searchValue={searchValue}
         setSearchValue={handleSearch}
+        searchPlaceHolder={
+          section === "home"
+            ? "applicant"
+            : section === "task"
+            ? "task"
+            : rehireTabActive
+            ? "rehire"
+            : "applicant"
+        }
       >
         <TitleNavigationBar
           title={
@@ -369,7 +461,9 @@ const Teamlead = () => {
               <SelectedCandidates
                 candidatesCount={
                   selectedTabActive
-                    ? candidatesData.selectedCandidates.length
+                    ? searchValue.length >= 1
+                      ? filteredJobs.length
+                      : candidatesData.selectedCandidates.length
                     : rehireTabActive
                     ? candidatesData.candidatesToRehire.length
                     : 0
@@ -491,14 +585,18 @@ const Teamlead = () => {
             <>
               <SelectedCandidates
                 showTasks={true}
-                tasksCount={userTasks.length}
+                tasksCount={
+                  searchValue.length >= 1
+                    ? filteredTasks.length
+                    : userTasks.length
+                }
               />
 
               <div className="tasks-container">
                 {section === "task" ? (
                   searchValue.length >= 1 ? (
                     React.Children.toArray(
-                      filteredJobs.map((dataitem) => {
+                      filteredTasks.map((dataitem) => {
                         return (
                           <JobCard
                             buttonText={"View"}

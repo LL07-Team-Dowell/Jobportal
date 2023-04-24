@@ -77,7 +77,7 @@ const AccountPage = () => {
     console.log("value", candidatesData.selectedCandidates);
     if ((section === "home" || section == undefined) && hireTabActive) {
       setFilteredJobs(
-        candidatesData.selectedCandidates.filter(
+        candidatesData.candidatesToHire.filter(
           (job) =>
             job.job_title
               .toLocaleLowerCase()
@@ -91,7 +91,7 @@ const AccountPage = () => {
       console.log("filteredJobs", filteredJobs);
     } else if (section === "onboarding" && showOnboarding) {
       setFilteredJobs(
-        candidatesData.selectedCandidates.filter(
+        candidatesData.onboardingCandidates.filter(
           (job) =>
             job.job_title
               .toLocaleLowerCase()
@@ -103,7 +103,7 @@ const AccountPage = () => {
       );
     } else if (section === "rehire" && rehireTabActive) {
       setFilteredJobs(
-        candidatesData.selectedCandidates.filter(
+        candidatesData.candidatesToRehire.filter(
           (job) =>
             job.job_title
               .toLocaleLowerCase()
@@ -115,14 +115,8 @@ const AccountPage = () => {
       );
     } else if (section === "rejected") {
       setFilteredJobs(
-        candidatesData.selectedCandidates.filter(
-          (job) =>
-            job.job_title
-              .toLocaleLowerCase()
-              .includes(value.toLocaleLowerCase()) ||
-            job.applicant
-              .toLocaleLowerCase()
-              .includes(value.toLocaleLowerCase())
+        candidatesData.rejectedCandidates.filter((job) =>
+          job.applicant.toLocaleLowerCase().includes(value.toLocaleLowerCase())
         )
       );
     }
@@ -133,20 +127,17 @@ const AccountPage = () => {
       company_id: currentUser?.portfolio_info[0].org_id,
     };
 
-    getJobs2(requestData)
+    Promise.all([
+      getJobs2(requestData),
+      getCandidateApplicationsForTeamLead(requestData),
+    ])
       .then((res) => {
-        const jobsMatchingCurrentCompany = res.data.response.data.filter(
+        const jobsMatchingCurrentCompany = res[0].data.response.data.filter(
           (job) => job.data_type === currentUser?.portfolio_info[0].data_type
         );
         setJobs(jobsMatchingCurrentCompany);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
 
-    getCandidateApplicationsForTeamLead(requestData)
-      .then((response) => {
-        const applicationForMatching = response.data.response.data.filter(
+        const applicationForMatching = res[1].data.response.data.filter(
           (application) =>
             application.data_type === currentUser?.portfolio_info[0].data_type
         );
@@ -201,6 +192,72 @@ const AccountPage = () => {
       .catch((err) => {
         console.log(err);
       });
+
+    // getJobs2(requestData)
+    //   .then((res) => {
+    //     const jobsMatchingCurrentCompany = res.data.response.data.filter(
+    //       (job) => job.data_type === currentUser?.portfolio_info[0].data_type
+    //     );
+    //     setJobs(jobsMatchingCurrentCompany);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
+
+    // getCandidateApplicationsForTeamLead(requestData)
+    //   .then((response) => {
+    //     const applicationForMatching = response.data.response.data.filter(
+    //       (application) =>
+    //         application.data_type === currentUser?.portfolio_info[0].data_type
+    //     );
+    //     const candidatesToHire = applicationForMatching.filter(
+    //       (application) =>
+    //         application.status === candidateStatuses.TEAMLEAD_HIRE
+    //     );
+    //     const candidatesToRehire = applicationForMatching.filter(
+    //       (application) =>
+    //         application.status === candidateStatuses.TO_REHIRE ||
+    //         application.status === candidateStatuses.TEAMLEAD_TOREHIRE
+    //     );
+    //     const candidatesOnboarding = applicationForMatching.filter(
+    //       (application) => application.status === candidateStatuses.ONBOARDING
+    //     );
+    //     const candidatesRejected = applicationForMatching.filter(
+    //       (application) => application.status === candidateStatuses.REJECTED
+    //     );
+
+    //     dispatchToCandidatesData({
+    //       type: candidateDataReducerActions.UPDATE_CANDIDATES_TO_HIRE,
+    //       payload: {
+    //         stateToChange: initialCandidatesDataStateNames.candidatesToHire,
+    //         value: candidatesToHire,
+    //       },
+    //     });
+
+    //     dispatchToCandidatesData({
+    //       type: candidateDataReducerActions.UPDATE_REHIRED_CANDIDATES,
+    //       payload: {
+    //         stateToChange: initialCandidatesDataStateNames.candidatesToRehire,
+    //         value: candidatesToRehire,
+    //       },
+    //     });
+
+    //     dispatchToCandidatesData({
+    //       type: candidateDataReducerActions.UPDATE_ONBOARDING_CANDIDATES,
+    //       payload: {
+    //         stateToChange: initialCandidatesDataStateNames.onboardingCandidates,
+    //         value: candidatesOnboarding,
+    //       },
+    //     });
+
+    //     dispatchToCandidatesData({
+    //       type: candidateDataReducerActions.UPDATE_REJECTED_CANDIDATES,
+    //       payload: {
+    //         stateToChange: initialCandidatesDataStateNames.rejectedCandidates,
+    //         value: candidatesRejected,
+    //       },
+    //     });
+    //   })
   }, []);
 
   useEffect(() => {
@@ -267,6 +324,17 @@ const AccountPage = () => {
         accountView={true}
         searchValue={searchValue}
         setSearchValue={handleSearch}
+        searchPlaceHolder={
+          section === "home"
+            ? "hire"
+            : section === "rejected"
+            ? "reject"
+            : showOnboarding
+            ? "onboarding"
+            : rehireTabActive
+            ? "rehire"
+            : "hire"
+        }
       >
         <TitleNavigationBar
           title={
@@ -333,7 +401,9 @@ const AccountPage = () => {
               <SelectedCandidates
                 candidatesCount={
                   hireTabActive
-                    ? candidatesData.candidatesToHire.length
+                    ? searchValue.length >= 1
+                      ? filteredJobs.length
+                      : candidatesData.candidatesToHire.length
                     : showOnboarding
                     ? candidatesData.onboardingCandidates.length
                     : rehireTabActive
@@ -496,7 +566,11 @@ const AccountPage = () => {
         ) : section === "rejected" ? (
           <>
             <RejectedCandidates
-              candidatesCount={candidatesData.rejectedCandidates.length}
+              candidatesCount={
+                searchValue.length >= 1
+                  ? filteredJobs.length
+                  : candidatesData.rejectedCandidates.length
+              }
             />
 
             <div className="jobs-container">

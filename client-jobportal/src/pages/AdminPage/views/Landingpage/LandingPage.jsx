@@ -14,24 +14,25 @@ import { useCurrentUserContext } from "../../../../contexts/CurrentUserContext";
 import { getApplicationForAdmin } from "../../../../services/adminServices";
 import { useState } from "react";
 const LandingPage = ({subAdminView}) => {
-  const { jobs, setJobs , setlist , jobs2 , setjobs2 , searchValue ,setsearchValue  } = useJobContext();
+  const { jobs, setJobs , setlist , jobs2 , setjobs2 , searchValue ,setsearchValue ,resp , setresponse  } = useJobContext();
   const handleSearchChange = (value) =>{
     console.log("kasaksldjalksdjalksdjlkjsakl") 
     setsearchValue(value) ; 
     setJobs(jobs2.filter(job => job.job_title.toLowerCase().includes(value.toLowerCase()) || job.skills.toLowerCase().includes(value.toLowerCase())))
 
   }
-  useEffect(()=>{
-    getApplicationForAdmin({company_id: currentUser?.portfolio_info[0].org_id})
-      .then(resp =>{
-        setlist(resp.data.response.data.filter(j => currentUser.portfolio_info[0].data_type === j.data_type)) ; 
+
+  useEffect(() => {
+    getApplicationForAdmin({ company_id: currentUser?.portfolio_info[0].org_id })
+      .then(resp => {
+        setlist(resp.data.response.data.filter(j => currentUser.portfolio_info[0].data_type === j.data_type));
       })
       .catch(err => console.log(err))
-  },[])
+  }, [])
   const navigate = useNavigate();
   const { currentUser, setCurrentUser } = useCurrentUserContext();
-  console.log("currentUser",currentUser)
-  console.log("jobs", jobs);
+  // console.log("currentUser", currentUser)
+  // console.log("jobs", jobs);
   useEffect(() => {
     if (jobs.length === 0) {
       axios
@@ -46,6 +47,7 @@ const LandingPage = ({subAdminView}) => {
           console.log('AAAAAAAA',response.data.response.data.filter(job => job.data_type === currentUser.portfolio_info[0].data_type )) ; 
           setJobs(response.data.response.data.filter(job => job.data_type === currentUser.portfolio_info[0].data_type ).filter(job => job.data_type !== "archive_data"));
           setjobs2(response.data.response.data.filter(job => job.data_type === currentUser.portfolio_info[0].data_type ).filter(job => job.data_type !== "archive_data")) ; 
+          setresponse(true);
           
         })
         .catch((error) => console.log(error));
@@ -68,7 +70,7 @@ const LandingPage = ({subAdminView}) => {
     getUserInfoFromLoginAPI(dataToPost)
       .then((res) => {
         setCurrentUser(res.data);
-        console.log(res.data.portfolio_info[0].data_type) ;
+        console.log(res.data.portfolio_info[0].data_type);
       })
       .catch((err) => {
         console.log("Failed to get user details from login API");
@@ -76,12 +78,12 @@ const LandingPage = ({subAdminView}) => {
       });
   }, []);
 
- 
-  console.log({searchValue}) ;
+
+  console.log({ searchValue });
   return (
     <StaffJobLandingLayout
       adminView={true}
-      handleNavIconClick={() => navigate("/add-job")} 
+      handleNavIconClick={() => navigate("/add-job")}
       searchValue={searchValue}
       setSearchValue={handleSearchChange}
       subAdminView={subAdminView}
@@ -89,7 +91,7 @@ const LandingPage = ({subAdminView}) => {
       <div className="landing-page">
         <div className="cards">
           {
-            jobs.length === 0 && searchValue ? <h1>No Job Found</h1>
+            jobs.length === 0 && searchValue || jobs.length === 0  && resp ? <h1>No Job Found</h1>
             :
             jobs.length > 0 ? (
               jobs.filter(job => job.data_type === currentUser.portfolio_info[0].data_type )
