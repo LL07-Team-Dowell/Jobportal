@@ -25,6 +25,10 @@ import { fetchCandidateTasks, getCandidateApplications, getJobs, getJobs2, getPr
 import { useCurrentUserContext } from '../../../../contexts/CurrentUserContext';
 import { getCandidateApplicationsForHr, getCandidateTask, getSettingUserProject } from '../../../../services/hrServices';
 import { useHrJobScreenAllTasksContext } from '../../../../contexts/HrJobScreenAllTasks';
+import HrTrainingQuestions from '../HrTrainingScreen/HrTrainingQuestion';
+import { ReactComponent as Frontend } from "../HrTrainingScreen/assets/system3.svg";
+import { ReactComponent as Ux } from "../HrTrainingScreen/assets/ux-design-1.svg";
+import { ReactComponent as Backend } from "../HrTrainingScreen/assets/database-1.svg";
 
 function fuzzySearch(query, text) {
   const searchRegex = new RegExp(query.split('').join('.*'), 'i');
@@ -76,7 +80,7 @@ function HrJobScreen() {
 
   useEffect(() => {
 
-    if ( (sub_section !== undefined) && (!location.state) ) return navigate("/home");
+    if ( (sub_section !== undefined) && (section !== "hr-training") && (!location.state) ) return navigate("/home");
 
     if ( (path !== undefined) && (!location.state)) return navigate("/home");
 
@@ -293,11 +297,83 @@ function HrJobScreen() {
     setShowCurrentCandidateTask(false);
   }
 
+  const trainingCards = [
+    {
+      id: 1,
+      module: "Frontend",
+      description:
+        "Prepare for a career in front-end Development. Receive professional-level training from uxliving lab",
+      svg: <Frontend />,
+    },
+    {
+      id: 2,
+      module: "Backend",
+      description:
+        "Prepare for a career in Back-end Development. Receive professional-level training from uxliving lab",
+      svg: <Backend />,
+    },
+    {
+      id: 3,
+      module: "UI/UX",
+      description:
+        "Prepare for a career in UI/UX. Receive professional-level training from uxliving lab",
+      svg: <Ux />,
+    },
+    {
+      id: 4,
+      module: "Virtual Assistant",
+      description:
+        "Prepare for a career as a Virtual Assistant . Receive professional-level training from uxliving lab",
+      svg: <Frontend />,
+    },
+    {
+      id: 5,
+      module: "Web",
+      description:
+        "Prepare for a career in Web Development. Receive professional-level training from uxliving lab",
+      svg: <Backend />,
+    },
+    {
+      id: 6,
+      module: "Mobile",
+      description:
+        "Prepare for a career in Mobile Development. Receive professional-level training from uxliving lab",
+      svg: <Ux />,
+    },
+  ];
+
   return (
     <StaffJobLandingLayout hrView={true} runExtraFunctionOnNavItemClick={hideTaskAndAttendaceView} hideSideBar={showAddTaskModal} searchValue={jobSearchInput} setSearchValue={setJobSearchInput} searchPlaceHolder={section === "home" ?"received" : section === "guest-applications" ? "guests" : section === "shortlisted" ? "shortlisted" : section === "hr-training" ? "hr-training" : "received"}>
     <div className="hr__Page__Container">
-    <TitleNavigationBar className={path === undefined ? "": "view__Application__Navbar"} title={path === undefined ? section === "user" ? "Profile" : section === "tasks" ? "Tasks" : section === "attendance" ? "Attendance" : "Applications" : "Application Details"} hideBackBtn={path === undefined && sub_section === undefined ? true : false} handleBackBtnClick={() => navigate(-1)} />
-    { section !== "user" && section !== "attendance" && section !== "tasks" && path === undefined && sub_section === undefined && <TogglerNavMenuBar menuItems={["Received", "Guests", "Shortlisted" , "Hr Training"]} currentActiveItem={currentActiveItem} handleMenuItemClick={handleMenuItemClick} /> }
+    <TitleNavigationBar 
+      className={
+        path === undefined ? "" : "view__Application__Navbar"
+      } 
+      title={
+        path === undefined ? 
+          section === "user" ? "Profile" 
+          : 
+          section === "tasks" ? "Tasks" 
+          : 
+          sub_section !== undefined && section === "hr-training" ? 
+            sub_section ? sub_section : `${trainingCards.module}` 
+          : section === "attendance" ? "Attendance" 
+          : "Applications" : 
+          "Application Details" 
+      } 
+      hideBackBtn={
+        path === undefined && sub_section === undefined ? true : false
+      } 
+      handleBackBtnClick={() => navigate(-1)} 
+    />
+    { 
+      section !== "user" && section !== "attendance" && section !== "tasks" && path === undefined && sub_section === undefined && 
+      <TogglerNavMenuBar 
+        menuItems={["Received", "Guests", "Shortlisted" , "Hr Training"]} 
+        currentActiveItem={currentActiveItem} 
+        handleMenuItemClick={handleMenuItemClick} 
+      /> 
+    }
     {
       sub_section === undefined && section === "home" || section === undefined ? <>
         <div className='hr__wrapper'>
@@ -351,7 +427,11 @@ function HrJobScreen() {
           </> :
 
           sub_section === undefined && section === "hr-training" ? <>
-            <HrTrainingScreen />
+            <HrTrainingScreen trainingCards={trainingCards}/>
+          </> :
+
+          sub_section !== undefined && section === "hr-training" ? <>
+            <HrTrainingQuestions trainingCards={trainingCards}/>
           </> :
 
           sub_section === undefined && section === "guest-applications" ?

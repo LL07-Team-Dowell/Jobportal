@@ -13,7 +13,7 @@ import { getCandidateApplications } from '../../../../services/commonServices';
 import { useCurrentUserContext } from '../../../../contexts/CurrentUserContext';
 import { getAppliedJobs } from '../../../../services/candidateServices';
 
-function Home({ setHired, setAssignedProjects }) {
+function Home({ setHired, setAssignedProjects,  setCandidateShortListed }) {
 
   const [loading, setLoading] = useState(true);
   const { candidateJobs, setCandidateJobs } = useCandidateJobsContext();
@@ -23,7 +23,7 @@ function Home({ setHired, setAssignedProjects }) {
 
   useEffect(() => {
 
-    if (!currentUser) return setLoading(false);
+    if (!currentUser) return;
     if (Array.isArray(candidateJobs.appliedJobs) && candidateJobs.appliedJobs.length > 0) return setLoading(false);
 
     getAppliedJobs(currentUser?.portfolio_info[0].org_id).then(res => {
@@ -35,6 +35,13 @@ function Home({ setHired, setAssignedProjects }) {
         (application) => application.username === currentUser.userinfo.username
       );
       const userSelectedJobs = currentUserAppliedJobs.filter(application => application.status === candidateStatuses.ONBOARDING);
+      const userShortlistedJobs = currentUserAppliedJobs.filter(application => application.status === candidateStatuses.SHORTLISTED);
+
+      if (userShortlistedJobs.length >= 1) {
+        setCandidateShortListed(true)
+        setLoading(false)
+        return;
+      }
 
       if (userSelectedJobs.length >= 1) {
         setAssignedProjects(userSelectedJobs.map((job) => job.project))
@@ -51,11 +58,11 @@ function Home({ setHired, setAssignedProjects }) {
       setLoading(false);
     })
 
-  }, [])
+  }, [currentUser, candidateJobs])
 
   const handleLoginLinkClick = (e) => {
     e.preventDefault();
-    window.location.href = dowellLoginUrl
+    window.location.replace(dowellLoginUrl)
   }
 
   if (loading) return <LoadingSpinner />
@@ -75,13 +82,26 @@ function Home({ setHired, setAssignedProjects }) {
           <h1>Join DoWell team</h1>
           <div className='content__Wrappper'>
             <div className='content__Item'>
+
+              {/* <img src={assets.internship} alt='job category' />
+              <img src={assets.freelaner} alt='job category' />
+              <img src={assets.researcher} alt='job category' /> */}
+
               {
-                React.Children.toArray(availableJobCategories.slice(0, 2).map(category => {
+                React.Children.toArray(availableJobCategories.slice(0, 1).map(category => {
                   return <Link to={`/jobs/c/${category.toLocaleLowerCase().replaceAll(' ', '-')}`}>
-                    <img src={assets.users_img_1} alt='job category' />
+                    <img src={assets.employee} alt='job category' />
                   </Link>
                 }))
               }
+              {
+                React.Children.toArray(availableJobCategories.slice(1, 2).map(category => {
+                  return <Link to={`/jobs/c/${category.toLocaleLowerCase().replaceAll(' ', '-')}`}>
+                    <img src={assets.internship} alt='job category' />
+                  </Link>
+                }))
+              }
+
               {/* <div className='bottom__Content'>
                 {
                   React.Children.toArray(availableJobCategories.slice(0, 2).map(category => {
@@ -101,12 +121,26 @@ function Home({ setHired, setAssignedProjects }) {
             </div>
             <div className='content__Item'>
               {
+                React.Children.toArray(availableJobCategories.slice(2, 3).map(category => {
+                  return <Link to={`/jobs/c/${category.toLocaleLowerCase().replaceAll(' ', '-')}`}>
+                    <img src={assets.researcher} alt='job category' />
+                  </Link>
+                }))
+              }
+              {
+                React.Children.toArray(availableJobCategories.slice(3, 4).map(category => {
+                  return <Link to={`/jobs/c/${category.toLocaleLowerCase().replaceAll(' ', '-')}`}>
+                    <img src={assets.freelaner} alt='job category' />
+                  </Link>
+                }))
+              }
+              {/* {
                 React.Children.toArray(availableJobCategories.slice(2).map(category => {
                   return <Link to={`/jobs/c/${category.toLocaleLowerCase().replaceAll(' ', '-')}`}>
                     <img src={assets.users_img_2} alt='job category' />
                   </Link>
                 }))
-              }
+              } */}
               {/* <div className='bottom__Content'>
                 {
                   React.Children.toArray(availableJobCategories.slice(2).map(category => {

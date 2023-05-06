@@ -15,7 +15,7 @@ import { Tooltip } from "react-tooltip";
 import "./style.css";
 import StaffJobLandingLayout from "../../../../layouts/StaffJobLandingLayout/StaffJobLandingLayout";
 
-const AddJob = ({subAdminView}) => {
+const AddJob = ({ subAdminView }) => {
   const { currentUser } = useCurrentUserContext();
   const navigate = useNavigate();
   const { setJobs } = useJobContext();
@@ -37,13 +37,15 @@ const AddJob = ({subAdminView}) => {
     workflow_terms: [],
     other_info: [],
     company_id: currentUser.portfolio_info[0].org_id,
+    module: "",
     data_type: currentUser.portfolio_info[0].data_type,
     created_by: currentUser.userinfo.username,
-    created_on: new Date(),
+    created_on: new Date(), 
   });
 
   const [selectedOption, setSelectedOption] = useState("");
   const [secondOption, setSecondOption] = useState("");
+  const [thirdOption, setThirdOption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOptionChange = (e) => {
@@ -60,6 +62,15 @@ const AddJob = ({subAdminView}) => {
     setNewJob((prevValue) => {
       const copyOfPrevValue = { ...prevValue };
       copyOfPrevValue["type_of_job"] = e.target.value;
+      return copyOfPrevValue;
+    });
+  };
+
+  const handleThirdOptionChange = (e) => {
+    setThirdOption(e.target.value);
+    setNewJob((prevValue) => {
+      const copyOfPrevValue = { ...prevValue };
+      copyOfPrevValue["module"] = e.target.value;
       return copyOfPrevValue;
     });
   };
@@ -114,6 +125,7 @@ const AddJob = ({subAdminView}) => {
       "payment",
       "description",
       "job_category",
+      "module",
     ];
 
     if (newJob.job_category === "research_associate") {
@@ -130,6 +142,15 @@ const AddJob = ({subAdminView}) => {
     }
     if (newJob.type_of_job === "") {
       toast.info("Please select type of job");
+      return;
+    } else if (fields.find((field) => newJob[field] === "")) {
+      toast.info(
+        `Please select ${fields.find((field) => newJob[field] === "")} field`
+      );
+      return;
+    }
+    if (newJob.module === "") {
+      toast.info("Please select Module");
       return;
     } else if (fields.find((field) => newJob[field] === "")) {
       toast.info(
@@ -220,8 +241,8 @@ const AddJob = ({subAdminView}) => {
                     type={"radio"}
                     id={"freelancer"}
                     name="options"
-                    value={"freelancer"}
-                    checked={selectedOption === "freelancer"}
+                    value={"Freelancer"}
+                    checked={selectedOption === "Freelancer"}
                     onChange={handleOptionChange}
                   />
                   <div className="radio__radio"></div>
@@ -233,8 +254,8 @@ const AddJob = ({subAdminView}) => {
                     type={"radio"}
                     id={"internship"}
                     name="options"
-                    value={"internship"}
-                    checked={selectedOption === "internship"}
+                    value={"Internship"}
+                    checked={selectedOption === "Internship"}
                     onChange={handleOptionChange}
                   />
                   <div className="radio__radio"></div>
@@ -259,8 +280,8 @@ const AddJob = ({subAdminView}) => {
                     type={"radio"}
                     id={"research_associate"}
                     name="options"
-                    value={"research_associate"}
-                    checked={selectedOption === "research_associate"}
+                    value={"Research_associate"}
+                    checked={selectedOption === "Research_associate"}
                     onChange={handleOptionChange}
                   />
                   <div className="radio__radio"></div>
@@ -270,7 +291,7 @@ const AddJob = ({subAdminView}) => {
 
               {newJob.job_category.length < 1 ? (
                 <></>
-              ) : newJob.job_category === "freelancer" ? (
+              ) : newJob.job_category === "Freelancer" ? (
                 <>
                   <h3>Type of Job</h3>
                   <div className="type_of_job">
@@ -306,7 +327,7 @@ const AddJob = ({subAdminView}) => {
                     </div>
                   </div>
                 </>
-              ) : newJob.job_category === "internship" ? (
+              ) : newJob.job_category === "Internship" ? (
                 <>
                   <h3>Type of Job</h3>
                   <div className="type_of_job">
@@ -392,6 +413,37 @@ const AddJob = ({subAdminView}) => {
                   />
                 </div>
               </div>
+
+              <label htmlFor="module">Module</label>
+              <select
+                className="select"
+                name={"module"}
+                id="module"
+                onChange={handleThirdOptionChange}
+              >
+                <option value="">Select Module</option>
+                <option value="Frontend" selected={thirdOption === "Frontend"}>
+                  Frontend
+                </option>
+                <option value="Backend" selected={thirdOption === "Backend"}>
+                  Backend
+                </option>
+                <option value="UI/UX" selected={thirdOption === "UI/UX"}>
+                  UI/UX
+                </option>
+                <option
+                  value="Virtual Assistant"
+                  selected={thirdOption === "Virtual Assistant"}
+                >
+                  Virtual Assitant
+                </option>
+                <option value="Web" selected={thirdOption === "Web"}>
+                  Web
+                </option>
+                <option value="Mobile" selected={thirdOption === "Mobile"}>
+                  Mobile
+                </option>
+              </select>
 
               <label htmlFor="payment">Payment</label>
               <input
