@@ -1,4 +1,7 @@
 .question__background {
+  --primary-color: #005734;
+  --secondary-color: #1f1f1f;
+  --tertiary-color: #7e7e7e;
   width: 98%;
   padding-left: 12%;
   padding-right: 12%;
@@ -7,6 +10,20 @@
   border-radius: 1rem;
   background-color: #f3f8f4;
 }
+
+.content__container {
+  position: relative;
+}
+
+.content__container .question__action__btn {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 2.9rem;
+  right: -4.5rem;
+  gap: 2rem;
+}
+
 .question__background .question__description {
   background-color: #fff;
   margin-left: 0;
@@ -29,17 +46,42 @@
 }
 
 .head .question__title {
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.question__selection {
+  display: flex;
+  justify-content: space-between;
+  height: 3rem;
+  align-items: center;
+}
+
+.question__selection .questions svg {
+  margin-left: 1.5rem;
+  cursor: pointer;
+}
+
+.questions {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  margin: 0;
+  height: 2.4rem;
+  color: #7e7e7e;
 }
 
 .question__body .question__link {
   padding: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  width: 100%;
+  width: 60%;
   border: none;
   border-bottom: 1px solid #ccc;
+  background-color: #f3f8f4;
+  letter-spacing: 0.01em;
+  font-family: inherit;
+  height: 85%;
 }
 
 .question__body .bottom {
@@ -49,12 +91,12 @@
 }
 
 .bottom .send__btn {
-  background-color: var(--green-color);
+  background-color: var(--green-color); 
   padding: 5% 10%;
   min-width: 6rem;
-  height: 2.8rem;
+  height: 2.4rem;
   width: max-content;
-  padding: 0 2%;
+  padding: 0 1%;
   white-space: nowrap;
 }
 
@@ -68,9 +110,19 @@
   max-width: 100%;
 }
 
+.send__btn {
+  padding: 0.5rem 3rem 0.5rem 3rem;
+  border-radius: 0.7rem;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  margin: 0.8rem 0 0.8rem 0;
+  cursor: pointer;
+}
+
 .send__btn:hover {
   background-color: #005734;
-  box-shadow: 0 0.4rem 1.3rem rgba(0, 87, 52, 1);
+  box-shadow: 0 0.2rem 1rem rgba(0, 87, 52, 1);
   transition: 0.2s ease;
 }
 
@@ -78,6 +130,15 @@
   background-color: var(--tertiary-color);
   box-shadow: none;
   cursor: not-allowed;
+}
+
+.save {
+  font-size: 1.2rem;
+  font-weight: 300;
+  gap: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {

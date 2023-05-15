@@ -1,31 +1,48 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { IoIosArrowBack } from 'react-icons/io';
 import styled from 'styled-components';
 import * as assets from '../../../../assets/assetsIndex';
 import { useNavigate } from 'react-router-dom';
+import { useCurrentUserContext } from '../../../../contexts/CurrentUserContext';
+import { FaRegUserCircle } from 'react-icons/fa';
 
-function TraningProgress() {
+function TraningProgress({ shorlistedJob }) {
+    // console.log(shorlistedJob[0].shortlisted_on);
+    // const { currentUser } = useCurrentUserContext();
+    const [complete, setComplete] = useState(false);
+    console.log(complete);
+    const username = shorlistedJob[0]?.applicant;
+    const shortlistedate = shorlistedJob[0].shortlisted_on;
+    const date = new Date(shortlistedate);
+    const formattedDate = date.toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+
+
+    // console.log(currentUser.userinfo.username);
+
     const Wrapper = styled.div`
         font-family:'poppins';
-        background-color:#F5F5F5;
-        height: 90vh;
+        background-color:#ffffff;
+        height: 30rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        position: reletive;
     `
 
     const Section_1 = styled.div`
-        border-bottom: 1px solid gray;
         font-family:'poppins';
+        border-bottom: 1px solid #dfdddd;
+        font-family:'poppins';
+        height: 6rem;
     `
 
     const Navbar = styled.nav`
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid #F0F0F0;
+        border-bottom: 1px solid #dfdddd;
         padding: 0 16px;
-        height: 10vh;
+        height: 5rem;
         background-color: white;
     `;
 
@@ -34,13 +51,7 @@ function TraningProgress() {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            position: relative;
 
-            img{
-                width: 120px;
-                height: 120px;
-                padding: 10px;
-            }
 
             h1{
                 color:#005734;
@@ -61,7 +72,11 @@ function TraningProgress() {
             }
 
             svg{
-                font-size: 25px;
+                font-size: 28px;
+                cursor: pointer;
+                font-weight: 500;
+                margin-right: 2.2rem;
+                color: #7C7C7C;
             }
 
             .home{
@@ -85,23 +100,25 @@ function TraningProgress() {
     `;
 
     const Section_2 = styled.div`
-        padding: 50px;
-        background-color:  #F5F5F5;
+        padding: 50px 76px;
+        background-color:  #ffffff;
+        border-bottom: 1px solid #dfdddd;
         position: relative;
 
         .left-content{
                 display: flex;
                 align-items: center;            
-            img {
-                height: 90px;
-                width: 90px;
-                border-radius: 60px;
-            }
+
+                svg{
+                    font-size: 3rem;
+                }
+
 
             .title{
                 padding: 10px 10px;
                 h2{
                     font-weight: 500;
+                    text-transform: capitalize;
                 }
                 h3{
                     font-weight: 400;
@@ -114,61 +131,70 @@ function TraningProgress() {
             display: flex;
             position: absolute;
             bottom: 3px;
-            left: 80px;
+            left: 70px;
 
             .progress {
-                margin-right: 15px;
-                border-bottom: 3px solid #005734;
+                border-bottom: 4px solid #005734;
                 color: #005734;
+                cursor: pointer;
+                font-size: 18px;
             }
 
             .completed{
                 color: #A3A1A1;
+                cursor: pointer;
+                font-size: 18px;
             }
 
             h5 {
                 font-weight: 400;
+                margin: 0 20px;
             }
         }
     `
 
     const Section_3 = styled.div`
-        padding: 50px;
+        padding: 50px 76px;
         position: relative;
 
         .traning_section {
             display: flex;
-            align-items: center;
             .right-content{
-                padding: 0 30px;
-                span {
-                    font-weight: 300;
-                    font-size: 13px;
+                padding: 10px 30px;
+                .traninning-program{
+                    font-size: 18px;
                     color: #7E7E7E;
+                    font-weight: 300;
                 }
+
                 h6 {
-                    font-size: 1.2rem;
-                    font-weight: 500;
+                    font-size: 21px;
+                    font-weight: 600;
                 }
                 .content{
                     display: flex;
                     align-items: center;
+                    
                     img{
                         height:50px;
                         width:50px;
                     }
-                    span{
-                        font-size: 13px;
-                        color: #7E7E7E;
-                        margin-left: 5px;
+
+                    .traninng-tag{
+                        font-size: 18px;
+                        color: #A6A6A6;
+                        font-weight: 300;
+                        margin-right: 10px;
                     }
+
+                   
                 }
+                
             }
 
             .left-content{
-                img{
-                    width: 250px;
-                    height: 170px;
+                img {
+                    height: 200px;
                 }
             }
 
@@ -178,10 +204,10 @@ function TraningProgress() {
                 right: 3rem;
                 bottom: 3rem;
                 color: #038953;
-                font-size: 1rem;
                 border: 1px solid #038953;
                 padding: 6px 20px;
                 cursor: pointer;
+                font-size: 18px;
             }
         }
     `
@@ -205,9 +231,10 @@ function TraningProgress() {
             <Wrapper>
                 <Section_2>
                     <div className="left-content">
-                        <img src={assets.dev_img} alt="dev" />
+                        {/* <img src={assets.dev_img} alt="dev" /> */}
+                        <FaRegUserCircle />
                         <div className="title">
-                            <h2>Welcome back, George!</h2>
+                            <h2>Welcome back, {username}!</h2>
                             <h3>Front-end Developer</h3>
                         </div>
                     </div>
@@ -215,11 +242,11 @@ function TraningProgress() {
 
                     </div>
                     <div className="bar-bottom">
-                        <div className="progress">
-                            <h5>In Progress</h5>
+                        <div className={complete ? "completed" : "progress"}>
+                            <h5 onClick={() => setComplete(false)}>In Progress</h5>
                         </div>
-                        <div className="completed">
-                            <h5>Completed</h5>
+                        <div className={complete ? "progress" : "completed"}>
+                            <h5 onClick={() => setComplete(true)}>Completed</h5>
                         </div>
                     </div>
                 </Section_2>
@@ -230,20 +257,23 @@ function TraningProgress() {
                             <img src={assets.frontendimage} alt="frontend" />
                         </div>
                         <div className="right-content">
-                            <span>Training Program</span>
+                            <span className='traninning-program'>Training Program</span>
                             <h6>Become a Front-end Developer</h6>
                             <div className="content">
-                                <img src={assets.logo_img} alt="logo" />
-                                <span>Training</span>
-                                <span>Apr 2023</span>
+                                <img src={assets.langing_logo} alt="logo" />
+                                <span className='traninng-tag'>Training</span>
+                                <span className='traninng-tag'> . </span>
+                                <span className='traninng-tag'>{formattedDate}</span>
                             </div>
                         </div>
                         <div className="bottom-content">
-                            Start Now
+                            {
+                                complete ? "Preview Form" : "Start Now"
+                            }
                         </div>
                     </div>
                 </Section_3>
-            </Wrapper>
+            </Wrapper >
         </>
 
     )

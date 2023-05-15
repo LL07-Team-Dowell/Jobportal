@@ -5,26 +5,40 @@ import { useCurrentUserContext } from "../../../../contexts/CurrentUserContext";
 import { createQuestionForTrainingMangement } from "../../../../services/hrTrainingServices";
 import "./Hr_TrainingQuestion.css";
 import { toast } from "react-toastify";
+import DropdownButton from "../../../TeamleadPage/components/DropdownButton/Dropdown";
+import { ReactComponent as Add } from "./assets/addbtn.svg";
+import { ReactComponent as Delete } from "./assets/deletebtn.svg";
+import { validateUrl } from "../../../../helpers/helpers";
+import LoadingSpinner from "../../../../components/LoadingSpinner/LoadingSpinner";
+import { useHrJobScreenAllTasksContext } from "../../../../contexts/HrJobScreenAllTasks";
 
-function HrTrainingQuestions({ trainingCards }) {
+function HrTrainingQuestions() {
   const { currentUser } = useCurrentUserContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("Link");
+  const [selectOption, setSelectOption] = useState([
+    "Link",
+    "Text",
+    "Image",
+    "Video",
+  ]);
 
+  const { sub_section } = useParams();
+  const { setQuestions } = useHrJobScreenAllTasksContext();
+  
   const navigate = useNavigate();
-  // const { module } = useParams();
 
-  const [questions, setQuestions] = useState({
+  const [question, setQuestion] = useState({
     company_id: currentUser.portfolio_info[0].org_id,
     data_type: currentUser.portfolio_info[0].data_type,
     question_link: "",
-    module: "",
-    created_on: new Date(),
+    module: sub_section,
     created_by: currentUser.userinfo.username,
     is_active: true,
   });
 
   const handleOnChange = (valueEntered, inputName) => {
-    setQuestions((prevValue) => {
+    setQuestion((prevValue) => {
       const copyOfPrevValue = { ...prevValue };
       copyOfPrevValue[inputName] = valueEntered;
       return copyOfPrevValue;
@@ -33,32 +47,44 @@ function HrTrainingQuestions({ trainingCards }) {
 
   const handleOnSubmit = async (e) => {
     e.preventDefault();
-    // console.log(questions);
+    console.log(question);
 
-    // const fields = ["question_link"];
+    const fields = ["question_link"];
 
-    // if (questions.question_link === "") {
-    //   toast.info("Please input question link");
-    //   return;
-    // } else if (fields.find((field) => questions[field] === "")) {
-    //   toast.info(
-    //     `Please input ${fields.find((field) => questions[field] === "")} field`
-    //   );
-    //   return;
-    // }
+    if (question.question_link === "") {
+      toast.info("Please input question link");
+      return;
+    } else if (fields.find((field) => question[field] === "")) {
+      toast.info(
+        `Please input ${fields.find((field) => question[field] === "")} field`
+      );
+      return;
+    }
+
+    if (!validateUrl(question.question_link)) {
+      toast.error("Invalid question link");
+      return;
+    }
 
     setIsLoading(true);
     try {
-      const response = await createQuestionForTrainingMangement(questions);
+      const newQuestion = {
+        ...question,
+        created_on: new Date(),
+      };
+      const response = await createQuestionForTrainingMangement(newQuestion);
       console.log(response.data);
 
-      // if (response.status === 201) {
-      //   setQuestions((prevValue) => [questions, ...prevValue]);
-      //   toast.success("Question created successfully");
-      //   navigate("/hr-training");
-      // } else {
-      //   toast.error("Question failed to be created");
-      // }
+      if (response.status === 201) {
+        setQuestions((prevValue) => [
+          { ...newQuestion, newly_created: true },
+          ...prevValue,
+        ]);
+        toast.success("Question created successfully");
+        navigate("/hr-training");
+      } else {
+        toast.error("Question failed to be created");
+      }
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong");
@@ -67,35 +93,66 @@ function HrTrainingQuestions({ trainingCards }) {
     setIsLoading(false);
   };
 
+  // useEffect(() => {
+  //   if (selectOption.length < 1) return;
+  //   if (selectedOption !== "") return;
+  //   setSelectOption(selectOption[0]);
+  // }, [selectOption]);
+
   return (
     <>
       <div className="container">
         <div className="question__background">
-          <div className="question__description">
-            <div className="question__top__background"></div>
-            <div className="question__body">
-              <div className="head">
-                <h2 className="question__title">Add Form Title</h2>
-                <span></span>
-              </div>
-              <input
-                type="text"
-                name={"question_link"}
-                value={questions.question_link}
-                placeholder="Add Description"
-                className="question__link"
-                onChange={(e) => handleOnChange(e.target.value, e.target.name)}
-                required
-              />
-              <div className="bottom">
-                <button
-                  className="send__btn"
-                  onClick={(e) => handleOnSubmit(e)}
-                >
-                  Send
-                </button>
+          <div className="content__container">
+            <div className="question__description">
+              <div className="question__body">
+                <div className="head">
+                  <h2 className="question__title">Add Question Link</h2>
+                  <span></span>
+                </div>
+                <div className="question__selection">
+                  <input
+                    type="text"
+                    name={"question_link"}
+                    value={question.question_link}
+                    placeholder="Add a Question"
+                    className="question__link"
+                    onChange={(e) =>
+                      handleOnChange(e.target.value, e.target.name)
+                    }
+                    required
+                  />
+                  <DropdownButton
+                    className="questions"
+                    currentSelection={selectedOption}
+                    handleSelectionClick={(value) => {
+                      setSelectedOption(value);
+                    }}
+                    selections={selectOption}
+                    removeDropDownIcon={false}
+                  />
+                </div>
+                <div className="bottom">
+                  <button
+                    className="send__btn"
+                    onClick={(e) => handleOnSubmit(e)}
+                    disabled={isLoading}
+                  >
+                    <div className="save">
+                      {isLoading ? (
+                        <LoadingSpinner width={25} height={25} color="#fff" />
+                      ) : (
+                        <div>Send</div>
+                      )}
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
+            {/*<div className="question__action__btn">
+              <Add />
+              <Delete />
+                      </div>*/}
           </div>
         </div>
       </div>
