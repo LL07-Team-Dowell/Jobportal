@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Jobportal/static/css/main.adfa3dbc.css",
-    "main.js": "/Jobportal/static/js/main.b3066f7b.js",
+    "main.css": "/Jobportal/static/css/main.b6a2fc71.css",
+    "main.js": "/Jobportal/static/js/main.896750bb.js",
     "static/js/787.7ad4c28f.chunk.js": "/Jobportal/static/js/787.7ad4c28f.chunk.js",
     "static/media/intro-video.mp4": "/Jobportal/static/media/intro-video.2d1439d0707aa1ea6d32.mp4",
     "static/media/cities.png": "/Jobportal/static/media/cities.3e0ea410bfe189d462d3.png",
@@ -11,7 +11,7 @@
     "static/media/internship.png": "/Jobportal/static/media/internship.6af72f4db221f430a3ba.png",
     "static/media/employee.png": "/Jobportal/static/media/employee.650ea1fae32bd34c3b30.png",
     "static/media/research.png": "/Jobportal/static/media/research.3d0398e3fa80a4b77b82.png",
-    "static/media/hero_img.png": "/Jobportal/static/media/hero_img.a12daea46af93db3b440.png",
+    "static/media/hero_img.png": "/Jobportal/static/media/hero_img.0e8f1743a47b4c9e9e62.png",
     "static/media/dowell-logo.png": "/Jobportal/static/media/dowell-logo.85d017e6d34ecfcf0163.png",
     "static/media/freelancer.png": "/Jobportal/static/media/freelancer.60ff66d3110c58ad8c12.png",
     "static/media/landing-logo.png": "/Jobportal/static/media/landing-logo.13cfa69b57d9bdf1e3da.png",
@@ -23,6 +23,8 @@
     "static/media/ux-design-1.svg": "/Jobportal/static/media/ux-design-1.d4fa3c20f5867b7d37c2ca065eef45c9.svg",
     "static/media/database-1.svg": "/Jobportal/static/media/database-1.8d97ecac3cefa37328f862c2d859a2da.svg",
     "static/media/message.svg": "/Jobportal/static/media/message.8bca43a946cbdaaa14794d2f760c6bd1.svg",
+    "static/media/addbtn.svg": "/Jobportal/static/media/addbtn.542f2b467194095005fce122892072aa.svg",
+    "static/media/deletebtn.svg": "/Jobportal/static/media/deletebtn.f548f5f668192ef4bd81d176138b9245.svg",
     "index.html": "/Jobportal/index.html",
     "static/media/two.svg": "/Jobportal/static/media/two.75956cc15cded2d8521fe0b89b49092d.svg",
     "static/media/three.svg": "/Jobportal/static/media/three.e1feaa3093ae7dc082f7ee95e8440244.svg",
@@ -32,12 +34,12 @@
     "static/media/backpage.svg": "/Jobportal/static/media/backpage.3d9040928503cd5c04b6499fa8f376af.svg",
     "static/media/plus.svg": "/Jobportal/static/media/plus.f1bdc5a4ee49cf352188ee9867aa84d1.svg",
     "static/media/selectorArrow.svg": "/Jobportal/static/media/selectorArrow.a2bb23a6d3ef612222ea1181867b9561.svg",
-    "main.adfa3dbc.css.map": "/Jobportal/static/css/main.adfa3dbc.css.map",
-    "main.b3066f7b.js.map": "/Jobportal/static/js/main.b3066f7b.js.map",
+    "main.b6a2fc71.css.map": "/Jobportal/static/css/main.b6a2fc71.css.map",
+    "main.896750bb.js.map": "/Jobportal/static/js/main.896750bb.js.map",
     "787.7ad4c28f.chunk.js.map": "/Jobportal/static/js/787.7ad4c28f.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.adfa3dbc.css",
-    "static/js/main.b3066f7b.js"
+    "static/css/main.b6a2fc71.css",
+    "static/js/main.896750bb.js"
   ]
 }
