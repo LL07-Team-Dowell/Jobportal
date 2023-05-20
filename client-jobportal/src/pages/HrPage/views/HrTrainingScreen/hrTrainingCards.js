@@ -27,10 +27,11 @@ export const trainingCards = [
       "Prepare for a career in UI/UX. Receive professional-level training from uxliving lab",
     svg: <Ux />,
     action: <RiEdit2Fill style={{ fontSize: "1.4rem", color: "#000" }} />,
+    // escapeSlash: true,
   },
   {
     id: 4,
-    module: "Virtual Assistant",
+    module: "Virtual_Assistant",
     description:
       "Prepare for a career as a Virtual Assistant . Receive professional-level training from uxliving lab",
     svg: <Frontend />,

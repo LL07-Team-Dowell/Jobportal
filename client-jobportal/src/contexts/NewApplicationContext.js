@@ -21,6 +21,7 @@ export const newApplicationState = {
     company_id: "",
     data_type: "",
     payment: "",
+    module:"",
     // time_interval: "",
     application_submitted_on: "",
     portfolio_name: "",
@@ -48,6 +49,11 @@ export const excludedApplicantInfo = [
   "server_discord_link",
   "job_category",
   "portfolio_name",
+  "product_discord_link",
+  "shortlisted_on",
+  "onboarded_on",
+  "selected_on",
+  "payment,"
 ];
 
 export const mutableNewApplicationStateNames = {
@@ -57,6 +63,7 @@ export const mutableNewApplicationStateNames = {
     job_number: "job_number",
     job_category:"job_category",
     payment: "payment",
+    module:"module",
     country: "country",
     internet_speed:"internet_speed",
     username: "username",
