@@ -10,7 +10,6 @@ import JobCard from '../../../../components/JobCard/JobCard';
 import TitleNavigationBar from '../../../../components/TitleNavigationBar/TitleNavigationBar';
 import { changeToTitleCase } from '../../../../helpers/helpers';
 import { useCandidateJobsContext } from '../../../../contexts/CandidateJobsContext';
-// import { getJobs } from '../../../../services/commonServices';
 import { getAppliedJobs, getJobs } from '../../../../services/candidateServices';
 import { useCurrentUserContext } from '../../../../contexts/CurrentUserContext';
 import { useJobContext } from '../../../../contexts/Jobs';
@@ -32,7 +31,7 @@ function JobScreen() {
     const [currentJobCategory, setCurrentJobCategory] = useState(null);
     const [jobsToDisplay, setJobsToDisplay] = useState([]);
     const { currentUser } = useCurrentUserContext();
-
+    console.log(jobs);
     useEffect(() => {
         // console.log(jobs);
         // const findJobsMatchingCategory = (category) => jobs.filter(job => job.job_category.toLocaleLowerCase().includes(category.toLocaleLowerCase()) || category.toLocaleLowerCase().includes(job.job_category.toLocaleLowerCase()));
@@ -190,7 +189,8 @@ function JobScreen() {
             getAppliedJobs(datass)
         ]).then(([jobsResponse, appliedJobsResponse]) => {
             const filterJob = jobsResponse.data.response.data.filter(job => job.data_type === currentUser?.portfolio_info[0].data_type);
-            setJobs(filterJob.sort((a, b) => a.job_title.localeCompare(b.job_title)));
+            setJobs(filterJob.sort((a, b) => new Date(b.created_on) - new Date(a.created_on)));
+
             setJobsLoading(false);
             setAllRequestsDone(true);
 
@@ -250,7 +250,6 @@ function JobScreen() {
                                                     React.Children.toArray(jobsToDisplay.map(job => {
 
                                                         if (!job.is_active) return <></>
-
                                                         return <JobCard
                                                             job={job}
                                                             candidateViewJob={true}
