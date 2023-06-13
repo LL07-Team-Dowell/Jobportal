@@ -8,13 +8,15 @@ import axios from 'axios';
 import { useCurrentUserContext } from '../../../../contexts/CurrentUserContext';
 import LoadingSpinner from '../../../../components/LoadingSpinner/LoadingSpinner';
 import { RiTeamFill } from 'react-icons/ri';
+import "./index.scss"
+import { getAllTeams } from '../../../../services/createMembersTasks';
 const Index = () => {
   const { currentUser } = useCurrentUserContext();
   const {data , setdata} = useValues() ;
   const [impLoading , setImpLoading] = useState(false) ; 
   useEffect(()=>{
     setImpLoading(true)
-    axios(`https://100098.pythonanywhere.com/team_task_management/get_all_teams/${currentUser.portfolio_info[0].org_id}/`)
+    getAllTeams(currentUser.portfolio_info[0].org_id)
     .then(resp =>{ 
       console.log(resp.data.response.data)
       setdata({...data , TeamsSelected:resp.data.response.data});
@@ -28,15 +30,22 @@ const Index = () => {
   const back = () => {
     setchoose(0)
   }
-  if(choose === 1) return <StaffJobLandingLayout teamleadView={true}><Teams back={back}/></StaffJobLandingLayout> 
-  if(choose === 2 ) return <StaffJobLandingLayout teamleadView={true}><TasksCo bback={back}/></StaffJobLandingLayout>
+  if(choose === 1) return <StaffJobLandingLayout teamleadView={true}> <div className="container"><Teams back={back}/></div> </StaffJobLandingLayout> 
+  if(choose === 2 ) return <StaffJobLandingLayout teamleadView={true}> <div className="container"><TasksCo bback={back}/></div> </StaffJobLandingLayout>
   if(impLoading)return <StaffJobLandingLayout teamleadView={true}><LoadingSpinner/></StaffJobLandingLayout> 
   return (
     <StaffJobLandingLayout teamleadView={true}>
-    <button onClick={() => setchoose(2)}>Team tasks  <RiTeamFill/> </button>
-    <button onClick={() => setchoose(1)}>show teams <AiOutlineTeam/> </button>
+      <div className='container'>
+      <button className='first-button' onClick={() => setchoose(2)}>   <RiTeamFill style={iconsStyle}/> <div>Team tasks</div></button>
+    <button className='first-button'  onClick={() => setchoose(1)}> <AiOutlineTeam style={iconsStyle}/><div>Show Teams</div></button>
+      </div>
+    
     </StaffJobLandingLayout>
   )
 }
 
 export default Index
+const iconsStyle = {
+  fontSize:60 ,
+
+}

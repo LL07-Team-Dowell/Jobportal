@@ -434,7 +434,7 @@ function App() {
             </CandidateTaskContextProvider>
           }
         />
-        {/* <Route
+        <Route
           path="/create-task"
           element={
             <CandidateTaskContextProvider>
@@ -443,7 +443,7 @@ function App() {
               </ValuesProvider>
             </CandidateTaskContextProvider>
           }
-        /> */}
+        />
 
         <Route path="*" element={<ErrorPage />} />
       </Routes>
