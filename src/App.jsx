@@ -51,6 +51,11 @@ import TraningProgress from "./pages/CandidatePage/views/TraningProgress.js/Tran
 import { ResponsesContextProvider } from "./contexts/Responses";
 import Index from "./pages/TeamleadPage/views/CreateMembersTask/Index";
 import { ValuesProvider } from "./pages/TeamleadPage/views/CreateMembersTask/context/Values";
+import StaffJobLandingLayout from "./layouts/StaffJobLandingLayout/StaffJobLandingLayout";
+import CreateTeam from "./pages/TeamleadPage/views/CreateMembersTask/views/CreateTeam";
+import { TeamProvider } from "./pages/TeamleadPage/views/CreateMembersTask/context/Team";
+import TeamScreenTasks from "./pages/TeamleadPage/views/CreateMembersTask/views/TeamScreenTasks";
+import TeamScreenMembers from "./pages/TeamleadPage/views/CreateMembersTask/views/TeamScreenMembers";
 
 function App() {
   const { currentUser, setCurrentUser } = useCurrentUserContext();
@@ -66,7 +71,7 @@ function App() {
 
   if (loading) return <LoadingPage />;
 
-  // console.log("CURRENT USER", currentUser);
+  console.log("CURRENT USER", currentUser);
 
   // // NO LOGGED IN USER VIEW
   // if (!currentUser) {
@@ -119,7 +124,7 @@ function App() {
   if (
     currentUser.settings_for_profile_info &&
     currentUser.settings_for_profile_info.profile_info[0].Role ===
-      testingRoles.accountRole
+    testingRoles.accountRole
   ) {
     return (
       <Routes>
@@ -147,7 +152,7 @@ function App() {
   if (
     currentUser.settings_for_profile_info &&
     currentUser.settings_for_profile_info.profile_info[0].Role ===
-      testingRoles.subAdminRole
+    testingRoles.subAdminRole
   ) {
     return (
       <Routes>
@@ -325,7 +330,7 @@ function App() {
   if (
     currentUser.settings_for_profile_info &&
     currentUser.settings_for_profile_info.profile_info[0].Role ===
-      testingRoles.hrRole
+    testingRoles.hrRole
   ) {
     return (
       <Routes>
@@ -398,7 +403,7 @@ function App() {
   if (
     currentUser.settings_for_profile_info &&
     currentUser.settings_for_profile_info.profile_info[0].Role ===
-      testingRoles.teamLeadRole
+    testingRoles.teamLeadRole
   ) {
     return (
       <Routes>
@@ -444,11 +449,75 @@ function App() {
             </CandidateTaskContextProvider>
           }
         />
+        <Route
+          path="/create-task/create-new-team/"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true}>
+                <ValuesProvider>
+                  <CreateTeam/>
+                </ValuesProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
+
+        <Route
+          path="/team-screen-member/:id/team-members"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true}>
+                <TeamProvider>
+                  <TeamScreenMembers/>
+                </TeamProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
+
+        <Route
+          path="/team-screen-member/:id/team-tasks"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true}>
+                <TeamProvider>
+                  <TeamScreenTasks/>
+                </TeamProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
 
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     );
   }
+
+  //Provertion Period Page
+  // if (testingRoles.provertionRole === "proverion_period") {
+  //   return <Routes>
+  //     <Route
+  //       path="/"
+  //       element={
+  //         <NavigationContextProvider>
+  //           <CandidateTaskContextProvider>
+  //             <CandidateJobsContextProvider>
+  //               <JobContextProvider>
+  //                 <AfterSelectionScreen assignedProjects={assignedProjects} />
+  //               </JobContextProvider>
+  //             </CandidateJobsContextProvider>
+  //           </CandidateTaskContextProvider>
+  //         </NavigationContextProvider>
+  //       }
+  //     >
+  //       <Route path=":section" element={<AfterSelectionScreen />} />
+  //     </Route>
+
+  //     <Route path="/logout" element={<Logout />} />
+
+  //     <Route path="*" element={<ErrorPage />} />
+  //   </Routes>
+  // }
 
   // CANDIDATE PAGE
   return candidateHired ? (
