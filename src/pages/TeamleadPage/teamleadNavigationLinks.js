@@ -13,11 +13,11 @@ export const teamleadNavigationLinks = [
         icon: <ImStack />,
         text: "Tasks"
     },
-    // {
-    //     linkAddress: "/create-task",
-    //     icon: <GiTeamIdea />, 
-    //     text: "Team tasks"
-    // },
+    {
+        linkAddress: "/create-task",
+        icon: <GiTeamIdea />, 
+        text: "Team tasks"
+    },
     {
         linkAddress: "/user",
         icon: <FiUser />, 

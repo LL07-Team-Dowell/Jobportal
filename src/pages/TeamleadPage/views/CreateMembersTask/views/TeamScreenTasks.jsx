@@ -8,7 +8,7 @@ import TeamScreeTaskProgessDetail from './compoonent/teamScreeTaskProgessDetail/
 import { getAllTeams } from '../../../../../services/createMembersTasks';
 import { useCurrentUserContext } from '../../../../../contexts/CurrentUserContext';
 import CreateTask from './compoonent/createTask/createTask';
-
+import LoadingSpinner from '../../../../../components/LoadingSpinner/LoadingSpinner';
 const TeamScreenTasks = () => {
   const { currentUser } = useCurrentUserContext();
     const {id} = useParams();
@@ -17,27 +17,27 @@ const TeamScreenTasks = () => {
     const [detail ,setdetail] = useState('in progress') ;
     const [showCreatTask,setShowCreateTask] = useState(false) 
     useEffect(()=>{
-      if(team.members === undefined){
+      if(team?.members === undefined){
         setloading(true)
         getAllTeams(currentUser.portfolio_info[0].org_id)
           .then(resp =>{ 
           setteam(resp.data.response.data.find(team => team["_id"] === id))
-          setloading(false)
-      })
+          setloading(false)})
       .catch(err => console.log(err))
       }
     },[])
     console.log({team})
-    if (loading) return <h1>Loading...</h1>
-  return (
-    <>
-    <Navbar title={team.team_name} removeButton={true}/>
-    <TeamScreenLinks id={id}/>
-    <TeamScreenTaskProgress />
-    <TeamScreeTaskProgessDetail members={team.members}  detail={detail} setdetail={setdetail} ShowCreateTask={()=>setShowCreateTask(true)}/>
-    {showCreatTask && <CreateTask id={id} members={team.members} team={team} unShowCreateTask={()=>setShowCreateTask(false)}/>}
-    </>
-    )
+    if (loading) return <LoadingSpinner/>
+      return (
+        <div style={{height:'130%'}}>
+          { team?.team_name !== undefined ? <Navbar title={team?.team_name.toString()} removeButton={true}/> : null }
+          <TeamScreenLinks id={id}/>
+          <TeamScreenTaskProgress />
+          <TeamScreeTaskProgessDetail id={id} title={team?.team_name} members={team?.members}  detail={detail} setdetail={setdetail} ShowCreateTask={()=>setShowCreateTask(true)}/>
+          {showCreatTask && <CreateTask id={id} members={team.members} team={team} unShowCreateTask={()=>setShowCreateTask(false)}/>} 
+        </div>
+        )
+ 
 }
 
 export default TeamScreenTasks
