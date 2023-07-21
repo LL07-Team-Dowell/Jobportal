@@ -15,6 +15,12 @@
   margin: auto;
 }
 
+.job_container textarea {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  resize: none;
+}
+
 .navLink {
   width: 0%;
 }
@@ -91,7 +97,8 @@ h3 {
   display: flex;
 }
 
-.job_details input {
+.job_details input,
+.job_details textarea {
   padding: 1.1rem 1.1rem 1.1rem 2rem;
   border-radius: 0.8rem;
   border: 0.1rem solid var(--primary-color);
@@ -236,10 +243,16 @@ h3 {
 .currency {
   border: 1px solid rgba(0, 0, 0, 0.12);
   margin: 0;
-  height: 2.4rem;
+  height: 3rem;
   color: #7e7e7e;
+  width: max-content;
+  margin-left: 0 !important;
+  margin-top: 0.15rem;
 }
 
+.currency span {
+  white-space: nowrap;
+}
 .payment_input {
   width: 100%;
 }

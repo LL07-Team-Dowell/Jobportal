@@ -21,7 +21,8 @@ const AfterSelectionScreen = ({ assignedProjects }) => {
     const [ showAddTaskModal, setShowAddTaskModal ] = useState(false);
     const { section } = useNavigationContext();
     const { setUserTasks } = useCandidateTaskContext();
-    
+
+
     return <>
         {
             section === undefined ? <>

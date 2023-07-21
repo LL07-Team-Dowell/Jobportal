@@ -31,19 +31,18 @@ const AddTaskScreen = ({ teamMembers, closeTaskScreen, updateTasks, afterSelecti
     }
     function convertDateFormat(date) {
         const dateObj = new Date(date);
-        const formattedDate = dateObj.toLocaleString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-        });
+        const month = dateObj.getMonth() + 1; // Months are zero-based
+        const day = dateObj.getDate();
+        const year = dateObj.getFullYear();
+        const hours = dateObj.getHours();
+        const minutes = dateObj.getMinutes();
+        const seconds = dateObj.getSeconds();
 
-        const [formattedTime, formattedDateOnly] = formattedDate.split(',');
-
-        return `${formattedTime} ${formattedDateOnly}`;
+        const formattedDate = `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+        console.log(formattedDate);
+        return formattedDate;
     }
+
 
     const formattedDate = convertDateFormat(time);
     console.log(formattedDate);
@@ -198,12 +197,15 @@ const AddTaskScreen = ({ teamMembers, closeTaskScreen, updateTasks, afterSelecti
                 </h1>
                 {
                     showTaskForm ? <>
-                        <input type={"text"} placeholder={"Task Assignee"} value={newTaskDetails.username} readOnly={true} />
-                        <input type={"text"} placeholder={"today time"} value={TimeValue} readOnly={true} />
+                        <span className="selectProject">Username</span>
+                        <input type={"text"} placeholder={"Task Assignee"} value={newTaskDetails.username} style={{ margin: 0, marginBottom: "0.8rem" }} readOnly={true} />
+                        <span className="selectProject">Date of Submission</span>
+                        <input type={"text"} placeholder={"today time"} value={TimeValue} style={{ margin: 0, marginBottom: "0.8rem" }} readOnly={true} />
                         <span className="selectProject">Select Project</span>
                         <br />
-                        <select onChange={e => selctChange(e)} className="addTaskDropDown"><option value={""}>Select</option>{assignedProject.map((v, i) => <option key={i} value={v}>{v}</option>)}</select>
-                        <textarea placeholder="Enter Task" name="description" value={newTaskDetails.description} onChange={handleChange} rows={5}></textarea>
+                        <select onChange={e => selctChange(e)} className="addTaskDropDown" style={{ margin: 0, marginBottom: "0.8rem"  }} ><option value={""}>Select</option>{assignedProject.map((v, i) => <option key={i} value={v}>{v}</option>)}</select>
+                        <span className="selectProject">Enter Task Details</span>
+                        <textarea placeholder="Enter Task" name="description" value={newTaskDetails.description} style={{ margin: 0 }} onChange={handleChange} rows={5}></textarea>
                         <button type={"button"} className="add__Task__Btn" disabled={disabled} onClick={() => editPage ? handleUpdateTaskBtnClick() : CreateNewTaskFunction()}>{editPage ? "Update Task" : "Add Task"}</button>
                     </> :
 

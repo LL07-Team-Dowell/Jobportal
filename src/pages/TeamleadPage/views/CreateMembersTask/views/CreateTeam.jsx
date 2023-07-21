@@ -9,19 +9,27 @@ import { teamManagementProductName } from '../../../../../utils/utils';
 import { toast } from 'react-toastify';
 import { BsPlus } from 'react-icons/bs';
 import { FaTimes } from 'react-icons/fa';
+import LittleLoading from '../../../../CandidatePage/views/ResearchAssociatePage/littleLoading';
+import LoadingSpinner from '../../../../../components/LoadingSpinner/LoadingSpinner';
+
+
 const CreateTeam = () => {
   
   // USER
   const { currentUser } = useCurrentUserContext();
   // DATA
   const { data, setdata } = useValues();
-  const MembersCurrentUser = currentUser.selected_product.userportfolio.map(v => v.username.length !== 0 && v.username[0] !== 'owner' ? v.username[0] : null).filter(v => v !== null).map((v,i)=>({member:v, id:i}))
+  const MembersCurrentUser = currentUser?.settings_for_profile_info?.fakeSuperUserInfo ?
+    currentUser?.userportfolio?.filter(user => user.member_type !== 'owner').map(v => v.username.length !== 0 ? v.username[0] : null).filter(v => v !== null).map((v,i)=>({member:v, id:i}))
+    :
+    currentUser?.selected_product?.userportfolio.map(v => v.username.length !== 0 && v.username[0] !== 'owner' ? v.username[0] : null).filter(v => v !== null).map((v,i)=>({member:v, id:i}))
   // States
   const [showCard, setshowCard] = useState(false);
   const [toggleCheckboxes, settoggleCheckboxes] = useState(false);
   const [displaidMembers, setDesplaidMembers] = useState(MembersCurrentUser)
   const [inputMembers, setInputMembers] = useState([]) ; 
   const [query,setquery] = useState('');
+  const [loading, setLoading] = useState(false)
   // Navigate 
   const navigate = useNavigate()
   // FUNCTIONS
@@ -42,26 +50,29 @@ const removeMember = (id) => {
 }
 
   const createTeamSubmit = () => {
-    if(data.team_name.length > 0  && data.selected_members.length > 0 && data.teamDiscription){
-
-      createTeam({
-        team_name:data.team_name,
-        team_description:data.teamDiscription,
-        company_id:currentUser.portfolio_info[0].org_id,
-        members:data.selected_members,
-      })
-      .then(resp => {
-        navigate(`/team-screen-member/${resp.data.response.inserted_id}/team-tasks`)
-        setdata({...data, TeamsSelected:{...data.TeamsSelected,team_name:data.team_name,_id:resp.data.response.inserted_id }})
-        toast.success("team created successfully !")
-      }
-        
-        )
-      .catch(err => {
-        console.log(err)}
-      )
+    if(data.team_name.length > 0  && inputMembers.length > 0 && data.teamDiscription){
+      if(!loading){
+        setLoading(true)
+        createTeam({
+          team_name:data.team_name,
+          team_description:data.teamDiscription,
+          company_id:currentUser.portfolio_info[0].org_id,
+          members:inputMembers.map(v => v.member),
+          created_by: currentUser.userinfo.username,
+          data_type: currentUser.portfolio_info[0].data_type
+        })
+        .then(resp => {
+          navigate(`/team-screen-member/${resp.data.response.inserted_id}/team-tasks`)
+          setdata({...data, TeamsSelected:{...data.TeamsSelected,team_name:data.team_name,_id:resp.data.response.inserted_id }})
+          toast.success("team created successfully !")
+          setLoading(false)
+        })
+        .catch(err => {
+          console.log(err) } )
+}
     }else{
       toast.error('some data are missing fill all the inputs')
+      console.log(data.team_name, inputMembers, data.teamDiscription)
     }
     
   }
@@ -83,7 +94,6 @@ const removeMember = (id) => {
           </p>
         </div>
       </div>
-
       {showCard ? (
         <div className='overlay' >
         <div className='create_your_team  ' tabIndex={0}   >
@@ -133,6 +143,21 @@ const removeMember = (id) => {
       }
       </div>
 
+          <br />
+          <div className="buttons">
+            <button onClick={createTeamSubmit}>{loading ? <LoadingSpinner color={'white'} width='20px' height='20px' /> : 'Create'}</button>
+            <button onClick={()=>setshowCard(false)}>Cancel</button>
+          </div>
+        </div>
+        </div>
+      ) : null}
+    </div>
+    </>
+  );
+};
+
+export default CreateTeam;
+
           {/* <label htmlFor=''>Add asdasd</label>
           <div
             className='add_member_input'
@@ -144,7 +169,7 @@ const removeMember = (id) => {
           <br />
           {toggleCheckboxes ? (
             <div className='checkboxes'>
-               {currentUser.selected_product.userportfolio.map((user, index) => user.username[0] !== 'owner' ?  (
+               {currentUser?.selected_product?.userportfolio.map((user, index) => user.username[0] !== 'owner' ?  (
             <div key={index}>
               <input
                 type='checkbox'
@@ -168,17 +193,3 @@ const removeMember = (id) => {
               ))} */}
             {/* </div>
           ) : null} */}
-          <br />
-          <div className="buttons">
-            <button onClick={createTeamSubmit}>Create</button>
-            <button onClick={()=>setshowCard(false)}>Cancel</button>
-          </div>
-        </div>
-        </div>
-      ) : null}
-    </div>
-    </>
-  );
-};
-
-export default CreateTeam;

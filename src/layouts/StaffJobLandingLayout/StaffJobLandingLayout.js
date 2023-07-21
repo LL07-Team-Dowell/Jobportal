@@ -21,6 +21,7 @@ import { teamManagementProductName } from "../../utils/utils";
 import { hr } from "date-fns/locale";
 import { IoShareSocial } from "react-icons/io5";
 import ShareJobModal from "../../components/ShareJobModal/ShareJobModal";
+import PublicAccountConfigurationModal from "../../pages/TeamleadPage/components/PublicAccountConfigurationModal/PublicAccountConfigurationModal";
 
 const StaffJobLandingLayout = ({
   children,
@@ -45,8 +46,14 @@ const StaffJobLandingLayout = ({
   modelDurationInSec,
   hideSearchBar,
   showShareModalForJob,
-  jobLinkToShare,
+  jobLinkToShareObj,
   handleCloseShareJobModal,
+  showPublicAccountConfigurationModal,
+  handleClosePublicAccountConfigurationModal,
+  handlePublicAccountConfigurationModalBtnClick,
+  publicAccountConfigurationBtnDisabled,
+  publicAccountDetailState,
+  handleChangeInPublicAccountState,
 }) => {
   const isLargeScreen = useMediaQuery("(min-width: 992px)");
   const { currentUser } = useCurrentUserContext();
@@ -103,7 +110,7 @@ const StaffJobLandingLayout = ({
                 <div className="add__Icon__Container">
                   <AiOutlinePlus />
                 </div>
-                {isLargeScreen && <h2>Add New Job</h2>}
+                {isLargeScreen && <h2>All Jobs</h2>}
               </div>
             )
           ) : (
@@ -174,13 +181,24 @@ const StaffJobLandingLayout = ({
           {
             adminView && showShareModalForJob && 
             <ShareJobModal
-              linkToShare={jobLinkToShare}
+              linkToShareObj={jobLinkToShareObj}
               handleCloseModal={
                 handleCloseShareJobModal && typeof handleCloseShareJobModal === 'function' ?
                 () => handleCloseShareJobModal()
                 :
                 () => {}
               }
+            />
+          }
+
+          {
+            hrView && showPublicAccountConfigurationModal &&
+            <PublicAccountConfigurationModal 
+              handleCloseModal={handleClosePublicAccountConfigurationModal}
+              handleBtnClick={handlePublicAccountConfigurationModalBtnClick}
+              btnDisabled={publicAccountConfigurationBtnDisabled}
+              details={publicAccountDetailState}
+              handeDetailChange={handleChangeInPublicAccountState}
             />
           }
 

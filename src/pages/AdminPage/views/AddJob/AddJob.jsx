@@ -115,17 +115,9 @@ const AddJob = ({ subAdminView }) => {
   };
 
   const handleAddTerms = (termsKey) => {
-    const newTerms = newJob[termsKey].slice();
-
-    if (newTerms === "") {
-      toast.info("Please enter a valid term");
-      return;
-    }
-
-    const updatedTerms = [...newJob[termsKey], newTerms];
     setNewJob((prevValue) => {
       const copyOfPrevValue = { ...prevValue };
-      copyOfPrevValue[termsKey] = updatedTerms;
+      copyOfPrevValue[termsKey].push("");
       return copyOfPrevValue;
     });
   };
@@ -560,8 +552,8 @@ const AddJob = ({ subAdminView }) => {
                   UI/UX
                 </option>
                 <option
-                  value="Virtual_Assistant"
-                  selected={thirdOption === "Virtual_Assistant"}
+                  value="Virtual Assistant"
+                  selected={thirdOption === "Virtual Assistant"}
                 >
                   Virtual Assistant
                 </option>
@@ -601,14 +593,14 @@ const AddJob = ({ subAdminView }) => {
               </div>
 
               <label htmlFor="description">Description</label>
-              <input
-                type="text"
+              <textarea
                 name={"description"}
                 value={newJob.description}
                 onChange={(e) => handleChange(e.target.value, e.target.name)}
                 placeholder={"Enter your answer"}
                 required
                 ref={descriptionRef}
+                rows={5}
               />
 
               <div className="terms">

@@ -23,13 +23,16 @@ import JobCard from '../../../../components/JobCard/JobCard';
 import StaffJobLandingLayout from '../../../../layouts/StaffJobLandingLayout/StaffJobLandingLayout';
 import { getJobs2 } from '../../../../services/commonServices';
 import { useCurrentUserContext } from '../../../../contexts/CurrentUserContext';
-import { getCandidateApplicationsForHr, getCandidateTask, getSettingUserProject } from '../../../../services/hrServices';
+import { getCandidateApplicationsForHr, getCandidateTask, getSettingUserProject, hrSendMailToPublicUser } from '../../../../services/hrServices';
 import { useHrJobScreenAllTasksContext } from '../../../../contexts/HrJobScreenAllTasks';
 import HrTrainingQuestions from '../HrTrainingScreen/HrTrainingQuestion';
 import { trainingCards } from '../HrTrainingScreen/hrTrainingCards';
 import { getTrainingManagementQuestions } from '../../../../services/hrTrainingServices';
 import { IoMdRefresh } from "react-icons/io";
 import { set } from 'date-fns';
+import { toast } from 'react-toastify';
+import { getUserInfoFromLoginAPI } from '../../../../services/authServices';
+import { teamManagementProductName } from '../../../../utils/utils';
 
 function fuzzySearch(query, text) {
   const searchRegex = new RegExp(query.split('').join('.*'), 'i');
@@ -37,7 +40,7 @@ function fuzzySearch(query, text) {
 }
 
 function HrJobScreen() {
-  const { currentUser } = useCurrentUserContext();
+  const { currentUser, userRolesLoaded, setUserRolesFromLogin, setRolesLoaded } = useCurrentUserContext();
   const { setQuestions } = useHrJobScreenAllTasksContext();
   const { section, sub_section, path } = useNavigationContext();
   const [jobs, setJobs] = useState([]);
@@ -64,6 +67,10 @@ function HrJobScreen() {
   const [ guestApplications, setGuestApplications ] = useState([]);
   const [ currentActiveItem, setCurrentActiveItem ] = useState("Received");
   const [ trackingProgress, setTrackingProgress ] = useState(false);
+  const [ showPublicAccountConfigurationModal, setShowPublicAccountConfigurationModal ] = useState(false);
+  const [ newPublicConfigurationLoading, setNewPublicConfigurationLoading ] = useState(false);
+  const [ newPublicAccountDetails, setNewPublicAccountDetails ] = useState(initialPublicAccountDetails);
+  const [ currentCandidateData, setCurrentCandidateData ] = useState(null);
   
   const handleEditTaskBtnClick = (currentData) => {
     setEditTaskActive(true);
@@ -90,6 +97,18 @@ function HrJobScreen() {
   }, [sub_section, path])
 
   useEffect(() => {
+
+    if (!userRolesLoaded) {
+      getUserInfoFromLoginAPI({ session_id: sessionStorage.getItem('session_id'), product: teamManagementProductName }).then(res => {
+        // console.log(res.data.roles);
+        setUserRolesFromLogin(res.data.roles);
+        setRolesLoaded(true);
+
+      }).catch(err => {
+        console.log('Failed to fetch roles: ', err.response ? err.response.data : err.message);
+        setRolesLoaded(true);
+      })
+    }
 
     Promise.all([
       getCandidateApplicationsForHr(currentUser.portfolio_info[0].org_id),
@@ -153,6 +172,8 @@ function HrJobScreen() {
     setShowCurrentCandidateTask(false);
     const currentPath = location.pathname.split("/")[1];
     
+    if (location.state && location.state.candidate) setCurrentCandidateData(location.state.candidate);
+
     if (!currentPath) return setCurrentActiveItem("Received");
     if (currentPath === "guest-applications") return setCurrentActiveItem("Guests");
     if (currentPath === "shortlisted") return setCurrentActiveItem("Shortlisted");
@@ -303,6 +324,77 @@ function HrJobScreen() {
     })
   }
 
+  const handlePublicDetailChange = (name, value) => {
+    setNewPublicAccountDetails((prevValue) => {
+      return { 
+        ...prevValue,
+        [name]: value,
+      }
+    })
+  }
+
+  const handlePublicAccountConfigurationModalBtnClick = async () => {
+
+    if (!currentCandidateData || newPublicConfigurationLoading) return
+
+    const copyOfPublicDetail = { ...newPublicAccountDetails }
+
+    copyOfPublicDetail.qr_id = currentCandidateData.username;
+    copyOfPublicDetail.org_name = currentUser?.portfolio_info[0]?.org_name;
+    copyOfPublicDetail.org_id = currentCandidateData?.company_id;
+    copyOfPublicDetail.owner_name = currentUser?.settings_for_profile_info?.fakeSuperUserInfo ? 
+     currentUser?.userinfo?.username
+    :
+     currentUser?.portfolio_info[0]?.owner_name;
+    copyOfPublicDetail.product = teamManagementProductName;
+    copyOfPublicDetail.toemail = currentCandidateData?.applicant_email;
+    copyOfPublicDetail.toname = currentCandidateData?.applicant;
+    copyOfPublicDetail.job_role = currentCandidateData.job_title;
+    copyOfPublicDetail.data_type = currentCandidateData?.data_type;
+
+    const copyOfPublicDetailKeys = Object.keys(copyOfPublicDetail);
+    const keysFilledStatus = copyOfPublicDetailKeys.map(key => {
+      if (!copyOfPublicDetail[key] || copyOfPublicDetail[key].length < 1) return 'missing';
+      return 'filled'
+    })
+
+    const missingValueIndex = keysFilledStatus.findIndex(key => key === 'missing');
+    if (missingValueIndex !== -1) return toast.info(`Please enter ${readablePublicAccountStateNames[copyOfPublicDetailKeys[missingValueIndex]]}`)
+    
+    // console.log(copyOfPublicDetail);
+
+    setNewPublicConfigurationLoading(true);
+
+    try {
+      const response = (await hrSendMailToPublicUser(copyOfPublicDetail)).data;
+      // console.log(response);
+
+      setNewPublicConfigurationLoading(false);
+
+      setCandidateData((prevCandidates) => {
+        return [...prevCandidates, currentCandidateData];
+      });
+      
+      setGuestApplications((prevApplications) => {
+        return prevApplications.filter(
+          (application) => application._id !== currentCandidateData._id
+        );
+      });
+      
+      setNewPublicAccountDetails(initialPublicAccountDetails);
+      setShowPublicAccountConfigurationModal(false);
+
+      toast.success(response.message)
+  
+      navigate('/guest-applications');
+
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response ? error.response.data : error.message);
+      setNewPublicConfigurationLoading(false);
+    }
+  }
+
   return (
     <StaffJobLandingLayout 
       hrView={true}
@@ -316,6 +408,12 @@ function HrJobScreen() {
       showLoadingOverlay={trackingProgress}
       modelDurationInSec={5.69} 
       searchPlaceHolder={section === "home" ?"received" : section === "guest-applications" ? "guests" : section === "shortlisted" ? "shortlisted" : section === "hr-training" ? "hr-training" : "received"}
+      showPublicAccountConfigurationModal={showPublicAccountConfigurationModal}
+      handleClosePublicAccountConfigurationModal={() => setShowPublicAccountConfigurationModal(false)}
+      publicAccountConfigurationBtnDisabled={newPublicConfigurationLoading}
+      handlePublicAccountConfigurationModalBtnClick={handlePublicAccountConfigurationModalBtnClick}
+      publicAccountDetailState={newPublicAccountDetails}
+      handleChangeInPublicAccountState={handlePublicDetailChange}
     >
     <div className="hr__Page__Container">
     <TitleNavigationBar 
@@ -329,6 +427,10 @@ function HrJobScreen() {
           section === "tasks" ? "Tasks" 
           :
           section === "hr-training" ? "HR Training"
+          :
+          section === "guest-applications" ? "Guest Applications"
+          :
+          section === "shortlisted" ? "Shortlisted Applications"
           :
           sub_section !== undefined && section === "hr-training" ? 
             sub_section ? sub_section : `${trainingCards.module}` 
@@ -676,6 +778,8 @@ function HrJobScreen() {
                 updateCandidateData={setCandidateData}
                 updateAppliedData={section === "guest-applications" ? setGuestApplications : setAppliedJobs}
                 jobTitle={jobs.find(job => job.job_number === location.state.candidate.job_number)?.job_title}
+                setShowPublicAccountConfigurationModal={setShowPublicAccountConfigurationModal}
+                updateInterviewTimeSelected={(valuePassed) => handlePublicDetailChange(mutablePublicAccountStateNames.date_time, valuePassed)}
               />
             </>
           </div>
@@ -704,6 +808,43 @@ function HrJobScreen() {
     </div>
     </StaffJobLandingLayout>
   )
+}
+
+
+const initialPublicAccountDetails = {
+  "qr_id": "",
+  "org_name": "",
+  "org_id": "",
+  "owner_name": "",
+  "portfolio_name": "",
+  "unique_id": "",
+  "product": teamManagementProductName,
+  "role": "",
+  "member_type": "",
+  "toemail": "",
+  "toname": "",
+  "subject": "",
+  "job_role": "",
+  "data_type": "",
+  "date_time": "",
+}
+
+const readablePublicAccountStateNames = {
+  "subject": "subject of mail",
+  "portfolio_name": "portfolio name",
+  "unique_id": "unique id",
+  "member_type": "member type",
+  "role": "role",
+}
+
+
+export const mutablePublicAccountStateNames = {
+  "portfolio_name": "portfolio_name",
+  "unique_id": "unique_id",
+  "role": "role",
+  "member_type": "member_type",
+  "subject": "subject",
+  "date_time": "date_time",
 }
 
 export default HrJobScreen
