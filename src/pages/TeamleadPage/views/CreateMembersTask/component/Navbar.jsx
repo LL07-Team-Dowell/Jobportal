@@ -2,7 +2,7 @@ import React from 'react'
 import { BiPlus } from 'react-icons/bi'
 import { MdOutlineArrowBackIosNew } from 'react-icons/md'
 import { NavLink, useNavigate } from 'react-router-dom'
-const Navbar = ({title , removeButton, color, noButtonBack}) => {
+const Navbar = ({title , removeButton, color, noButtonBack, addTeamTask, addTeamTaskTitle, handleAddTeamTaskFunction}) => {
   const navigate = useNavigate()
   return (
     <nav className='create-new-team-header'>
@@ -14,6 +14,10 @@ const Navbar = ({title , removeButton, color, noButtonBack}) => {
             {!removeButton && <NavLink className='create-new-team-btn' to={"/create-task/create-new-team/"}>
               <BiPlus/> <span>Create New</span>
             </NavLink>}
+            {
+              addTeamTask && <button className='create-new-team-btn' style={{fontWeight:600,textAlign:'center'}} onClick={handleAddTeamTaskFunction}>
+                <BiPlus style={{fontWeight:600,fontSize:'20px'}}/> <span>{addTeamTaskTitle}</span></button>
+            }
         </div>
     </nav>
   )

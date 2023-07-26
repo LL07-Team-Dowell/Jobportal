@@ -100,14 +100,15 @@ const LandingPage = ({ subAdminView }) => {
       });
   }, []);
 
-  const handleShareIconClick = (jobId) => {
+  const handleShareIconClick = (jobId, jobName) => {
     // console.log(jobId);
     setShowShareModal(true);
     setJobLinkToShareObj({
       view: 'public',
       job_company_id: currentUser?.portfolio_info[0].org_id,
       job_id: jobId,
-      company_data_type: currentUser?.portfolio_info[0]?.data_type
+      company_data_type: currentUser?.portfolio_info[0]?.data_type,
+      job_name: jobName,
     });
   }
 
@@ -120,11 +121,21 @@ const LandingPage = ({ subAdminView }) => {
 
 
   console.log({ searchValue });
-  
+  const EditActiveCardStatus = (id) => {
+    console.log({id})
+    setJobs(jobs.map(job => {
+      if(job._id !== id) return job
+      return {...job,is_active:!job.is_active} 
+    }))
+    setjobs2(jobs.map(job => {
+      if(job._id !== id) return job
+      return {...job,is_active:!job.is_active} 
+    }))
+  }
   return (
     <StaffJobLandingLayout
       adminView={true}
-      handleNavIconClick={() => navigate("/add-job")}
+      handleNavIconClick={() => navigate("/add")}
       searchValue={searchValue}
       setSearchValue={handleSearchChange}
       subAdminView={subAdminView}
@@ -156,8 +167,9 @@ const LandingPage = ({ subAdminView }) => {
                       jobs={jobs} 
                       setJobs={setJobs} 
                       setShowOverlay={setstateTrackingProgress} 
-                      handleShareIconClick={(passedJobId) => handleShareIconClick(passedJobId)}
+                      handleShareIconClick={(passedJobId, passedJobName) => handleShareIconClick(passedJobId, passedJobName)}
                       index={index}
+                      EditActiveCardStatus={EditActiveCardStatus}
                     />
                   ))
                 :
@@ -172,8 +184,9 @@ const LandingPage = ({ subAdminView }) => {
                       jobs={jobs} 
                       setJobs={setJobs} 
                       setShowOverlay={setstateTrackingProgress} 
-                      handleShareIconClick={(passedJobId) => handleShareIconClick(passedJobId)}
+                      handleShareIconClick={(passedJobId, passedJobName) => handleShareIconClick(passedJobId, passedJobName)}
                       index={index}
+                      EditActiveCardStatus={EditActiveCardStatus}
                     />
                   ))
                 :

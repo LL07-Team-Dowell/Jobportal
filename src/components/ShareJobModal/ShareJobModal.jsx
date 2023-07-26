@@ -36,7 +36,7 @@ const ShareJobModal = ({ linkToShareObj, handleCloseModal }) => {
         const publicIdsToSet = currentUser?.userportfolio?.filter(portfolio => portfolio.member_type === 'public');
 
         setPublicIds(publicIdsToSet)
-        setMaximumNumberOfPublicIds(Math.max(publicIdsToSet.map(item => item.username.length)));
+        setMaximumNumberOfPublicIds(Math.max(...publicIdsToSet.map(item => item.username.length)));
 
     }, [])
 
@@ -106,6 +106,7 @@ const ShareJobModal = ({ linkToShareObj, handleCloseModal }) => {
             "job_company_id": linkToShareObj?.job_company_id,
             "job_id": linkToShareObj?.job_id,
             "company_data_type": linkToShareObj?.company_data_type,
+            "job_name": linkToShareObj?.job_name,
         }
 
         const currentJobLinks = jobLinks.slice();

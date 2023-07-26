@@ -37,6 +37,7 @@ const Card = ({
   setShowOverlay,
   handleShareIconClick,
   index,
+  EditActiveCardStatus
 }) => {
   const { list } = useJobContext();
   const navigate = useNavigate();
@@ -96,7 +97,6 @@ const Card = ({
   };
 
   const handleCheckboxChange = () => {
-    setIsActive(!is_activee);
     setLoading(true);
     // console.log({ id: _id, is_activee });
 
@@ -104,6 +104,7 @@ const Card = ({
       .then((response) => {
         // console.log(response.data);
         setLoading(false);
+        EditActiveCardStatus(_id)
       })
       .catch((error) => {
         // console.log(error);
@@ -183,9 +184,9 @@ const Card = ({
                 onClick={
                   handleShareIconClick && typeof handleShareIconClick === 'function' ?
                     newly_created ?
-                    () => fetchJobsAgain(null, (passedId) => handleShareIconClick(passedId))
+                    () => fetchJobsAgain(null, (passedId, passedName) => handleShareIconClick(passedId, passedName))
                     :
-                    () => handleShareIconClick(_id) 
+                    () => handleShareIconClick(_id, job_title) 
                   :
                   () => {}
                 }
