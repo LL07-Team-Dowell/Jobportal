@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 const TeamThread = ({ title = "Team Issues", color }) => {
   const { id } = useParams();
-
+  console.log(id);
   const Wrappen = styled.section`
   display: flex;
   align-items: center;
@@ -42,12 +42,29 @@ const TeamThread = ({ title = "Team Issues", color }) => {
   }
 `;
   const [panding, setPanding] = useState(true);
+  const [resolve, setResolve] = useState(false);
+  const [progress, setProgress] = useState(false);
+  const [status, setStatus] = useState();
+
   const clickToPandingApproval = () => {
     setPanding(true);
+    setProgress(false);
+    setResolve(false);
+    setStatus('In progress')
   };
 
   const clickToApproved = () => {
     setPanding(false);
+    setProgress(true);
+    setResolve(false);
+    setStatus('Completed')
+  };
+
+  const clickToResolve = () => {
+    setPanding(false);
+    setProgress(false);
+    setResolve(true);
+    setStatus('Resolved')
   };
 
   const navigate = useNavigate()
@@ -56,7 +73,7 @@ const TeamThread = ({ title = "Team Issues", color }) => {
     <div className='create-new-team-header'>
       <div>
         <div>
-          <button className='back' onClick={() => navigate(-1)}><MdOutlineArrowBackIosNew /></button>
+          <button className='back' onClick={() => navigate(`/team-screen-member/${id}/team-issues`)}><MdOutlineArrowBackIosNew /></button>
           {title !== undefined && <h1 style={{ color: color ? color : '#000' }}>{title}</h1>}
         </div>
       </div>
@@ -64,10 +81,11 @@ const TeamThread = ({ title = "Team Issues", color }) => {
 
     <div className="create-new-team-heade">
       <Wrappen>
-        <NavLink className={`${panding ? 'link-isActive' : 'link-notactive'}`} to={`/team-screen-member/${id}/team-issues`} onClick={clickToPandingApproval}>In progress</NavLink>
-        <NavLink className={`${panding ? 'link-notactive' : 'link-isActive'}`} to={`/team-screen-member/${id}/team-issues`} onClick={clickToApproved}>Completed</NavLink>
+        <NavLink className={`${panding ? 'link-isActive' : 'link-notactive'}`} to={`/team-screen-member/${id}/issue-inprogress`} onClick={clickToPandingApproval}>In progress</NavLink>
+        <NavLink className={`${progress ? 'link-isActive' : 'link-notactive'}`} to={`/team-screen-member/${id}/issue-completed`} onClick={clickToApproved}>Completed</NavLink>
+        <NavLink className={`${resolve ? 'link-isActive' : 'link-notactive'}`} to={`/team-screen-member/${id}/issue-resolved`} onClick={clickToResolve}>Resolved</NavLink>
       </Wrappen>
-      <ThreadItem />
+      <ThreadItem status={status} />
     </div>
   </>
   )

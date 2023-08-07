@@ -5,8 +5,9 @@ import { testThreadsToWorkWith } from "../../../../../../../utils/testData";
 import Comment from '../../../../../../CandidatePage/views/TeamsScreen/components/addComment';
 import ThreadComment from './ThreadComment';
 import Modal from './Modal';
-import { featchAllComment } from '../../../../../../../services/teamleadServices';
+import { featchAllComment, fetchThread } from '../../../../../../../services/teamleadServices';
 import { useParams } from 'react-router-dom';
+import { useCurrentUserContext } from '../../../../../../../contexts/CurrentUserContext';
 
 const Wrapper = styled.div`
 display: flex;
@@ -18,6 +19,7 @@ align-items: left !important;
     width: 80%;
     margin: auto;
 }
+
 .header-items {
     display: flex;
     width: 20rem;
@@ -35,7 +37,6 @@ align-items: left !important;
   }
   
   .team-screen-threads-card {
-    width: 100%;
     height: 100%;
     border-radius: 10px;
     background-color: #fff;
@@ -46,6 +47,13 @@ align-items: left !important;
     align-items: flex-start;
     justify-content: space-between;
   }
+
+  .thread-card{
+    width: 400px;
+    flex-wrap: wrap;
+    display: flex;
+    flex-direction: column;
+  }
   
   .team-screen-threads-details {
     width: 100%;
@@ -55,6 +63,10 @@ align-items: left !important;
     padding: 2% 3%;
   }
   
+  .team-screen-thread-container{
+    flex-direction: row;
+  }
+
   .team-screen-threads-container {
     display: flex;
     flex-direction: column;
@@ -88,22 +100,31 @@ align-items: left !important;
   }
 
   .threads-created{
-    background-color: #005734;
     width: 50%;
     height: 50%;
     padding: 1rem;
     border-radius: 50%;
     cursor: pointer;
-
   }
   
-  .threads-progress {
+  .threads-btn {
     width: 40%;
     height: 40%;
-    background-color: red;
     padding: 1rem;
     border-radius: 50%;
     cursor:pointer;
+    background-color: red;
+    cursor: pointer;
+  }
+
+  .active-thread-btn{
+    width: 40%;
+    height: 40%;
+    padding: 1rem;
+    border-radius: 50%;
+    cursor:pointer;
+    background-color: #005734;
+    cursor: pointer;
   }
   
   .comments-section {
@@ -175,12 +196,11 @@ align-items: left !important;
 
 .modal-content {
   position: relative;
-  max-width: 80%;
   max-height: 80%;
 }
 
 .modal-content img {
-  width: 100%;
+  width: 1000px;
   height: auto;
 }
 
@@ -199,12 +219,23 @@ align-items: left !important;
   
 `
 
-const ThreadItem = () => {
+const ThreadItem = ({ status }) => {
+  const { currentUser, setCurrentUser } = useCurrentUserContext();
+  const document_id = currentUser.portfolio_info[0].org_id;
   const { id } = useParams();
-  console.log(id);
+  console.log(status);
+
   const [threads, setThreads] = useState([]);
   const [showComment, setShowComment] = useState(false);
   const [showModalStates, setShowModalStates] = useState({});
+
+  //Filter Based on status
+  const completedThreads = testThreadsToWorkWith.filter((thread) => thread.current_status === status);
+  const resolvedThreads = testThreadsToWorkWith.filter((thread) => thread.current_status == "Resolved");
+
+  const inProgressThreads = testThreadsToWorkWith.filter(
+    (thread) => thread.current_status === "In progress" || thread.current_status === "Created" || thread.current_status == undefined
+  );
 
   // Function to handle opening the modal for a specific thread
   const handleImageClick = (threadId) => {
@@ -230,106 +261,274 @@ const ThreadItem = () => {
     }));
   };
 
-  //Fetch all comments
-  const fetchComment = async (id) => {
+  //Fetch Comment 
+  // const fetchComment = async (document_id) => {
+  //   const data = { document_id };
+  //   try {
+  //     const response = await featchAllComment(data);
+  //     console.log(response);
+  //     console.log('Comment fetched successfully:', response.data);
+  //     // Do something with the responseData if needed.
+  //   } catch (error) {
+  //     console.log(error);
+  //     console.error('Failed to fetch comment:', error.message);
+  //     // Handle the error or display an error message to the user.
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   const documentId = document_id;
+  //   fetchComment(documentId);
+  // }, []);
+
+  //Fetch Thread 
+  const fetchData = async () => {
     try {
-      const response = await featchAllComment(id);
-      console.log(response);
-      console.log('Comment created successfully:', response.data);
+      const documentId = id;
+      const response = await fetchThread(documentId);
+      console.log('Comment fetched successfully:', response.data.data);
+      setThreads(response.data.data)
       // Do something with the responseData if needed.
     } catch (error) {
-      console.error('Failed to create comment:', error.message);
+      console.error('Failed to fetch comment:', error.message);
       // Handle the error or display an error message to the user.
     }
-  }
+  };
 
-  useEffect(() => {
-    fetchComment();
-  }, [id])
+  // Call the function
+  fetchData();
+
+
+
+
 
   const handleSubmit = () => { };
+
 
   return (
     <Wrapper>
       <div className="team-screen-threads">
         <div className="team-screen-thread-container">
-          {testThreadsToWorkWith.map((thread) => (
-            <div className="team-screen-threads-card" key={thread._id}>
-              <div className="thread-card">
-                {console.log(thread)}
-                {showModalStates[thread._id] && (
-                  <Modal imageUrl={thread.image} handleClose={() => handleClose(thread._id)} />
-                )}
-                <div className="image-container">
-                  {thread.image && (
-                    <img src={thread.image} alt="thread" onClick={() => handleImageClick(thread._id)} />
-                  )}
-                  {thread.image && (
-                    <div className="view-btn-container">
-                      <button className="view-btn" onClick={() => handleImageClick(thread._id)}>
-                        View
-                      </button>
+          {
+            status == "Completed" && <>
+              {completedThreads.map((thread) => (
+                <div className="team-screen-threads-card" key={thread._id}>
+                  <div className="thread-card">
+                    {console.log(thread)}
+                    {showModalStates[thread._id] && (
+                      <Modal imageUrl={thread.image} handleClose={() => handleClose(thread._id)} />
+                    )}
+                    <div className="image-container">
+                      {thread.image && (
+                        <img src={thread.image} alt="thread" onClick={() => handleImageClick(thread._id)} />
+                      )}
+                      {thread.image && (
+                        <div className="view-btn-container">
+                          <button className="view-btn" onClick={() => handleImageClick(thread._id)}>
+                            View
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
+
+                    <div className="team-screen-threads-container">
+                      <p>{thread.thread}</p>
+                      <div>
+                        <p>Assigned to : Team Development A</p>
+                        <p>Raised by : {thread.created_by}</p>
+                      </div>
+                      <div className="team-screen-threads-progress">
+                        <div className="progress">
+                          <p>Created</p>
+                          <div className={thread.current_status == "Created" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>In progress</p>
+                          <div className={thread.current_status == "In progress" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>Completed</p>
+                          <div className={thread.current_status == "Completed" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>Resolved</p>
+                          <div className={thread.current_status == "Resolved" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                      </div>
+                      <div className="comments-section">
+                        <p className="comments">
+                          <FaRegComments onClick={handleSubmit} />
+                          &bull;
+                          <span onClick={() => handlCommentClick(thread._id)}>10 Comments</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="comment-action">
+                    {
+                      showComment[thread._id] && (
+                        <ThreadComment
+                          comments={thread.comments[0].comment}
+                          user={thread.comments[0].user}
+                          threadId={thread._id}
+                          document_id={id}
+                          commentInput="comment-input"
+                        />
+                      )
+                    }
+                  </div>
+                </div>
+              ))}
+            </>
+          }
+          
+          {
+            status == "In progress" || status == undefined && <>
+              {inProgressThreads.map((thread) => (
+                <div className="team-screen-threads-card" key={thread._id}>
+                  <div className="thread-card">
+                    {console.log(thread)}
+                    {showModalStates[thread._id] && (
+                      <Modal imageUrl={thread.image} handleClose={() => handleClose(thread._id)} />
+                    )}
+                    <div className="image-container">
+                      {thread.image && (
+                        <img src={thread.image} alt="thread" onClick={() => handleImageClick(thread._id)} />
+                      )}
+                      {thread.image && (
+                        <div className="view-btn-container">
+                          <button className="view-btn" onClick={() => handleImageClick(thread._id)}>
+                            View
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="team-screen-threads-container">
+                      <p>{thread.thread}</p>
+                      <div>
+                        <p>Assigned to : Team Development A</p>
+                        <p>Raised by : {thread.created_by}</p>
+                      </div>
+                      <div className="team-screen-threads-progress">
+                        <div className="progress">
+                          <p>Created</p>
+                          <div className={thread.current_status == "Created" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>In progress</p>
+                          <div className={thread.current_status == "In progress" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>Completed</p>
+                          <div className={thread.current_status == "Completed" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>Resolved</p>
+                          <div className={thread.current_status == "Resolved" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                      </div>
+                      <div className="comments-section">
+                        <p className="comments">
+                          <FaRegComments onClick={handleSubmit} />
+                          &bull;
+                          <span onClick={() => handlCommentClick(thread._id)}>10 Comments</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="comment-action">
+                    {
+                      showComment[thread._id] && (
+                        <ThreadComment
+                          comments={thread.comments[0].comment}
+                          user={thread.comments[0].user}
+                          threadId={thread._id}
+                          document_id={id}
+                          commentInput="comment-input"
+                        />
+                      )
+                    }
+                  </div>
                 </div>
 
-                <div className="team-screen-threads-container">
-                  <p>{thread.thread}</p>
-                  <div>
-                    <p>Assigned to : Team Development A</p>
-                    <p>Raised by : {thread.created_by}</p>
+              ))}
+            </>
+          }
+
+          {
+            status == "Resolved" && <>
+              {resolvedThreads.map((thread) => (
+                <div className="team-screen-threads-card" key={thread._id}>
+                  <div className="thread-card">
+                    {console.log(thread)}
+                    {showModalStates[thread._id] && (
+                      <Modal imageUrl={thread.image} handleClose={() => handleClose(thread._id)} />
+                    )}
+                    <div className="image-container">
+                      {thread.image && (
+                        <img src={thread.image} alt="thread" onClick={() => handleImageClick(thread._id)} />
+                      )}
+                      {thread.image && (
+                        <div className="view-btn-container">
+                          <button className="view-btn" onClick={() => handleImageClick(thread._id)}>
+                            View
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="team-screen-threads-container">
+                      <p>{thread.thread}</p>
+                      <div>
+                        <p>Assigned to : Team Development A</p>
+                        <p>Raised by : {thread.created_by}</p>
+                      </div>
+                      <div className="team-screen-threads-progress">
+                        <div className="progress">
+                          <p>Created</p>
+                          <div className={thread.current_status == "Created" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>In progress</p>
+                          <div className={thread.current_status == "In progress" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>Completed</p>
+                          <div className={thread.current_status == "Completed" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                        <div className="progress">
+                          <p>Resolved</p>
+                          <div className={thread.current_status == "Resolved" ? "active-thread-btn" : "threads-btn"}></div>
+                        </div>
+                      </div>
+                      <div className="comments-section">
+                        <p className="comments">
+                          <FaRegComments onClick={handleSubmit} />
+                          &bull;
+                          <span onClick={() => handlCommentClick(thread._id)}>10 Comments</span>
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="team-screen-threads-progress">
-                    <div className="progress">
-                      <p>Created</p>
-                      <div className="threads-progress"></div>
-                    </div>
-                    <div className="progress">
-                      <p>In progress</p>
-                      <div className="threads-progress"></div>
-                    </div>
-                    <div className="progress">
-                      <p>Completed</p>
-                      <div className="threads-progress"></div>
-                    </div>
-                    <div className="progress">
-                      <p>Resolved</p>
-                      <div className="threads-progress"></div>
-                    </div>
-                  </div>
-                  <div className="comments-section">
-                    <p className="comments">
-                      <FaRegComments onClick={handleSubmit} />
-                      &bull;
-                      <span onClick={() => handlCommentClick(thread._id)}>10 Comments</span>
-                    </p>
+                  <div className="comment-action">
+                    {
+                      showComment[thread._id] && (
+                        <ThreadComment
+                          comments={thread.comments[0].comment}
+                          user={thread.comments[0].user}
+                          threadId={thread._id}
+                          document_id={id}
+                          commentInput="comment-input"
+                        />
+                      )
+                    }
                   </div>
                 </div>
-              </div>
-              <div className="comment-action">
-                {
-                  showComment[thread._id] && (
-                    <ThreadComment
-                      comments={thread.comments[0].comment}
-                      user={thread.comments[0].user}
-                      threadId={thread._id}
-                      document_id={id}
-                      commentInput="comment-input"
-                    />
-                  )
-                }
+              ))}
+            </>
+          }
 
-                {/* <ThreadComment
-                  text={text}
-                  handleChange={handleChange}
-                  comments={thread.comments[0].comment}
-                  user={thread.comments[0].user}
-                  commentInput="comment-input"
-                /> */}
-              </div>
-            </div>
-
-          ))}
         </div>
       </div>
     </Wrapper>
