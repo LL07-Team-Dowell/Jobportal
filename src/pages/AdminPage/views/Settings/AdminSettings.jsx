@@ -13,6 +13,7 @@ import { candidateStatuses } from "../../../CandidatePage/utils/candidateStatuse
 import { testingRoles } from "../../../../utils/testingRoles";
 import { MdArrowBackIos, MdOutlineArrowForwardIos } from "react-icons/md";
 import { IoFilterOutline } from "react-icons/io5";
+import TableRow from "./TableRow";
 
 const rolesDict = { 'Dept_Lead': 'Account', "Proj_Lead": 'Teamlead', "Hr": "Hr", "sub_admin": "Sub Admin", "group_lead": "Group Lead", "super_admin": "Super Admin" };
 
@@ -35,7 +36,7 @@ const AdminSettings = () => {
   const [ usersToDisplay, setUsersToDisplay ] = useState([]);
   const [ indexes, setIndexes ] = useState({
     start: 0,
-    end: 20,
+    end: 10,
   });
   const [ currentRoleFilter, setCurrentRoleFilter ] = useState('all');
   const roleFilterRef = useRef();
@@ -110,6 +111,9 @@ const AdminSettings = () => {
       :
       currentRoleFilter === 'no' ?
         options1?.filter(user => !settingUserProfileInfo.reverse().find(value => value["profile_info"][0]["profile_title"] === user.portfolio_name)).slice(indexes.start, indexes.end)
+      :
+      currentRoleFilter === 'hired' ?
+        options1?.filter(user => hiredCandidates.includes(user.portfolio_name)).slice(indexes.start, indexes.end)
       :
       options1.slice(indexes.start, indexes.end)
     );
@@ -207,12 +211,13 @@ const AdminSettings = () => {
     if (selection === 'forward') {
       if ((currentRoleFilter === 'yes') && (currentIndexes.end >= options1?.filter(user => settingUserProfileInfo.reverse().find(value => value["profile_info"][0]["profile_title"] === user.portfolio_name)).length)) return  
       if ((currentRoleFilter === 'no') && (currentIndexes.end >= options1?.filter(user => !settingUserProfileInfo.reverse().find(value => value["profile_info"][0]["profile_title"] === user.portfolio_name)).length)) return  
+      if ((currentRoleFilter === 'hired') && (currentIndexes.end >= options1?.filter(user => hiredCandidates.includes(user.portfolio_name)).length)) return
 
       if (currentIndexes.end >= options1?.length) return
 
       setIndexes({
-        start: currentIndexes.start + 20,
-        end: currentIndexes.end + 20,
+        start: currentIndexes.start + 10,
+        end: currentIndexes.end + 10,
       })
     }
 
@@ -221,12 +226,12 @@ const AdminSettings = () => {
       if (currentIndexes.start < 1) return
 
       setIndexes({
-        start: currentIndexes.start - 20,
-        end: currentIndexes.end - 20,
+        start: currentIndexes.start - 10,
+        end: currentIndexes.end - 10,
       })
     }
   }
-
+  console.log(usersToDisplay)
   return <StaffJobLandingLayout adminView={true} adminAlternativePageActive={true} pageTitle={"Settings"}>
     {(loading || loading2) ? <LoadingSpinner /> :
       <>
@@ -242,6 +247,9 @@ const AdminSettings = () => {
                   :
                   currentRoleFilter === 'no' ?
                     options1?.filter(user => !settingUserProfileInfo.reverse().find(value => value["profile_info"][0]["profile_title"] === user.portfolio_name)).length
+                  :
+                  currentRoleFilter === 'hired' ?
+                    options1?.filter(user => hiredCandidates.includes(user.portfolio_name)).length
                   :
                   options1?.length
                 }
@@ -272,32 +280,42 @@ const AdminSettings = () => {
               <option value={'all'}>All</option>
               <option value={'yes'}>Role assigned</option>
               <option value={'no'}>No role assigned</option>
+              <option value={'hired'}>Hired</option>
             </select>
           </div>
 
           <table>
             <thead>
-              <tr>
-                <th>S/N</th>
-                <th>Member portfolio name</th>
-                <th>Role Assigned</th>
-              </tr>
+            <tr>
+                  <th>S/N</th>
+                  <th>Member portfolio name</th>
+                  <th>Role Assigned</th>
+                  <th>Candidate Hired</th>
+                  <th>Update role</th>
+                </tr>
             </thead>
             <tbody>
-              {usersToDisplay?.map((option, index) =>
-                <tr key={index}> <td>{index + 1}</td>
-                  <td>{option.portfolio_name}</td>
-                  <td>{settingUserProfileInfo.reverse().find(value => value["profile_info"][0]["profile_title"] === option.portfolio_name)
-                    ? rolesDict[settingUserProfileInfo.reverse().find(value => value["profile_info"][0]["profile_title"] === option.portfolio_name)["profile_info"][0]["Role"]] ?
-                      rolesDict[settingUserProfileInfo.reverse().find(value => value["profile_info"][0]["profile_title"] === option.portfolio_name)["profile_info"][0]["Role"]] :
-                      "No Role assigned yet"
-                    : "No Role assigned yet"}</td>
-                </tr>)}
+              {usersToDisplay?.map((option, index) => (
+                  <TableRow
+                    index={index}
+                    key={index}
+                    option={option}
+                    settingUserProfileInfo={settingUserProfileInfo}
+                    rolesDict={rolesDict}
+                    currentUser={currentUser}
+                    Proj_Lead={Proj_Lead}
+                    setAlert={setAlert}
+                    setLoading={setLoading}
+                    projectList={options2}
+                    hiredCandidates={hiredCandidates}
+                    currentFilter={currentRoleFilter}
+                  />
+                ))}
 
             </tbody>
           </table>
         </div>
-
+{/* 
         <div className="Slections">
           <h2>Assign Roles & Rights to Portfolios & Teams</h2>
 
@@ -348,7 +366,7 @@ const AdminSettings = () => {
             height={24}
             style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
           /> : "Submit"}</button>}
-        </div>
+        </div> */}
 
       </>
     }

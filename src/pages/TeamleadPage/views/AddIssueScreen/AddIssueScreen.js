@@ -13,7 +13,7 @@ import {
   getAllTeams,
 } from "../../../../services/createMembersTasks";
 
-const AddIssueScreen = ({
+const AddIssueScreen = ({ 
   closeIssuesScreen,
   afterSelectionScreen,
   editPage,
@@ -43,10 +43,10 @@ const AddIssueScreen = ({
 
 
 
-  useClickOutside(ref, () => {
-    closeIssuesScreen();
-    !afterSelectionScreen && setEditPage(false);
-  });
+  // useClickOutside(ref, () => {
+  //   closeIssuesScreen();
+  //   !afterSelectionScreen && setEditPage(false);
+  // });
 
   useEffect(() => {
     getAllTeams(currentUser.portfolio_info[0].org_id)

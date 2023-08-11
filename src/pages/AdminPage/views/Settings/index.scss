@@ -1,28 +1,90 @@
-// colors 
-$main__green : #005734 ; 
-$background__gray: #F5F5F5 ; 
-$placeholder__gray:#A3A1A1 ; 
-$text__gray:#B8B8B8 ; 
-$span__gray:#B8B8B8 ; 
-$slider__gray:#D9D9D9 ; 
+// colors
+$main__green: #005734;
+$background__gray: #f5f5f5;
+$placeholder__gray: #a3a1a1;
+$text__gray: #b8b8b8;
+$span__gray: #b8b8b8;
+$slider__gray: #d9d9d9;
 
-
-
-
-.table_team_roles{
-  width: 50%;
+.table_team_roles {
+  width: 70%;
   margin: auto;
-  margin-top:40px;
+  margin-top: 40px;
   transform: translateX(-70px);
-  table{
+  padding-bottom: 100px;
+  margin-bottom: 100px;
+  
+  table {
     text-align: left;
     width: 100%;
-    background-color: #005734;
+    background-color: #fff;
     max-height: 100px;
     overflow: auto;
-    th , td {
+    border-radius: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    th,
+    td {
       background-color: white;
-      padding:10px
+      padding: 10px;
+    }
+    thead tr {
+      background-color: #005734;
+      border-bottom: 1px solid $placeholder__gray;
+    }
+    th {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    td {
+      font-size: .875rem;
+      &:last-child {
+        border-color: #fff;
+      }
+      select {
+        background: none;
+        outline: none;  
+        border: none;
+        // width: 100%;
+        cursor: pointer;
+        border: 1px solid #005734;
+        padding: 0.35rem 0.7rem;
+        border-radius: 5px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+        font-size: 0.78rem;
+      }
+      &.update__Role {
+        width: max-content;
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+    }
+    .update__Role__For__Portfolio__Wrapper {
+      display: flex;
+      gap: 1rem;
+      .update__Role__For__Portfolio__Btn {
+        border: 1px solid #fff;
+        background: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.green {
+          border-color: #2ec946;
+        }
+
+        &.red {
+          border-color: #ff0000;
+        }
+      }
     }
   }
 
@@ -43,6 +105,7 @@ $slider__gray:#D9D9D9 ;
       outline: none;  
       border: none;
       width: 100%;
+      cursor: pointer;
     }
   }
   
@@ -68,7 +131,7 @@ $slider__gray:#D9D9D9 ;
         gap: 0.3rem;
         button {
           border: 1px solid #2ec946;
-          background: none;
+          background: #fff;
           border-radius: 4px;
           cursor: pointer;
           font-size: 0.7rem;
@@ -80,66 +143,67 @@ $slider__gray:#D9D9D9 ;
         }
       }
     }
+
+    h2 {
+      font-weight: 500;
+    }
   }
 }
 
+.Slections {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 40px;
+  transform: translateX(-18px);
+  h2 {
+    text-align: left;
+    width: 60%;
+  }
+  > div {
+    margin-top: 20px;
+    width: 60%;
+    p {
+      color: #005734;
+      font-weight: 500;
+      margin-bottom: 7px;
+      span {
+        color: red;
+      }
+    }
+    select {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 2px solid $main__green;
+      background-color: #fff;
+      color: #333;
+      width: 60%;
+    }
 
-.Slections{
-            display: flex;
-            width: 100%;
-            height: 100%;
-            align-items: center;
-            flex-direction: column;
-            margin-top:40px;
-            transform: translateX(-18px);
-            h2{
-              text-align: left;
-              width: 60%;
-            }
-            >div{
-            margin-top: 20px;
-            width: 60%;
-            p{
-            color: #005734;
-            font-weight: 500;
-            margin-bottom: 7px;
-            span{
-            color:red ;
-            }
-            }
-            select {
-                        padding: 10px;
-                        font-size: 16px;
-                        border-radius: 4px;
-                        border: 2px solid $main__green;
-                        background-color: #fff;
-                        color: #333;
-                        width:60%;
-                      }
-                      
-                      option {
-                        font-size: 16px;
-                        background-color: #fff;
-                        color: #333;
-                      }
-            }
-            button{
-                        background-color: #005734;
-                        border: none;
-                        outline: transparent;
-                        padding:7px 10px; 
-                        font-weight:400;
-                        border-radius: 5px;
-                        color: white;
-                        cursor: pointer;
-                        transform: translate(30px,20px);
-                        &:hover {
-                        background-color: #005734;
-
-                        }
-            }
+    option {
+      font-size: 16px;
+      background-color: #fff;
+      color: #333;
+    }
+  }
+  button {
+    background-color: #005734;
+    border: none;
+    outline: transparent;
+    padding: 7px 10px;
+    font-weight: 400;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transform: translate(30px, 20px);
+    &:hover {
+      background-color: #005734;
+    }
+  }
 }
-
 
 $success-color: #2ec946;
 
@@ -147,7 +211,7 @@ main {
   padding: 0 40px;
 }
 
-@media only screen and (max-width: 900px){
+@media only screen and (max-width: 900px) {
   main {
     padding: 0 0px;
   }
@@ -168,7 +232,7 @@ section {
 
 @mixin alert-1($color) {
   background-color: rgba($color, 0.05);
-  
+
   .alert-title {
     color: $color;
   }
@@ -177,7 +241,7 @@ section {
 @mixin alert-2($color) {
   border-left: 4px solid $color;
   background-color: rgba($color, 0.05);
-  
+
   .alert-title {
     color: $color;
   }
@@ -187,33 +251,26 @@ section {
   border: 1px solid lighten($color, 25%);
   border-radius: 8px;
   background-color: rgba($color, 0.05);
-  
+
   .alert-title {
     color: $color;
   }
 }
 
-
-
 .alert-2-success {
   @include alert-2($success-color);
 }
-
-
-
-
-
 
 .alert-title {
   margin-top: 0;
   margin-bottom: 8px;
   font-size: 18px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .alert-content {
   margin: 0;
   font-size: 14px;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   color: #555555;
 }

@@ -55,7 +55,8 @@ const StaffJobLandingLayout = ({
   publicAccountConfigurationBtnDisabled,
   publicAccountDetailState,
   handleChangeInPublicAccountState,
-  searchTeam
+  searchTeam,
+  layoutBgColor,
 }) => {
   const isLargeScreen = useMediaQuery("(min-width: 992px)");
   const { currentUser } = useCurrentUserContext();
@@ -154,7 +155,12 @@ const StaffJobLandingLayout = ({
             <>
               <div className="jobs__Layout__Icons__Container">
                 <Link to={"/user"}>
-                  <HiOutlineUserCircle className="icon" />
+                  {
+                    currentUser.userinfo.profile_img ?
+                    <img src={currentUser.userinfo.profile_img} alt="#" style={{width:"30px"}} />
+                      :
+                    <HiOutlineUserCircle className="icon" />
+                  }
                 </Link>
               </div>
               <hr />
@@ -222,6 +228,14 @@ const StaffJobLandingLayout = ({
             className={`jobs__Layout__Content ${
               adminView ? "full__Width" : ""
             }`}
+            style={{
+              backgroundColor:
+                layoutBgColor ?
+                  layoutBgColor
+                :
+                  '#fff'
+              ,
+            }}
           >
             {children}
           </div>
