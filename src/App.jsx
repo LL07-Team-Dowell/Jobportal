@@ -69,6 +69,7 @@ import UserDetailNotFound from "./pages/UserDetailNotFound/UserDetailNotFound";
 import Payment from "./pages/AccountPage/Payment";
 import Add from "./pages/AdminPage/views/Add/Add";
 import TeamThreadScreen from "./pages/TeamleadPage/views/CreateMembersTask/views/compoonent/TeamThread/TeamThreadScreen";
+import GroupLeadTask from "./pages/GroupLeadPage/components/GroupLeadTask";
 
 function App() {
   const {
@@ -79,6 +80,9 @@ function App() {
     setPublicUserDetails,
     userDetailsNotFound,
     setUserDetailsNotFound,
+    isProductUser,
+    setIsProductUser,
+    setProductUserDetails,
   } = useCurrentUserContext();
   const [loading, setLoading] = useState(true);
   const [candidateHired, setCandidateHired] = useState(false);
@@ -87,14 +91,23 @@ function App() {
   const [shorlistedJob, setshorlistedJob] = useState([]);
 
   // console.log(shorlistedJob); 
-  useDowellLogin(setCurrentUser, setLoading, setIsPublicUser, setPublicUserDetails, setUserDetailsNotFound);
+  useDowellLogin(
+    setCurrentUser,
+    setLoading,
+    setIsPublicUser,
+    setPublicUserDetails,
+    setUserDetailsNotFound,
+    setIsProductUser,
+    setProductUserDetails,
+  );
+
   useTitle("Dowell Job Portal");
 
   if (loading) return <LoadingPage />;
 
   console.log("CURRENT USER", currentUser);
 
-  // NO LOGGED IN USER VIEW
+  // NO LOGGED IN PUBLIC USER VIEW
   if (isPublicUser) {
     return (
       <Routes>
@@ -129,6 +142,126 @@ function App() {
     );
   }
 
+  // NON LOGGED IN PRODUCT USER
+  if (isProductUser) {
+    return (
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <JobContextProvider>
+              <NewApplicationContextProvider>
+                <CandidateHomeScreen
+                  setHired={setCandidateHired}
+                  setAssignedProjects={setAssignedProjects}
+                  setCandidateShortListed={setCandidateShortListed}
+                  setshorlistedJob={setshorlistedJob}
+                />
+              </NewApplicationContextProvider>
+            </JobContextProvider>
+          }
+        >
+          <Route
+            path=":section"
+            element={
+              <JobContextProvider>
+                <NewApplicationContextProvider>
+                  <CandidateHomeScreen />
+                </NewApplicationContextProvider>
+              </JobContextProvider>
+            }
+          />
+        </Route>
+
+        <Route path="/jobs">
+          <Route
+            index
+            element={
+              <JobContextProvider>
+                <NewApplicationContextProvider>
+                  <JobScreen />
+                </NewApplicationContextProvider>
+              </JobContextProvider>
+            }
+          />
+          <Route
+            path=":jobTitle"
+            element={
+              <JobContextProvider>
+                <NewApplicationContextProvider>
+                  <SingleJobScreen />
+                </NewApplicationContextProvider>
+              </JobContextProvider>
+            }
+          />
+          <Route
+            exact
+            path="c/research-associate"
+            element={<ResearchAssociatePage />}
+          />
+          <Route
+            exact
+            path="c/employee"
+            element={
+              <JobContextProvider>
+                <NewApplicationContextProvider>
+                  <EmployeeJobScreen />
+                </NewApplicationContextProvider>
+              </JobContextProvider>
+            }
+          />
+          <Route
+            exact
+            path="c/intern"
+            element={
+              <JobContextProvider>
+                <NewApplicationContextProvider>
+                  <InternJobScreen />
+                </NewApplicationContextProvider>
+              </JobContextProvider>
+            }
+          />
+          <Route
+            exact
+            path="c/freelancer"
+            element={
+              <JobContextProvider>
+                <NewApplicationContextProvider>
+                  <FreelancerJobScreen />
+                </NewApplicationContextProvider>
+              </JobContextProvider>
+            }
+          />
+        </Route>
+
+        <Route
+          path="/apply/job/:id"
+          element={
+            <JobContextProvider>
+              <NewApplicationContextProvider>
+                <JobApplicationScreen />
+              </NewApplicationContextProvider>
+            </JobContextProvider>
+          }
+        >
+          <Route
+            path=":section"
+            element={
+              <JobContextProvider>
+                <NewApplicationContextProvider>
+                  <JobApplicationScreen />
+                </NewApplicationContextProvider>
+              </JobContextProvider>
+            }
+          />
+        </Route>
+
+        <Route path="*" element={<ErrorPage />} />
+      </Routes>
+    )
+  }
+
+
   if (!currentUser || userDetailsNotFound) {
     return (
       <Routes>
@@ -155,7 +288,7 @@ function App() {
   // ACCOUNT PAGE
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[0].Role ===
+    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
     testingRoles.accountRole
   ) {
     return (
@@ -185,7 +318,7 @@ function App() {
   if (
     (
       currentUser.settings_for_profile_info &&
-      currentUser.settings_for_profile_info.profile_info[0].Role ===
+      currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
       testingRoles.subAdminRole
     ) || (
       currentUser.settings_for_profile_info &&
@@ -289,7 +422,7 @@ function App() {
     ||
     (
       currentUser.settings_for_profile_info &&
-      currentUser.settings_for_profile_info.profile_info[0].Role === testingRoles.superAdminRole
+      currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role === testingRoles.superAdminRole
     )
   ) {
     return (
@@ -448,7 +581,7 @@ function App() {
   // HR PAGE
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[0].Role ===
+    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
     testingRoles.hrRole
   ) {
     return (
@@ -521,7 +654,7 @@ function App() {
   // TEAMLEAD PAGE
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[0].Role ===
+    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
     testingRoles.teamLeadRole
   ) {
     return (
@@ -682,10 +815,193 @@ function App() {
     );
   }
 
+
+  // // GROUPLEAD PAGE
+  // if (
+  //   currentUser.settings_for_profile_info &&
+  //   currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
+  //   testingRoles.groupLeadRole
+  // ) {
+  //   return (
+  //     <Routes>
+  //       <Route path="/logout" element={<Logout />} />
+
+
+  //       <Route
+  //         path="/"
+  //         element={
+  //           <NavigationContextProvider>
+  //             <CandidateContextProvider>
+  //               <CandidateTaskContextProvider>
+  //                 <ValuesProvider>
+  //                   <Teamlead isGrouplead={true} />
+  //                 </ValuesProvider>
+  //               </CandidateTaskContextProvider>
+  //             </CandidateContextProvider>
+  //           </NavigationContextProvider>
+  //         }
+  //       >
+  //         <Route
+  //           path=":section"
+  //           element={
+  //             <CandidateTaskContextProvider>
+  //               <ValuesProvider>
+  //                 <Teamlead isGrouplead={true} />
+  //               </ValuesProvider>
+  //             </CandidateTaskContextProvider>
+  //           }
+  //         />
+  //       </Route>
+
+  //       <Route
+  //         path="/new-task-screen"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <ValuesProvider>
+  //               <CreateTaskScreen />
+  //             </ValuesProvider>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+
+  //       <Route
+  //         path="/task"
+  //         element={
+  //           <NavigationContextProvider>
+  //             <CandidateContextProvider>
+  //               <CandidateTaskContextProvider>
+  //                 <ValuesProvider>
+  //                   <GroupLeadTask />
+  //                 </ValuesProvider>
+  //               </CandidateTaskContextProvider>
+  //             </CandidateContextProvider>
+  //           </NavigationContextProvider>
+  //         }
+  //       />
+
+  //       <Route
+  //         path="/create-task"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <ValuesProvider>
+  //               <Index />
+  //             </ValuesProvider>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+  //       <Route
+  //         path="/create-task/create-new-team/"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <StaffJobLandingLayout teamleadView={true}>
+  //               <ValuesProvider>
+  //                 <CreateTeam />
+  //               </ValuesProvider>
+  //             </StaffJobLandingLayout>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+
+  //       <Route
+  //         path="/team-screen-member/:id/team-members"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+  //               <TeamProvider>
+  //                 <ValuesProvider>
+  //                   <TeamScreenMembers />
+  //                 </ValuesProvider>
+  //               </TeamProvider>
+  //             </StaffJobLandingLayout>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+
+  //       <Route
+  //         path="/team-screen-member/:id/team-tasks"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+  //               <TeamProvider>
+  //                 <ValuesProvider>
+  //                   <TeamScreenTasks />
+  //                 </ValuesProvider>
+  //               </TeamProvider>
+  //             </StaffJobLandingLayout>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+  //       <Route
+  //         path="/team-screen-member/:id/team-issues"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+  //               <TeamProvider>
+  //                 <ValuesProvider>
+  //                   {/* create a component here */}
+  //                   <TeamThreadScreen />
+  //                 </ValuesProvider>
+  //               </TeamProvider>
+  //             </StaffJobLandingLayout>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+  //       <Route
+  //         path="/team-screen-member/:id/issue-inprogress"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+  //               <TeamProvider>
+  //                 <ValuesProvider>
+  //                   {/* create a component here */}
+  //                   <TeamThread />
+  //                 </ValuesProvider>
+  //               </TeamProvider>
+  //             </StaffJobLandingLayout>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+  //       <Route
+  //         path="/team-screen-member/:id/issue-completed"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+  //               <TeamProvider>
+  //                 <ValuesProvider>
+  //                   {/* create a component here */}
+  //                   <TeamThread />
+  //                 </ValuesProvider>
+  //               </TeamProvider>
+  //             </StaffJobLandingLayout>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+  //       <Route
+  //         path="/team-screen-member/:id/issue-resolved"
+  //         element={
+  //           <CandidateTaskContextProvider>
+  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+  //               <TeamProvider>
+  //                 <ValuesProvider>
+  //                   {/* create a component here */}
+  //                   <TeamThread />
+  //                 </ValuesProvider>
+  //               </TeamProvider>
+  //             </StaffJobLandingLayout>
+  //           </CandidateTaskContextProvider>
+  //         }
+  //       />
+  //       <Route path="*" element={<ErrorPage />} />
+  //     </Routes>
+  //   );
+  // }
+
+
+
   //Provertion Period Page
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[0].Role ===
+    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
     testingRoles.provertionRole
   ) {
     return <Routes>

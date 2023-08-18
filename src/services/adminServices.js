@@ -63,3 +63,23 @@ export const generateReport = async (data) => {
 export const getUsedQrCodes = async (companyId) => {
   return await currentBackendAxiosInstance.get(`get_all_qrcode/${companyId}/`)
 };
+
+export const createNewProductLink = async (data) => {
+  return await currentBackendAxiosInstance.post(
+    "public_product_url/",
+    data
+  );
+};
+
+export const getCreatedProductLinks = async (companyId) => {
+  return await currentBackendAxiosInstance.get(
+    `/fetch_public_product_url/${companyId}/`,
+  );
+};
+
+export const adminEditUserSettingProfile = async (id, data) => {
+  return await currentBackendAxiosInstance.put(
+    `settinguserprofileinfo/${id}`,
+    data
+  );
+};

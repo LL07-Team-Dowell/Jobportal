@@ -13,6 +13,8 @@ export default function useDowellLogin(
   updatePublicUserState,
   updateDetailsForPublicUser,
   updateNoUserDetailFound,
+  updateProductUserState,
+  updateDetailsForProductUser,
 ) {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentLocalSessionId = sessionStorage.getItem("session_id");
@@ -20,6 +22,8 @@ export default function useDowellLogin(
   const currentLocalUserDetails = sessionStorage.getItem("user");
   const currentPublicSession = sessionStorage.getItem("public_user_session");
   const currentPublicUserDetails = sessionStorage.getItem("public_user");
+  const currentProductSession = sessionStorage.getItem("product_user_session");
+  const currentProductUserDetails = sessionStorage.getItem("product_user");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,7 +35,7 @@ export default function useDowellLogin(
     const jobCompanyDataType = searchParams.get("company_data_type");
     const publicUserQrId = searchParams.get("qr_id");
     const masterLinkId = searchParams.get("link_id");
-
+    const companyId = searchParams.get("company_id");
 
     // FOR PUBLIC USERS
     if (currentPublicSession && currentPublicUserDetails) {
@@ -42,6 +46,17 @@ export default function useDowellLogin(
       return
     }
 
+    // FOR LOGGED IN PRODUCT USERS
+    if (currentProductSession && currentProductUserDetails) {
+      updatePageLoading(false);
+      updateProductUserState(true);
+      updateDetailsForProductUser(JSON.parse(currentProductUserDetails));
+
+      return
+    }
+
+
+    // INITIAL LOAD FOR PUBLIC USER
     if (publicView && publicView === 'public' && jobToView && jobCompanyId && jobCompanyDataType) {
       updatePageLoading(false);
       updatePublicUserState(true);
@@ -62,6 +77,27 @@ export default function useDowellLogin(
       navigate(`/apply/job/${jobToView}`)
       return
     }
+
+    
+    // INITIAL LOAD FOR PRODUCT USER
+    if (publicView && publicView === 'product' && companyId && jobCompanyDataType) {
+      updatePageLoading(false);
+      updateProductUserState(true);
+
+      const productUserDetails = {
+        company_id: companyId,
+        data_type: jobCompanyDataType,
+        qr_id: publicUserQrId,
+        masterLinkId: masterLinkId,
+      };
+
+      updateDetailsForProductUser(productUserDetails)
+
+      sessionStorage.setItem('product_user_session', true);
+      sessionStorage.setItem('product_user', JSON.stringify(productUserDetails));
+
+      return
+    }
   
 
     // FOR LOGGED IN USERS
@@ -76,7 +112,7 @@ export default function useDowellLogin(
           .then(async (res) => {
             const currentUserDetails = res.data;
 
-            if (currentUserDetails.message) {
+            if (currentUserDetails.message || currentUserDetails.msg) {
               updateNoUserDetailFound(true);
               updatePageLoading(false);
 
@@ -96,7 +132,7 @@ export default function useDowellLogin(
               //CHECK IF USER HAS ROLE CONFIGURED
               const userHasRoleConfigured = settingForCurrentUserOrg.find(
                 (setting) =>
-                  setting.profile_info[0].profile_title ===
+                  setting.profile_info[setting.profile_info.length - 1].profile_title ===
                   currentUserDetails.portfolio_info[0].portfolio_name
               );
 
@@ -139,7 +175,7 @@ export default function useDowellLogin(
           .then(async (res) => {
             const currentUserDetails = res.data;
             
-            if (currentUserDetails.message) {
+            if (currentUserDetails.message || currentUserDetails.msg) {
               updateNoUserDetailFound(true);
               updatePageLoading(true);
 
@@ -180,7 +216,7 @@ export default function useDowellLogin(
         .then(async (res) => {
           const currentUserDetails = res.data;
 
-          if (currentUserDetails.message) {
+          if (currentUserDetails.message || currentUserDetails.msg) {
             updateNoUserDetailFound(true);
             updatePageLoading(false);
 
@@ -213,7 +249,7 @@ export default function useDowellLogin(
       .then(async (res) => {
         const currentUserDetails = res.data;
 
-        if (currentUserDetails.message) {
+        if (currentUserDetails.message || currentUserDetails.msg) {
           updateNoUserDetailFound(true);
           updatePageLoading(false);
 
@@ -233,7 +269,7 @@ export default function useDowellLogin(
           //CHECK IF USER HAS ROLE CONFIGURED
           const userHasRoleConfigured = settingForCurrentUserOrg.find(
             (setting) =>
-              setting.profile_info[0].profile_title ===
+              setting.profile_info[setting.profile_info.length - 1].profile_title ===
               currentUserDetails.portfolio_info[0].portfolio_name
           );
 

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { AiOutlineCheck, AiOutlineClose } from "react-icons/ai";
 import LoadingSpinner from "../../../../components/LoadingSpinner/LoadingSpinner";
 import { toast } from "react-toastify";
+import { adminEditUserSettingProfile } from "../../../../services/adminServices";
 export default function TableRow({
   index,
   option,
@@ -20,6 +21,7 @@ export default function TableRow({
   updateSettingsUserProfileInfo,
   updatedUsers,
   rolesNamesDict,
+  currentSearch,
 }) {
   const [roleAssigned, setRoleAssigned] = useState('No role assigned');
   const [ updatedRole, setUpdatedRole ] = useState(null);
@@ -29,22 +31,23 @@ export default function TableRow({
   const roleRef = useRef();
   const projectAssignedRef = useRef();
   const [loaded, setLoaded] = useState(false);
+  const [ currentSettingItem, setCurrentSettingItem ] = useState(null);
   
   useEffect(() => {
     setLoaded(false);
 
+    const foundUserSettingItem = settingUserProfileInfo?.reverse()
+    ?.find(
+      (value) =>
+        value?.profile_info[value?.profile_info.length - 1]?.profile_title === option.portfolio_name
+    );
+
+    setCurrentSettingItem(foundUserSettingItem);
+
     const [roleAssignedToPortfolio, projectAssignedToPortfolio] = [
-      settingUserProfileInfo?.reverse()
-      ?.find(
-        (value) =>
-          value?.profile_info[0]?.profile_title === option.portfolio_name
-      )?.profile_info[0]?.Role
+      foundUserSettingItem?.profile_info[foundUserSettingItem?.profile_info.length - 1]?.Role
       ,
-      settingUserProfileInfo?.reverse()
-      ?.find(
-        (value) =>
-          value?.profile_info[0]?.profile_title === option.portfolio_name
-      )?.profile_info[0]?.project
+      foundUserSettingItem?.profile_info[foundUserSettingItem?.profile_info.length - 1]?.project
     ];
 
     setRoleAssigned(
@@ -65,13 +68,13 @@ export default function TableRow({
 
     const timeout = setTimeout(() => {
       setLoaded(true)
-    }, 300);
+    }, 150);
 
     return (() => {
       clearTimeout(timeout)
     })
 
-  }, [updatedUsers, currentFilter])
+  }, [updatedUsers, currentFilter, availableProjects, hiredCandidates, currentSearch])
   
   const submit2 = () => {
     const teamManagementProduct = currentUser.portfolio_info.find(
@@ -79,7 +82,47 @@ export default function TableRow({
     );
     if (!teamManagementProduct) return;
 
+    if (updatedRole && rolesDict[updatedRole] === "Teamlead" && Proj_Lead.length < 1 && projectAssigned === 'No project assigned') return toast.info("Please assign a project for teamlead");
+    if (updatedRole && rolesDict[updatedRole] === "Group Lead" && Proj_Lead.length < 1 && projectAssigned === 'No project assigned') return toast.info("Please assign a project for grouplead");
+
     setLoading(true);
+
+    if (currentSettingItem) {
+      
+      const foundIndexOfItem = settingUserProfileInfo?.findIndex(
+        (value) =>
+          value?.id === currentSettingItem?.id
+      );
+      
+      const dataToPost = {
+        profile_title: option.portfolio_name,
+        Role: !updatedRole ? rolesNamesDict[roleAssigned] : updatedRole,
+        project: Proj_Lead,
+      }
+
+      adminEditUserSettingProfile(currentSettingItem?.id, dataToPost).then(res => {
+        setRoleAssigned(!updatedRole ? roleAssigned : rolesDict[updatedRole]);
+        setLoading(false);
+        setUpdatedRole(null);
+        setUpdatedProject(null);
+        setProjectAssigned(Proj_Lead);
+        toast.success(`Successfully updated role for ${option.portfolio_name}`)
+
+        if (foundIndexOfItem === -1) return
+        const copyOfSettingUserInfo = settingUserProfileInfo?.slice();
+        copyOfSettingUserInfo[foundIndexOfItem].profile_info = res.data;
+
+        updateSettingsUserProfileInfo(copyOfSettingUserInfo);
+      }).catch(err => {
+        console.log(err)
+        setLoading(false);
+        toast.error(`An error occurred while trying to update setting for ${option?.portfolio_name}`)
+        // setUpdatedRole(null);
+        // setUpdatedProject(null);
+      })
+      return
+    }
+
     axios
       .post(
         "https://100098.pythonanywhere.com/settinguserprofileinfo/",
@@ -91,7 +134,7 @@ export default function TableRow({
           profile_info: [
             {
               profile_title: option.portfolio_name,
-              Role: updatedRole,
+              Role: !updatedRole ? rolesNamesDict[roleAssigned] : updatedRole,
               version: "1.0",
               project: Proj_Lead,
             },
@@ -101,7 +144,7 @@ export default function TableRow({
       )
       .then((response) => {
         console.log(response);
-        setRoleAssigned(rolesDict[updatedRole]);
+        setRoleAssigned(!updatedRole ? roleAssigned : rolesDict[updatedRole]);
         setLoading(false);
         setUpdatedRole(null);
         setUpdatedProject(null);
@@ -112,8 +155,9 @@ export default function TableRow({
       .catch((error) => {
         console.log(error)
         setLoading(false);
-        setUpdatedRole(null);
-        setUpdatedProject(null);
+        toast.error(`An error occurred while trying to configure setting for ${option?.portfolio_name}`)
+        // setUpdatedRole(null);
+        // setUpdatedProject(null);
       });
   };
   // console.log({ roleAssigned });
@@ -164,12 +208,41 @@ export default function TableRow({
             setUpdatedProject(true);
           }} 
           style={{
-            backgroundColor: ((roleAssigned === 'Teamlead' && hiredCandidates.includes(option.portfolio_name)) || (updatedRole && rolesDict[updatedRole] === 'Teamlead')) ? '#fff' : `#f5f5f5`,
-            filter: ((roleAssigned === 'Teamlead' && hiredCandidates.includes(option.portfolio_name)) || (updatedRole && rolesDict[updatedRole] === 'Teamlead')) ? 'brightness(1)': 'brightness(0.9)',
-            cursor: ((roleAssigned === 'Teamlead' && hiredCandidates.includes(option.portfolio_name)) || (updatedRole && rolesDict[updatedRole] === 'Teamlead')) ? 'pointer' : 'not-allowed',
+            backgroundColor: (
+                (roleAssigned === 'Teamlead' && hiredCandidates.includes(option.portfolio_name)) || 
+                (updatedRole && rolesDict[updatedRole] === 'Teamlead') ||
+                (roleAssigned === 'Group Lead' && hiredCandidates.includes(option.portfolio_name)) || 
+                (updatedRole && rolesDict[updatedRole] === 'Group Lead')
+              ) ? '#fff' 
+              : 
+              `#f5f5f5`
+            ,
+            filter: (
+                (roleAssigned === 'Teamlead' && hiredCandidates.includes(option.portfolio_name)) || 
+                (updatedRole && rolesDict[updatedRole] === 'Teamlead') ||
+                (roleAssigned === 'Group Lead' && hiredCandidates.includes(option.portfolio_name)) || 
+                (updatedRole && rolesDict[updatedRole] === 'Group Lead')
+              ) ? 'brightness(1)'
+              : 
+              'brightness(0.9)'
+            ,
+            cursor: (
+                (roleAssigned === 'Teamlead' && hiredCandidates.includes(option.portfolio_name)) || 
+                (updatedRole && rolesDict[updatedRole] === 'Teamlead') ||
+                (roleAssigned === 'Group Lead' && hiredCandidates.includes(option.portfolio_name)) || 
+                (updatedRole && rolesDict[updatedRole] === 'Group Lead')
+              ) ? 'pointer' 
+              : 
+              'not-allowed'
+            ,
             maxWidth: '50%'
           }}
-          disabled={!((roleAssigned === 'Teamlead' && hiredCandidates.includes(option.portfolio_name)) || (updatedRole && rolesDict[updatedRole] === 'Teamlead'))}
+          disabled={!(
+            (roleAssigned === 'Teamlead' && hiredCandidates.includes(option.portfolio_name)) || 
+            (updatedRole && rolesDict[updatedRole] === 'Teamlead') ||
+            (roleAssigned === 'Group Lead' && hiredCandidates.includes(option.portfolio_name)) || 
+            (updatedRole && rolesDict[updatedRole] === 'Group Lead')
+          )}
           ref={projectAssignedRef}
         >
           <option value="" disabled>Set project</option>
