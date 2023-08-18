@@ -90,25 +90,6 @@ const StaffJobLandingLayout = ({
   return (
     <>
       <nav style={{ display: hideTitleBar ? "none" : "block" }}>
-        <div style={{ position: "relative" }}>
-          <p
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "1rem",
-              fontWeight: "600",
-              fontSize: "1.1rem",
-              position: "absolute",
-              top: "-1rem",
-              right: "45%",
-              zIndex: "100",
-              color: "red",
-            }}
-          >
-            You're on the Beta Version of Jobportal
-          </p>
-        </div>
         <div
           className={`staff__Jobs__Layout__Navigation__Container ${
             adminView ? "admin" : ""
