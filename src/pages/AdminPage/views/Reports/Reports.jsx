@@ -80,6 +80,7 @@ const AdminReports = ({ subAdminView }) => {
         setLoading(false);
       });
   }, []);
+  console.log(data.hiring_rate)
   if (loading)
     return (
       <StaffJobLandingLayout
@@ -106,8 +107,9 @@ const AdminReports = ({ subAdminView }) => {
             <select
               className="select_time_tage"
               onChange={handleSelectOptionsFunction}
+              defaultValue={""}
             >
-              <option value="select_time">select time</option>
+              <option value="" disabled> select time</option>
               <option value="last_7_days">last 7 days</option>
               <option value="custom_time">custom time</option>
             </select>
@@ -127,8 +129,8 @@ const AdminReports = ({ subAdminView }) => {
                         data.number_active_jobs,
                         data.number_inactive_jobs,
                       ],
-                      backgroundColor: ["#D3D3D3", "#005734"],
-                      borderColor: ["#D3D3D3", "#005734"],
+                      backgroundColor: ["#005734", "#D3D3D3"],
+                      borderColor: ["#005734", "#D3D3D3"],
                     },
                   ],
                 }}
@@ -159,7 +161,28 @@ const AdminReports = ({ subAdminView }) => {
                   }}
                 ></Doughnut>
               </div>
-              <div>hiring rate:{data.hiring_rate}</div>
+              {/* <div>hiring rate:{data.hiring_rate}</div> */}
+              <div style={{ width: 400, height: 300 }}>
+                <Doughnut
+                  data={{
+                    labels: [
+                      "hiring rate",
+                      "hiring total",
+                    ],
+                    datasets: [
+                      {
+                        label: "Poll",
+                        data: [
+                          extractNumber(data.hiring_rate),
+                          100,
+                        ],
+                        backgroundColor: ["#D3D3D3", "#005734"],
+                        borderColor: ["#D3D3D3", "#005734"],
+                      },
+                    ],
+                  }}
+                ></Doughnut>
+              </div>
             </div>
           </div>
 
@@ -417,3 +440,9 @@ function isValidDate(inputDate) {
   }
   return true;
 }
+
+function extractNumber(inputString) {
+  if(inputString === undefined) return 0
+  const cleanedString = inputString.replace('%', '').trim();
+  const number = parseFloat(cleanedString).toFixed(2);
+  return parseFloat(number);}

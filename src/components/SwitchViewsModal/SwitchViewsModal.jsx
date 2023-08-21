@@ -14,7 +14,7 @@ const SwitchViewsModal = ({ handleCloseModal }) => {
     const handleItemClick = (item) => {
         handleCloseModal();
 
-        if (item === testingRoles.groupLeadRole) return toast.info('Still in development');
+        // if (item === testingRoles.groupLeadRole) return toast.info('Still in development');
 
         navigate("/");
 

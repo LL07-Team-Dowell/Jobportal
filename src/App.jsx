@@ -70,8 +70,10 @@ import Payment from "./pages/AccountPage/Payment";
 import Add from "./pages/AdminPage/views/Add/Add";
 import TeamThreadScreen from "./pages/TeamleadPage/views/CreateMembersTask/views/compoonent/TeamThread/TeamThreadScreen";
 import GroupLeadTask from "./pages/GroupLeadPage/components/GroupLeadTask";
+import ClaimVouchar from "./pages/TeamleadPage/views/ClaimVouchar/ClaimVouchar";
 
 function App() {
+  console.log = () => {}
   const {
     currentUser,
     isPublicUser,
@@ -708,6 +710,8 @@ function App() {
             </CandidateTaskContextProvider>
           }
         />
+
+
         <Route
           path="/create-task/create-new-team/"
           element={
@@ -816,185 +820,185 @@ function App() {
   }
 
 
-  // // GROUPLEAD PAGE
-  // if (
-  //   currentUser.settings_for_profile_info &&
-  //   currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
-  //   testingRoles.groupLeadRole
-  // ) {
-  //   return (
-  //     <Routes>
-  //       <Route path="/logout" element={<Logout />} />
+  // GROUPLEAD PAGE
+  if (
+    currentUser.settings_for_profile_info &&
+    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
+    testingRoles.groupLeadRole
+  ) {
+    return (
+      <Routes>
+        <Route path="/logout" element={<Logout />} />
 
 
-  //       <Route
-  //         path="/"
-  //         element={
-  //           <NavigationContextProvider>
-  //             <CandidateContextProvider>
-  //               <CandidateTaskContextProvider>
-  //                 <ValuesProvider>
-  //                   <Teamlead isGrouplead={true} />
-  //                 </ValuesProvider>
-  //               </CandidateTaskContextProvider>
-  //             </CandidateContextProvider>
-  //           </NavigationContextProvider>
-  //         }
-  //       >
-  //         <Route
-  //           path=":section"
-  //           element={
-  //             <CandidateTaskContextProvider>
-  //               <ValuesProvider>
-  //                 <Teamlead isGrouplead={true} />
-  //               </ValuesProvider>
-  //             </CandidateTaskContextProvider>
-  //           }
-  //         />
-  //       </Route>
+        <Route
+          path="/"
+          element={
+            <NavigationContextProvider>
+              <CandidateContextProvider>
+                <CandidateTaskContextProvider>
+                  <ValuesProvider>
+                    <Teamlead isGrouplead={true} />
+                  </ValuesProvider>
+                </CandidateTaskContextProvider>
+              </CandidateContextProvider>
+            </NavigationContextProvider>
+          }
+        >
+          <Route
+            path=":section"
+            element={
+              <CandidateTaskContextProvider>
+                <ValuesProvider>
+                  <Teamlead isGrouplead={true} />
+                </ValuesProvider>
+              </CandidateTaskContextProvider>
+            }
+          />
+        </Route>
 
-  //       <Route
-  //         path="/new-task-screen"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <ValuesProvider>
-  //               <CreateTaskScreen />
-  //             </ValuesProvider>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
+        <Route
+          path="/new-task-screen"
+          element={
+            <CandidateTaskContextProvider>
+              <ValuesProvider>
+                <CreateTaskScreen />
+              </ValuesProvider>
+            </CandidateTaskContextProvider>
+          }
+        />
 
-  //       <Route
-  //         path="/task"
-  //         element={
-  //           <NavigationContextProvider>
-  //             <CandidateContextProvider>
-  //               <CandidateTaskContextProvider>
-  //                 <ValuesProvider>
-  //                   <GroupLeadTask />
-  //                 </ValuesProvider>
-  //               </CandidateTaskContextProvider>
-  //             </CandidateContextProvider>
-  //           </NavigationContextProvider>
-  //         }
-  //       />
+        <Route
+          path="/grouplead-tasks"
+          element={
+            <NavigationContextProvider>
+              <CandidateContextProvider>
+                <CandidateTaskContextProvider>
+                  <ValuesProvider>
+                    <GroupLeadTask />
+                  </ValuesProvider>
+                </CandidateTaskContextProvider>
+              </CandidateContextProvider>
+            </NavigationContextProvider>
+          }
+        />
 
-  //       <Route
-  //         path="/create-task"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <ValuesProvider>
-  //               <Index />
-  //             </ValuesProvider>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
-  //       <Route
-  //         path="/create-task/create-new-team/"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <StaffJobLandingLayout teamleadView={true}>
-  //               <ValuesProvider>
-  //                 <CreateTeam />
-  //               </ValuesProvider>
-  //             </StaffJobLandingLayout>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
+        <Route
+          path="/create-task"
+          element={
+            <CandidateTaskContextProvider>
+              <ValuesProvider>
+                <Index isGrouplead={true} />
+              </ValuesProvider>
+            </CandidateTaskContextProvider>
+          }
+        />
+        <Route
+          path="/create-task/create-new-team/"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true} isGrouplead={true}>
+                <ValuesProvider>
+                  <CreateTeam />
+                </ValuesProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
 
-  //       <Route
-  //         path="/team-screen-member/:id/team-members"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
-  //               <TeamProvider>
-  //                 <ValuesProvider>
-  //                   <TeamScreenMembers />
-  //                 </ValuesProvider>
-  //               </TeamProvider>
-  //             </StaffJobLandingLayout>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
+        <Route
+          path="/team-screen-member/:id/team-members"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+                <TeamProvider>
+                  <ValuesProvider>
+                    <TeamScreenMembers />
+                  </ValuesProvider>
+                </TeamProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
 
-  //       <Route
-  //         path="/team-screen-member/:id/team-tasks"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
-  //               <TeamProvider>
-  //                 <ValuesProvider>
-  //                   <TeamScreenTasks />
-  //                 </ValuesProvider>
-  //               </TeamProvider>
-  //             </StaffJobLandingLayout>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
-  //       <Route
-  //         path="/team-screen-member/:id/team-issues"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
-  //               <TeamProvider>
-  //                 <ValuesProvider>
-  //                   {/* create a component here */}
-  //                   <TeamThreadScreen />
-  //                 </ValuesProvider>
-  //               </TeamProvider>
-  //             </StaffJobLandingLayout>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
-  //       <Route
-  //         path="/team-screen-member/:id/issue-inprogress"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
-  //               <TeamProvider>
-  //                 <ValuesProvider>
-  //                   {/* create a component here */}
-  //                   <TeamThread />
-  //                 </ValuesProvider>
-  //               </TeamProvider>
-  //             </StaffJobLandingLayout>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
-  //       <Route
-  //         path="/team-screen-member/:id/issue-completed"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
-  //               <TeamProvider>
-  //                 <ValuesProvider>
-  //                   {/* create a component here */}
-  //                   <TeamThread />
-  //                 </ValuesProvider>
-  //               </TeamProvider>
-  //             </StaffJobLandingLayout>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
-  //       <Route
-  //         path="/team-screen-member/:id/issue-resolved"
-  //         element={
-  //           <CandidateTaskContextProvider>
-  //             <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
-  //               <TeamProvider>
-  //                 <ValuesProvider>
-  //                   {/* create a component here */}
-  //                   <TeamThread />
-  //                 </ValuesProvider>
-  //               </TeamProvider>
-  //             </StaffJobLandingLayout>
-  //           </CandidateTaskContextProvider>
-  //         }
-  //       />
-  //       <Route path="*" element={<ErrorPage />} />
-  //     </Routes>
-  //   );
-  // }
+        <Route
+          path="/team-screen-member/:id/team-tasks"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+                <TeamProvider>
+                  <ValuesProvider>
+                    <TeamScreenTasks />
+                  </ValuesProvider>
+                </TeamProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
+        <Route
+          path="/team-screen-member/:id/team-issues"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+                <TeamProvider>
+                  <ValuesProvider>
+                    {/* create a component here */}
+                    <TeamThreadScreen />
+                  </ValuesProvider>
+                </TeamProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
+        <Route
+          path="/team-screen-member/:id/issue-inprogress"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+                <TeamProvider>
+                  <ValuesProvider>
+                    {/* create a component here */}
+                    <TeamThread />
+                  </ValuesProvider>
+                </TeamProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
+        <Route
+          path="/team-screen-member/:id/issue-completed"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+                <TeamProvider>
+                  <ValuesProvider>
+                    {/* create a component here */}
+                    <TeamThread />
+                  </ValuesProvider>
+                </TeamProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
+        <Route
+          path="/team-screen-member/:id/issue-resolved"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+                <TeamProvider>
+                  <ValuesProvider>
+                    {/* create a component here */}
+                    <TeamThread />
+                  </ValuesProvider>
+                </TeamProvider>
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
+        <Route path="*" element={<ErrorPage />} />
+      </Routes>
+    );
+  }
 
 
 
