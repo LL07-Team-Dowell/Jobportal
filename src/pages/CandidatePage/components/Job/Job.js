@@ -16,6 +16,7 @@ import { useJobContext } from '../../../../contexts/Jobs';
 import { SettingsAccessibility } from '@mui/icons-material';
 import { IoMdRefresh } from 'react-icons/io';
 import { getCandidateApplicationsForHr } from '../../../../services/hrServices';
+import notFOundImage from '../../../../assets/images/user-not-found.jpg';
 
 function JobScreen() {
     const { jobs, setJobs } = useJobContext();
@@ -320,8 +321,23 @@ function JobScreen() {
         {
             isLoading ? <LoadingSpinner /> :
 
+                isProductUser && productUserDetails.onlySingleJobCategoryPermitted && (productUserDetails.categoryPassed !== currentCategory) ? <>
+                    <TitleNavigationBar 
+                        title={`Category not found`} 
+                        showSearchBar={false} 
+                        handleBackBtnClick={() => navigate(`/jobs/?jobCategory=${productUserDetails.categoryPassed}`)}
+                    />
+                    <div className='category__Not__Found'>
+                        <img src={notFOundImage} alt='not found illustration' />
+                    </div>
+                </> :
                 <>
-                    <TitleNavigationBar title={`${changeToTitleCase(currentCategory)} Jobs`} showSearchBar={true} handleBackBtnClick={() => currentCategory ? navigate(-1) : navigate("/home")} />
+                    <TitleNavigationBar 
+                        title={`${changeToTitleCase(currentCategory)} Jobs`} 
+                        hideBackBtn={isProductUser && productUserDetails.onlySingleJobCategoryPermitted ? true : false} 
+                        showSearchBar={true} 
+                        handleBackBtnClick={() => currentCategory ? navigate(-1) : navigate("/home")} 
+                    />
 
                     <div className='candidate__Jobs__Container'>
                         {/* <div className="refresh-container" onClick={handleRefreshForCandidateApplications} id='refresh-container'>
