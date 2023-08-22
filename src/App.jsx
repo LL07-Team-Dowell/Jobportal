@@ -94,10 +94,10 @@ function App() {
   const [shorlistedJob, setshorlistedJob] = useState([]);
 
 
-  // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
-  return <Routes>
-    <Route path="*" element={<PageUnderConstruction showProductView={true} />} />
-  </Routes>
+  // // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
+  // return <Routes>
+  //   <Route path="*" element={<PageUnderConstruction showProductView={true} />} />
+  // </Routes>
 
   // console.log(shorlistedJob); 
   useDowellLogin(
@@ -1290,7 +1290,8 @@ function App() {
               <CandidateJobsContextProvider>
                 <JobContextProvider>
                   <CandidateValuesProvider>
-                    <AfterSelectionScreen assignedProjects={assignedProjects} />
+                    <PageUnderConstruction showProductView={true} />
+                    {/* <AfterSelectionScreen assignedProjects={assignedProjects} /> */}
                   </CandidateValuesProvider>
                 </JobContextProvider>
               </CandidateJobsContextProvider>
@@ -1298,7 +1299,10 @@ function App() {
           </NavigationContextProvider>
         }
       >
-        <Route path=":section" element={<AfterSelectionScreen />} />
+        <Route path=":section" element={
+          <PageUnderConstruction showProductView={true} />
+          // <AfterSelectionScreen />
+        } />
       </Route>
       <Route path="/logout" element={<Logout />} />
       <Route path="*" element={<ErrorPage />} />
