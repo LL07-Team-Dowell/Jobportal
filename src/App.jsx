@@ -72,9 +72,10 @@ import TeamThreadScreen from "./pages/TeamleadPage/views/CreateMembersTask/views
 import GroupLeadTask from "./pages/GroupLeadPage/components/GroupLeadTask";
 import ClaimVouchar from "./pages/TeamleadPage/views/ClaimVouchar/ClaimVouchar";
 import { PageUnderConstruction } from "./pages/UnderConstructionPage/ConstructionPage";
+import TaskScreen from "./pages/TeamleadPage/views/TaskScreen/TaskScreen";
 
 function App() {
-  console.log = () => {}
+  console.log = () => {};
   const {
     currentUser,
     isPublicUser,
@@ -94,13 +95,12 @@ function App() {
   const [assignedProjects, setAssignedProjects] = useState([]);
   const [shorlistedJob, setshorlistedJob] = useState([]);
 
-
   // // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
   // return <Routes>
   //   <Route path="*" element={<PageUnderConstruction showProductView={true} />} />
   // </Routes>
 
-  // console.log(shorlistedJob); 
+  // console.log(shorlistedJob);
   useDowellLogin(
     setCurrentUser,
     setLoading,
@@ -108,7 +108,7 @@ function App() {
     setPublicUserDetails,
     setUserDetailsNotFound,
     setIsProductUser,
-    setProductUserDetails,
+    setProductUserDetails
   );
 
   useTitle("Dowell Job Portal");
@@ -143,11 +143,7 @@ function App() {
           />
         </Route>
 
-        <Route path="*"
-          element={
-            <>Page Not found</>
-          }
-        />
+        <Route path="*" element={<>Page Not found</>} />
       </Routes>
     );
   }
@@ -205,13 +201,9 @@ function App() {
               }
             />
           </Route>
-          <Route path="*"
-            element={
-              <>Page Not found</>
-            }
-          />
+          <Route path="*" element={<>Page Not found</>} />
         </Routes>
-      )
+      );
     }
 
     return (
@@ -328,9 +320,8 @@ function App() {
 
         <Route path="*" element={<ErrorPage />} />
       </Routes>
-    )
+    );
   }
-
 
   if (!currentUser || userDetailsNotFound) {
     return (
@@ -358,8 +349,9 @@ function App() {
   // ACCOUNT PAGE
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
-    testingRoles.accountRole
+    currentUser.settings_for_profile_info.profile_info[
+      currentUser.settings_for_profile_info.profile_info.length - 1
+    ].Role === testingRoles.accountRole
   ) {
     return (
       <Routes>
@@ -386,15 +378,13 @@ function App() {
 
   // SUB-ADMIN PAGE
   if (
-    (
-      currentUser.settings_for_profile_info &&
-      currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
-      testingRoles.subAdminRole
-    ) || (
-      currentUser.settings_for_profile_info &&
+    (currentUser.settings_for_profile_info &&
+      currentUser.settings_for_profile_info.profile_info[
+        currentUser.settings_for_profile_info.profile_info.length - 1
+      ].Role === testingRoles.subAdminRole) ||
+    (currentUser.settings_for_profile_info &&
       currentUser.settings_for_profile_info.fakeSuperUserInfo &&
-      currentUser.fakeSubAdminRoleSet
-    )
+      currentUser.fakeSubAdminRoleSet)
   ) {
     return (
       <Routes>
@@ -478,8 +468,7 @@ function App() {
 
   // ADMIN PAGE
   if (
-    (
-      currentUser.portfolio_info &&
+    (currentUser.portfolio_info &&
       currentUser.portfolio_info.length > 0 &&
       currentUser.portfolio_info.find(
         (item) => item.product === "Team Management"
@@ -487,13 +476,11 @@ function App() {
       currentUser.portfolio_info.find(
         (item) => item.product === "Team Management"
       ).member_type === "owner" &&
-      !currentUser.settings_for_profile_info?.fakeSuperUserInfo
-    )
-    ||
-    (
-      currentUser.settings_for_profile_info &&
-      currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role === testingRoles.superAdminRole
-    )
+      !currentUser.settings_for_profile_info?.fakeSuperUserInfo) ||
+    (currentUser.settings_for_profile_info &&
+      currentUser.settings_for_profile_info.profile_info[
+        currentUser.settings_for_profile_info.profile_info.length - 1
+      ].Role === testingRoles.superAdminRole)
   ) {
     return (
       <Routes>
@@ -577,7 +564,11 @@ function App() {
           path="/teams/create-new-team/"
           element={
             <CandidateTaskContextProvider>
-              <StaffJobLandingLayout adminView={true} pageTitle={"New Team"} adminAlternativePageActive={true}>
+              <StaffJobLandingLayout
+                adminView={true}
+                pageTitle={"New Team"}
+                adminAlternativePageActive={true}
+              >
                 <ValuesProvider>
                   <CreateTeam />
                 </ValuesProvider>
@@ -651,8 +642,9 @@ function App() {
   // HR PAGE
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
-    testingRoles.hrRole
+    currentUser.settings_for_profile_info.profile_info[
+      currentUser.settings_for_profile_info.profile_info.length - 1
+    ].Role === testingRoles.hrRole
   ) {
     return (
       <Routes>
@@ -724,13 +716,13 @@ function App() {
   // TEAMLEAD PAGE
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
-    testingRoles.teamLeadRole
+    currentUser.settings_for_profile_info.profile_info[
+      currentUser.settings_for_profile_info.profile_info.length - 1
+    ].Role === testingRoles.teamLeadRole
   ) {
     return (
       <Routes>
         <Route path="/logout" element={<Logout />} />
-
 
         <Route
           path="/"
@@ -778,7 +770,6 @@ function App() {
             </CandidateTaskContextProvider>
           }
         />
-
 
         <Route
           path="/create-task/create-new-team/"
@@ -887,17 +878,16 @@ function App() {
     );
   }
 
-
   // GROUPLEAD PAGE
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
-    testingRoles.groupLeadRole
+    currentUser.settings_for_profile_info.profile_info[
+      currentUser.settings_for_profile_info.profile_info.length - 1
+    ].Role === testingRoles.groupLeadRole
   ) {
     return (
       <Routes>
         <Route path="/logout" element={<Logout />} />
-
 
         <Route
           path="/"
@@ -930,7 +920,7 @@ function App() {
           element={
             <CandidateTaskContextProvider>
               <ValuesProvider>
-                <CreateTaskScreen />
+                <CreateTaskScreen isGrouplead={true} />
               </ValuesProvider>
             </CandidateTaskContextProvider>
           }
@@ -978,7 +968,7 @@ function App() {
           path="/team-screen-member/:id/team-members"
           element={
             <CandidateTaskContextProvider>
-              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true} isGrouplead={true}>
                 <TeamProvider>
                   <ValuesProvider>
                     <TeamScreenMembers />
@@ -993,7 +983,7 @@ function App() {
           path="/team-screen-member/:id/team-tasks"
           element={
             <CandidateTaskContextProvider>
-              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true} isGrouplead={true}>
                 <TeamProvider>
                   <ValuesProvider>
                     <TeamScreenTasks />
@@ -1007,7 +997,7 @@ function App() {
           path="/team-screen-member/:id/team-issues"
           element={
             <CandidateTaskContextProvider>
-              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true} isGrouplead={true}>
                 <TeamProvider>
                   <ValuesProvider>
                     {/* create a component here */}
@@ -1022,7 +1012,7 @@ function App() {
           path="/team-screen-member/:id/issue-inprogress"
           element={
             <CandidateTaskContextProvider>
-              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true} isGrouplead={true}>
                 <TeamProvider>
                   <ValuesProvider>
                     {/* create a component here */}
@@ -1037,7 +1027,7 @@ function App() {
           path="/team-screen-member/:id/issue-completed"
           element={
             <CandidateTaskContextProvider>
-              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true} isGrouplead={true}>
                 <TeamProvider>
                   <ValuesProvider>
                     {/* create a component here */}
@@ -1052,7 +1042,7 @@ function App() {
           path="/team-screen-member/:id/issue-resolved"
           element={
             <CandidateTaskContextProvider>
-              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true}>
+              <StaffJobLandingLayout teamleadView={true} hideSearchBar={true} isGrouplead={true}>
                 <TeamProvider>
                   <ValuesProvider>
                     {/* create a component here */}
@@ -1063,183 +1053,189 @@ function App() {
             </CandidateTaskContextProvider>
           }
         />
+
+        <Route 
+          path="/user-tasks"
+          element={
+            <CandidateTaskContextProvider>
+              <StaffJobLandingLayout
+                teamleadView={true}
+                isGrouplead={true}
+              >
+                <TaskScreen
+                  candidateAfterSelectionScreen={true}
+                  assignedProject={assignedProjects}
+                  showBackBtn={true}
+                  loadProjects={true}
+                  isGrouplead={true}
+                />
+              </StaffJobLandingLayout>
+            </CandidateTaskContextProvider>
+          }
+        />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     );
   }
 
-
-
   //Provertion Period Page
   if (
     currentUser.settings_for_profile_info &&
-    currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role ===
-    testingRoles.provertionRole
+    currentUser.settings_for_profile_info.profile_info[
+      currentUser.settings_for_profile_info.profile_info.length - 1
+    ].Role === testingRoles.provertionRole
   ) {
-    return <Routes>
-      <Route
-        path="/"
-        element={
-          <NavigationContextProvider>
-            <CandidateJobsContextProvider>
-              <JobContextProvider>
-                <ProvertionPeriod>
-                  <CandidateHomeScreen
-                    setHired={setCandidateHired}
-                    setAssignedProjects={setAssignedProjects}
-                    setCandidateShortListed={setCandidateShortListed}
-                    setshorlistedJob={setshorlistedJob}
-                  />
-                </ProvertionPeriod>
-              </JobContextProvider>
-            </CandidateJobsContextProvider>
-          </NavigationContextProvider>
-        }
-      >
+    return (
+      <Routes>
         <Route
-          path=":section"
+          path="/"
           element={
             <NavigationContextProvider>
+              <CandidateJobsContextProvider>
+                <JobContextProvider>
+                  <ProvertionPeriod>
+                    <CandidateHomeScreen
+                      setHired={setCandidateHired}
+                      setAssignedProjects={setAssignedProjects}
+                      setCandidateShortListed={setCandidateShortListed}
+                      setshorlistedJob={setshorlistedJob}
+                    />
+                  </ProvertionPeriod>
+                </JobContextProvider>
+              </CandidateJobsContextProvider>
+            </NavigationContextProvider>
+          }
+        >
+          <Route
+            path=":section"
+            element={
+              <NavigationContextProvider>
+                <JobContextProvider>
+                  <CandidateJobsContextProvider>
+                    <ProvertionPeriod>
+                      <CandidateHomeScreen />
+                    </ProvertionPeriod>
+                  </CandidateJobsContextProvider>
+                </JobContextProvider>
+              </NavigationContextProvider>
+            }
+          />
+        </Route>
+
+        <Route path="/jobs">
+          <Route
+            index
+            element={
               <JobContextProvider>
                 <CandidateJobsContextProvider>
                   <ProvertionPeriod>
-                    <CandidateHomeScreen />
+                    <JobScreen />
                   </ProvertionPeriod>
                 </CandidateJobsContextProvider>
               </JobContextProvider>
-            </NavigationContextProvider>
-          }
-        />
-      </Route>
-
-      <Route path="/jobs">
-        <Route
-          index
-          element={
-            <JobContextProvider>
-              <CandidateJobsContextProvider>
-                <ProvertionPeriod>
-                  <JobScreen />
-                </ProvertionPeriod>
-              </CandidateJobsContextProvider>
-            </JobContextProvider>
-          }
-        />
-        <Route
-          path=":jobTitle"
-          element={
-            <JobContextProvider>
-              <CandidateJobsContextProvider>
-                <ProvertionPeriod>
-                  <SingleJobScreen />
-                </ProvertionPeriod>
-              </CandidateJobsContextProvider>
-            </JobContextProvider>
-          }
-        />
-        <Route
-          exact
-          path="c/research-associate"
-          element={
-            <ProvertionPeriod>
-              <ResearchAssociatePage />
-            </ProvertionPeriod>
-          }
-        />
-        <Route
-          exact
-          path="c/employee"
-          element={
-            <JobContextProvider>
-              <CandidateJobsContextProvider>
-                <ProvertionPeriod>
-                  <EmployeeJobScreen />
-                </ProvertionPeriod>
-              </CandidateJobsContextProvider>
-            </JobContextProvider>
-          }
-        />
-        <Route
-          exact
-          path="c/intern"
-          element={
-            <JobContextProvider>
-              <CandidateJobsContextProvider>
-                <ProvertionPeriod>
-                  <InternJobScreen />
-                </ProvertionPeriod>
-              </CandidateJobsContextProvider>
-            </JobContextProvider>
-          }
-        />
-        <Route
-          exact
-          path="c/freelancer"
-          element={
-            <JobContextProvider>
-              <CandidateJobsContextProvider>
-                <ProvertionPeriod>
-                  <FreelancerJobScreen />
-                </ProvertionPeriod>
-              </CandidateJobsContextProvider>
-            </JobContextProvider>
-          }
-        />
-      </Route>
-
-      <Route
-        path="/logout"
-        element={
-          <JobContextProvider>
-            <CandidateJobsContextProvider>
+            }
+          />
+          <Route
+            path=":jobTitle"
+            element={
+              <JobContextProvider>
+                <CandidateJobsContextProvider>
+                  <ProvertionPeriod>
+                    <SingleJobScreen />
+                  </ProvertionPeriod>
+                </CandidateJobsContextProvider>
+              </JobContextProvider>
+            }
+          />
+          <Route
+            exact
+            path="c/research-associate"
+            element={
               <ProvertionPeriod>
-                <Logout />
+                <ResearchAssociatePage />
               </ProvertionPeriod>
-            </CandidateJobsContextProvider>
-          </JobContextProvider>
-        }
-      />
-      <Route
-        path="/alerts"
-        element={
-          <JobContextProvider>
-            <CandidateJobsContextProvider>
-              <ProvertionPeriod>
-                <AlertScreen />
-              </ProvertionPeriod>
-            </CandidateJobsContextProvider>
-          </JobContextProvider>
-        }
-      />
-      <Route
-        path="/user"
-        element={
-          <JobContextProvider>
-            <CandidateJobsContextProvider>
-              <ProvertionPeriod>
-                <UserScreen candidateSelected={false} />
-              </ProvertionPeriod>
-            </CandidateJobsContextProvider>
-          </JobContextProvider>
-        }
-      />
+            }
+          />
+          <Route
+            exact
+            path="c/employee"
+            element={
+              <JobContextProvider>
+                <CandidateJobsContextProvider>
+                  <ProvertionPeriod>
+                    <EmployeeJobScreen />
+                  </ProvertionPeriod>
+                </CandidateJobsContextProvider>
+              </JobContextProvider>
+            }
+          />
+          <Route
+            exact
+            path="c/intern"
+            element={
+              <JobContextProvider>
+                <CandidateJobsContextProvider>
+                  <ProvertionPeriod>
+                    <InternJobScreen />
+                  </ProvertionPeriod>
+                </CandidateJobsContextProvider>
+              </JobContextProvider>
+            }
+          />
+          <Route
+            exact
+            path="c/freelancer"
+            element={
+              <JobContextProvider>
+                <CandidateJobsContextProvider>
+                  <ProvertionPeriod>
+                    <FreelancerJobScreen />
+                  </ProvertionPeriod>
+                </CandidateJobsContextProvider>
+              </JobContextProvider>
+            }
+          />
+        </Route>
 
-      <Route
-        path="/applied"
-        element={
-          <NavigationContextProvider>
+        <Route
+          path="/logout"
+          element={
             <JobContextProvider>
               <CandidateJobsContextProvider>
                 <ProvertionPeriod>
-                  <AppliedScreen />
+                  <Logout />
                 </ProvertionPeriod>
               </CandidateJobsContextProvider>
             </JobContextProvider>
-          </NavigationContextProvider>
-        }
-      >
+          }
+        />
         <Route
-          path=":section"
+          path="/alerts"
+          element={
+            <JobContextProvider>
+              <CandidateJobsContextProvider>
+                <ProvertionPeriod>
+                  <AlertScreen />
+                </ProvertionPeriod>
+              </CandidateJobsContextProvider>
+            </JobContextProvider>
+          }
+        />
+        <Route
+          path="/user"
+          element={
+            <JobContextProvider>
+              <CandidateJobsContextProvider>
+                <ProvertionPeriod>
+                  <UserScreen candidateSelected={false} />
+                </ProvertionPeriod>
+              </CandidateJobsContextProvider>
+            </JobContextProvider>
+          }
+        />
+
+        <Route
+          path="/applied"
           element={
             <NavigationContextProvider>
               <JobContextProvider>
@@ -1251,25 +1247,25 @@ function App() {
               </JobContextProvider>
             </NavigationContextProvider>
           }
-        />
-      </Route>
+        >
+          <Route
+            path=":section"
+            element={
+              <NavigationContextProvider>
+                <JobContextProvider>
+                  <CandidateJobsContextProvider>
+                    <ProvertionPeriod>
+                      <AppliedScreen />
+                    </ProvertionPeriod>
+                  </CandidateJobsContextProvider>
+                </JobContextProvider>
+              </NavigationContextProvider>
+            }
+          />
+        </Route>
 
-      <Route
-        path="/apply/job/:id"
-        element={
-          <NewApplicationContextProvider>
-            <JobContextProvider>
-              <CandidateJobsContextProvider>
-                <ProvertionPeriod>
-                  <JobApplicationScreen />
-                </ProvertionPeriod>
-              </CandidateJobsContextProvider>
-            </JobContextProvider>
-          </NewApplicationContextProvider>
-        }
-      >
         <Route
-          path=":section"
+          path="/apply/job/:id"
           element={
             <NewApplicationContextProvider>
               <JobContextProvider>
@@ -1281,19 +1277,37 @@ function App() {
               </JobContextProvider>
             </NewApplicationContextProvider>
           }
-        />
-      </Route>
+        >
+          <Route
+            path=":section"
+            element={
+              <NewApplicationContextProvider>
+                <JobContextProvider>
+                  <CandidateJobsContextProvider>
+                    <ProvertionPeriod>
+                      <JobApplicationScreen />
+                    </ProvertionPeriod>
+                  </CandidateJobsContextProvider>
+                </JobContextProvider>
+              </NewApplicationContextProvider>
+            }
+          />
+        </Route>
 
-      <Route path="*" element={
-        <ProvertionPeriod>
-          <ErrorPage />
-        </ProvertionPeriod>
-      } />
-    </Routes>
+        <Route
+          path="*"
+          element={
+            <ProvertionPeriod>
+              <ErrorPage />
+            </ProvertionPeriod>
+          }
+        />
+      </Routes>
+    );
   }
 
   // CANDIDATE PAGE
-  return (candidateHired || currentUser.candidateIsHired) ? (
+  return candidateHired || currentUser.candidateIsHired ? (
     <Routes>
       <Route
         path="/team-screen-member/:id/team-tasks"
@@ -1351,8 +1365,8 @@ function App() {
               <CandidateJobsContextProvider>
                 <JobContextProvider>
                   <CandidateValuesProvider>
-                    <PageUnderConstruction showProductView={true} />
-                    {/* <AfterSelectionScreen assignedProjects={assignedProjects} /> */}
+                    {/* <PageUnderConstruction showProductView={true} /> */}
+                    <AfterSelectionScreen assignedProjects={assignedProjects} />
                   </CandidateValuesProvider>
                 </JobContextProvider>
               </CandidateJobsContextProvider>
@@ -1360,10 +1374,13 @@ function App() {
           </NavigationContextProvider>
         }
       >
-        <Route path=":section" element={
-          <PageUnderConstruction showProductView={true} />
-          // <AfterSelectionScreen />
-        } />
+        <Route
+          path=":section"
+          element={
+            // <PageUnderConstruction showProductView={true} />
+            <AfterSelectionScreen assignedProjects={assignedProjects} />
+          }
+        />
       </Route>
       <Route path="/logout" element={<Logout />} />
       <Route path="*" element={<ErrorPage />} />
@@ -1615,19 +1632,19 @@ function App() {
 //   </>
 // );
 
+// const categoriesForScreen = [
+//   {
+//     category: "employee",
+//     component: EmployeeJobScreen,
+//   },
+//   {
+//     category: "intern",
+//     component: InternJobScreen,
+//   },
+//   {
+//     category: "freelancer",
+//     component: FreelancerJobScreen,
+//   },
+// ];
 
-const categoriesForScreen = [
-  {
-    'category': 'employee',
-    'component': EmployeeJobScreen,
-  },
-  {
-    'category': 'intern',
-    'component': InternJobScreen,
-  },
-  {
-    'category': 'freelancer',
-    'component': FreelancerJobScreen,
-  }
-]
 export default App;

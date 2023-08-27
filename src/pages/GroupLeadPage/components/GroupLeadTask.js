@@ -39,12 +39,12 @@ const GroupLeadTask = () => {
 
     return (
 
-        <StaffJobLandingLayout teamleadView={true} searchValue={searchValue} setSearchValue={setSearchValue} searchTeam={true} isGrouplead={true}>
+        <StaffJobLandingLayout teamleadView={true} hideSearchBar={true} isGrouplead={true}>
             <br />
             <Navbar title={"View Tasks"} color={'#005734'} noButtonBack={true} removeButton={true} />
             <div className="container">
-                <div style={{ marginTop: 30 }} className="Create_Team">
-                    <div onClick={() => nevigate(`/new-task-screen?applicant=${username}`)}>
+                <div style={{ marginTop: 30 }} className="Create_Team" onClick={() => nevigate(`/user-tasks`)}>
+                    <div>
                         <div>
                             <AiOutlineAim
                                 className="icon"
@@ -53,12 +53,12 @@ const GroupLeadTask = () => {
                         </div>
                         <h4>View Your Added Tasks</h4>
                         <p>
-                            View the progress on the resolution of issues raised by your team.
+                            View the tasks you have added.
                         </p>
                     </div>
                 </div>
 
-                <div style={{ marginTop: 30 }} className="Create_Team">
+                <div style={{ marginTop: 30 }} className="Create_Team" onClick={() => nevigate(`/task`)}>
                     <div>
                         <div>
                             <AiOutlineAim
@@ -66,21 +66,21 @@ const GroupLeadTask = () => {
                                 style={{ fontSize: "2rem" }}
                             />
                         </div>
-                        <h4>View Task of Your Team Members</h4>
+                        <h4>View Your Team's Tasks</h4>
                         <p>
-                            View the progress on the resolution of issues raised by your team.
+                            View tasks added by your team members.
                         </p>
                     </div>
                 </div>
 
             </div>
 
-            <TaskScreen
+            {/* <TaskScreen
                 currentUser={currentTeamMember}
                 handleAddTaskBtnClick={() => setShowAddTaskModal(true)}
                 assignedProject={currentUser?.candidateAssignmentDetails?.assignedProjects ? currentUser.candidateAssignmentDetails.assignedProjects : ["Hi"]}
                 teamleadScreen={true}
-            />
+            /> */}
 
         </StaffJobLandingLayout >
     )

@@ -65,6 +65,8 @@ const Teamlead = ({ isGrouplead }) => {
   const [searchValue, setSearchValue] = useState("");
   const [filteredJobs, setFilteredJobs] = useState(jobs);
   const [filteredTasks, setFilteredTasks] = useState(userTasks);
+  const [showAddTaskModalForGrouplead, setShowAddTaskModalForGrouplead] = useState(false);
+  const [showAddIssueModalForGrouplead, setShowAddIssueModalForGrouplead ] = useState(false);
 
   const handleSearch = (value) => {
     const toAnagram = (word) => {
@@ -418,7 +420,7 @@ const Teamlead = ({ isGrouplead }) => {
     <>
       <StaffJobLandingLayout
         teamleadView={true}
-        hideSideBar={showAddTaskModal}
+        hideSideBar={showAddTaskModal || showAddIssueModalForGrouplead || showAddTaskModalForGrouplead}
         searchValue={searchValue}
         setSearchValue={handleSearch}
         searchPlaceHolder={
@@ -435,34 +437,48 @@ const Teamlead = ({ isGrouplead }) => {
         hideSearchBar={((isGrouplead && (section === "home" || section === undefined)) || section === "user") ? true : false}
         isGrouplead={isGrouplead}
       >
-        <TitleNavigationBar
-          title={
-            section === "task"
-              ?
-              isGrouplead ? ''
-                :
-                "Tasks"
-              : section === "user"
-                ? "Profile"
-                : showCandidate
-                  ? "Application Details"
-                  :
-                  isGrouplead ?
-                    " "
-                    : "Applications"
-          }
-          hideBackBtn={showCandidate || showCandidateTask ? false : true}
-          handleBackBtnClick={handleBackBtnClick}
-        />
-        {section !== "user" && !showCandidate && !isGrouplead && (
-          <TogglerNavMenuBar
-            className={"teamlead"}
-            menuItems={
-              ["Approval", "Tasks", "Rehire"]
+        {
+          !(isGrouplead && (section === "home" || section === undefined)) && <TitleNavigationBar
+            title={
+              section === "task"
+                ?
+                  "Tasks"
+                : section === "user"
+                  ? "Profile"
+                  : showCandidate
+                    ? "Application Details"
+                    :
+                    isGrouplead ?
+                      " "
+                      : "Applications"
             }
-            currentActiveItem={currentActiveItem}
-            handleMenuItemClick={handleMenuItemClick}
+            hideBackBtn={showCandidate || showCandidateTask || (section === "task" && isGrouplead) ? false : true}
+            handleBackBtnClick={(section === "task" && isGrouplead) ? () => navigate(-1) : () => handleBackBtnClick()}
           />
+        }
+        {section !== "user" && !showCandidate && !isGrouplead && (
+          <>
+            <TogglerNavMenuBar
+              className={"teamlead"}
+              menuItems={
+                ["Approval", "Tasks", "Rehire"]
+              }
+              currentActiveItem={currentActiveItem}
+              handleMenuItemClick={handleMenuItemClick}
+            />
+
+            <button
+              className="refresh-container-teamlead desktop"
+            >
+              <div className="refresh-btn refresh-btn-teamlead" onClick={handleRefreshForCandidateApplicationsForTeamlead}
+              >
+                <IoMdRefresh />
+                <p>Refresh</p>
+              </div>
+            </button>
+          </>
+
+
         )}
         {/* <ClaimVouchar /> */}
         <>
@@ -513,12 +529,22 @@ const Teamlead = ({ isGrouplead }) => {
                         setShowApplicationDetails(!showApplicationDetails)
                       }
                     />
+
+                    {/* <button
+                      className="refresh-container-teamlead"
+                    >
+                      <div className="refresh-btn refresh-btn-teamlead" onClick={handleRefreshForCandidateApplicationsForTeamlead}
+                      >
+                        <IoMdRefresh />
+                        <p>Refresh</p>
+                      </div>
+                    </button> */}
                   </div>
                 ) : (
                   <>
                     {isGrouplead && (section === 'home' || section === undefined) ? <></> :
                       <>
-                        <button
+                        {/* <button
                           className="refresh-container"
                           onClick={handleRefreshForCandidateApplicationsForTeamlead}
                         >
@@ -526,7 +552,7 @@ const Teamlead = ({ isGrouplead }) => {
                             <IoMdRefresh />
                             <p>Refresh</p>
                           </div>
-                        </button>
+                        </button> */}
                         <SelectedCandidates
                           candidatesCount={
                             selectedTabActive
@@ -538,13 +564,29 @@ const Teamlead = ({ isGrouplead }) => {
                                 : 0
                           }
                         />
+
+                        <button
+                          className="refresh-container-teamlead mobile"
+                        >
+                          <div className="refresh-btn refresh-btn-teamlead" onClick={handleRefreshForCandidateApplicationsForTeamlead}
+                          >
+                            <IoMdRefresh />
+                            <p>Refresh</p>
+                          </div>
+                        </button>
+
                       </>
                     }
 
                     {
                       isGrouplead ? <>
                         {/* <p style={{ textAlign: 'center' }}>More content coming soon...</p> */}
-                        <AddPage />
+                        <AddPage 
+                          showAddIssueModal={showAddIssueModalForGrouplead}
+                          setShowAddIssueModal={setShowAddIssueModalForGrouplead}
+                          showAddTaskModal={showAddTaskModalForGrouplead}
+                          setShowAddTaskModal={setShowAddTaskModalForGrouplead}
+                        />
                       </> :
                         <div className="jobs-container">
                           {selectedTabActive ? (
@@ -675,90 +717,85 @@ const Teamlead = ({ isGrouplead }) => {
                     <h1>Button</h1>
                   </>
                 ) : (
-                  isGrouplead ? <>
-                    <div className="tasks-container">
-                      Page not found
-                    </div>
-                  </> :
-                    <>
-                      <button
-                        className="refresh-container"
-                        onClick={handleRefreshForCandidateTask}
-                      >
-                        <div className="refresh-btn">
-                          <IoMdRefresh />
-                          <p>Refresh</p>
-                        </div>
-                      </button>
-                      <SelectedCandidates
-                        showTasks={true}
-                        tasksCount={
-                          searchValue.length >= 1
-                            ? filteredTasks.length
-                            : userTasks.length
-                        }
-                      />
+                  <>
+                    <button
+                      className="refresh-container"
+                      onClick={handleRefreshForCandidateTask}
+                    >
+                      <div className="refresh-btn">
+                        <IoMdRefresh />
+                        <p>Refresh</p>
+                      </div>
+                    </button>
+                    <SelectedCandidates
+                      showTasks={true}
+                      tasksCount={
+                        searchValue.length >= 1
+                          ? filteredTasks.length
+                          : userTasks.length
+                      }
+                    />
 
-                      <div className="tasks-container">
-                        {section === "task" ? (
-                          searchValue.length >= 1 ? (
-                            React.Children.toArray(
-                              filteredTasks.map((dataitem) => {
-                                return (
-                                  <JobCard
-                                    buttonText={"View"}
-                                    candidateCardView={true}
-                                    candidateData={dataitem}
-                                    jobAppliedFor={
-                                      jobs.find(
+                    <div className="tasks-container">
+                      {section === "task" ? (
+                        searchValue.length >= 1 ? (
+                          React.Children.toArray(
+                            filteredTasks.map((dataitem) => {
+                              return (
+                                <JobCard
+                                  buttonText={"View"}
+                                  candidateCardView={true}
+                                  candidateData={dataitem}
+                                  jobAppliedFor={
+                                    jobs.find(
+                                      (job) =>
+                                        job.job_number === dataitem.job_number
+                                    )
+                                      ? jobs.find(
                                         (job) =>
-                                          job.job_number === dataitem.job_number
-                                      )
-                                        ? jobs.find(
-                                          (job) =>
-                                            job.job_number ===
-                                            dataitem.job_number
-                                        ).job_title
-                                        : ""
-                                    }
-                                    handleBtnClick={handleViewTaskBtnClick}
-                                    taskView={true}
-                                  />
-                                );
-                              })
-                            )
-                          ) : (
-                            React.Children.toArray(
-                              userTasks.map((dataitem) => {
-                                return (
-                                  <JobCard
-                                    buttonText={"View"}
-                                    candidateCardView={true}
-                                    candidateData={dataitem}
-                                    jobAppliedFor={
-                                      jobs.find(
-                                        (job) =>
-                                          job.job_number === dataitem.job_number
-                                      )
-                                        ? jobs.find(
-                                          (job) =>
-                                            job.job_number ===
-                                            dataitem.job_number
-                                        ).job_title
-                                        : ""
-                                    }
-                                    handleBtnClick={handleViewTaskBtnClick}
-                                    taskView={true}
-                                  />
-                                );
-                              })
-                            )
+                                          job.job_number ===
+                                          dataitem.job_number
+                                      ).job_title
+                                      : ""
+                                  }
+                                  handleBtnClick={handleViewTaskBtnClick}
+                                  taskView={true}
+                                />
+                              );
+                            })
                           )
                         ) : (
-                          <></>
-                        )}
-                      </div>
-                    </>
+                          React.Children.toArray(
+                            userTasks.map((dataitem) => {
+                              return (
+                                <JobCard
+                                  buttonText={"View"}
+                                  candidateCardView={true}
+                                  candidateData={dataitem}
+                                  jobAppliedFor={
+                                    jobs.find(
+                                      (job) =>
+                                        job.job_number === dataitem.job_number
+                                    )
+                                      ? jobs.find(
+                                        (job) =>
+                                          job.job_number ===
+                                          dataitem.job_number
+                                      ).job_title
+                                      : ""
+                                  }
+                                  handleBtnClick={handleViewTaskBtnClick}
+                                  taskView={true}
+                                />
+                              );
+                            })
+                          )
+                        )
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </>
                 )
               ) : section === "user" ? (
                 <UserScreen isGrouplead={isGrouplead} />
