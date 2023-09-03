@@ -76,6 +76,7 @@ import TaskScreen from "./pages/TeamleadPage/views/TaskScreen/TaskScreen";
 
 function App() {
   console.log = () => {};
+  
   const {
     currentUser,
     isPublicUser,
