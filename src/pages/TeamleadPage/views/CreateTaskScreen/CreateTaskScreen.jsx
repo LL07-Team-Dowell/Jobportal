@@ -20,6 +20,8 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { approveTask } from "../../../../services/teamleadServices";
 import { toast } from "react-toastify";
 import { is } from "date-fns/locale";
+import { getCandidateTasksOfTheDayV2 } from "../../../../services/candidateServices";
+import { extractNewTasksAndAddExtraDetail } from "../../util/extractNewTasks";
 
 const CreateTaskScreen = ({
   candidateAfterSelectionScreen,
@@ -30,6 +32,7 @@ const CreateTaskScreen = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const applicant = searchParams.get("applicant");
+  const projectPassed = searchParams.get("project");
   const { userTasks, setUserTasks } = useCandidateTaskContext();
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -46,29 +49,70 @@ const CreateTaskScreen = ({
   const [loading, setLoading] = useState(true);
   const { currentUser } = useCurrentUserContext();
   const [isApproved, setIsApproved] = useState(false);
-  const [ updatedTasks, setUpdatedTasks ] = useState([]);
-  const [ tasksBeingApproved, setTasksBeingApproved ] = useState([]);
+  const [updatedTasks, setUpdatedTasks] = useState([]);
+  const [tasksBeingApproved, setTasksBeingApproved] = useState([]);
   const [singleTaskLoading, setSingleTaskLoading] = useState(false);
-  const [ tasksForTheDay, setTasksForTheDay ] = useState(null);
-  const [ singleTaskItem, setSingleTaskItem ] = useState(null);
+  const [tasksForTheDay, setTasksForTheDay] = useState(null);
+  const [singleTaskItem, setSingleTaskItem] = useState(null);
+  const [ allTasks, setAllTasks ] = useState([]);
 
   useEffect(() => {
     if (userTasks.length > 0) return setLoading(false);
-    getCandidateTaskForTeamLead(currentUser?.portfolio_info[0].org_id)
-      .then((res) => {
+    
+    const dataToPost = {
+      "company_id": currentUser.portfolio_info[0].org_id,
+      "data_type": currentUser.portfolio_info[0].data_type,
+      "project": currentUser?.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.project,
+    }
+
+    Promise.all([
+      getCandidateTaskForTeamLead(currentUser?.portfolio_info[0].org_id),
+      getCandidateTasksV2(dataToPost),
+    ])
+      .then(async (res) => {
+        const tasksToDisplay = res[0]?.data?.response?.data
+        ?.filter(
+          (task) =>
+            task.data_type === currentUser?.portfolio_info[0]?.data_type
+        )
+        const previousTasksFormat = tasksToDisplay.filter(task => !task.user_id && task.task);
+        const updatedTasksForMainProject = extractNewTasksAndAddExtraDetail(res[1]?.data?.task_details, res[1]?.data?.task, true);
+        
+        let updatedTasksForOtherProjects;
+
+        const userHasOtherProjects = currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.additional_projects && 
+        Array.isArray(
+          currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.additional_projects
+        )
+
+        if (userHasOtherProjects) {
+          updatedTasksForOtherProjects = await Promise.all(currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.additional_projects.map(async(project) => {
+            const dataToPost2 = {
+              ...dataToPost,
+              project: project
+            }
+  
+            const res = (await getCandidateTasksV2(dataToPost2)).data;
+  
+            const extractedTasks = extractNewTasksAndAddExtraDetail(res?.task_details, res?.task, true);
+            return extractedTasks;
+          }))
+        }
+
+        const newTasksToDisplay = userHasOtherProjects ? 
+          [...previousTasksFormat, ...updatedTasksForMainProject, ...updatedTasksForOtherProjects.flat()]
+          :
+        [...previousTasksFormat, ...updatedTasksForMainProject];
         setLoading(false);
+        setAllTasks(newTasksToDisplay);
+        const usersWithTasks = [
+          ...new Map(
+            newTasksToDisplay.map((task) => [task._id, task])
+          ).values(),
+        ];
         setUserTasks(
-          res.data.response.data
-            .filter(
-              (currenttask) =>
-                currenttask.data_type ===
-                currentUser?.portfolio_info[0].data_type
-            )
-            .filter(
-              (task) =>
-                task.project ===
-                currentUser?.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].project
-            )
+          usersWithTasks
+          .sort((a, b) => new Date(b?.task_created_date) - new Date(a?.task_created_date))
         );
       })
       .catch((err) => {
@@ -79,10 +123,12 @@ const CreateTaskScreen = ({
   useEffect(() => {
     if (selectOption.length < 1) return;
     if (selectedProject !== "") return;
-    setSelectedProject(selectOption[0]);
+    setSelectedProject(projectPassed ? projectPassed : selectOption[0]);
   }, [selectOption]);
 
   useEffect(() => {
+    setSingleTaskItem(null);
+    setTasksForTheDay(null);
     setTasksForSelectedProject(
       currentApplicantTasks.filter(
         (d) => d.project === selectedProject && d.applicant === applicant
@@ -94,7 +140,20 @@ const CreateTaskScreen = ({
   useEffect(() => {
     const applicantTasks = userTasks.filter((d) => d.applicant === applicant);
     setCurrentApplicantTasks(applicantTasks);
-    setSelectOption(Array.from(new Set(applicantTasks.map((d) => d.project))));
+    setSelectOption(
+      currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.additional_projects && 
+      Array.isArray(
+        currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.additional_projects
+      ) ? 
+      [
+        currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.project,
+        ...currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.additional_projects
+      ]
+      :
+      [
+        currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1]?.project 
+      ]
+    );
   }, [userTasks, applicant]);
 
   useEffect(() => {
@@ -115,13 +174,17 @@ const CreateTaskScreen = ({
     setTasksMonth(selectedDate.toLocaleString("en-us", { month: "long" }));
 
     if (applicant) {
-
+      const foundTasks = currentApplicantTasks.filter(
+        (d) => new Date(d.task_created_date).toDateString() === new Date(selectedDate).toDateString()
+      ).filter(d => d.project === selectedProject).map(d=> {
+        const foundSingleTasks = allTasks.filter(task => task.task_id === d._id && task.single_task_created_date === d.task_created_date);
+        d.tasksAdded = foundSingleTasks;
+        return d;
+      })
       setTasksDate(
-        currentApplicantTasks.filter(
-          (d) => new Date(d.task_created_date).toDateString() === new Date(selectedDate).toDateString()
-        )
+        foundTasks
       );
-  
+
       return
     }
 
@@ -171,27 +234,27 @@ const CreateTaskScreen = ({
         document_id: task._id,
         task: task.task,
       });
-    
+
       const copyOfUpdatedTasks = updatedTasks.slice();
-      copyOfUpdatedTasks.push({...task, approved: true, status: null});
+      copyOfUpdatedTasks.push({ ...task, approved: true, status: null });
       setUpdatedTasks(copyOfUpdatedTasks);
-    
+
       const copyOfTasksBeingApproved = tasksBeingApproved.slice();
       copyOfTasksBeingApproved.filter(t => t._id !== task._id);
       setTasksBeingApproved(copyOfTasksBeingApproved);
-      
+
       console.log(response.data);
       if (response.status === 200) {
         toast.success("Task approved");
       }
     } catch (err) {
-      console.log(err);
+      console.log(err.response);
       toast.error(
         err.response
-        ? err.response.status === 500
-          ? 'Task approval failed'
-          : err.response.data
-        : 'Task approval failed'
+          ? err.response.status === 500
+            ? 'Task approval failed'
+            : err.response.data.message
+          : 'Task approval failed'
       );
       setTasksBeingApproved(copyOfTasksBeingApproved.filter(t => task._id !== t._id));
 
@@ -227,7 +290,7 @@ const CreateTaskScreen = ({
   }
 
   return (
-    <StaffJobLandingLayout teamleadView={true} isGrouplead={isGrouplead}>
+    <StaffJobLandingLayout teamleadView={true} isGrouplead={isGrouplead} hideSearchBar={true}>
       <>
         <TitleNavigationBar
           title={`Tasks for ${applicant}`}
@@ -238,9 +301,8 @@ const CreateTaskScreen = ({
           <LoadingSpinner />
         ) : (
           <div
-            className={`candidate-task-screen-container ${
-              className ? className : ""
-            }`}
+            className={`candidate-task-screen-container ${className ? className : ""
+              }`}
           >
             {/* {!candidateAfterSelectionScreen && (
               <>
@@ -254,7 +316,7 @@ const CreateTaskScreen = ({
               handleSelectionClick={(selection) =>
                 setSelectedProject(selection)
               }
-              assignedProject={selectOption[0] ? selectOption[0] : ""}
+              assignedProject={selectedProject}
             />
             <div className="all__Tasks__Container">
               <Calendar
@@ -267,52 +329,34 @@ const CreateTaskScreen = ({
                 {
                   singleTaskLoading ?
                     <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      width: 'max-content',
-                    }}
-                  >
-                    <LoadingSpinner
-                      width={'16px'}
-                      height={'16px'}
-                    />
-                    <p className="task__Title" style={{ margin: 0 }}>Loading tasks...</p>
-                  </div>
-                  :
-                  tasksDate.length === 0 ? (
-                    singleTaskItem ? <>
-                      <CandidateTaskItem 
-                        currentTask={singleTaskItem}
-                        candidatePage={candidateAfterSelectionScreen}
-                        handleEditBtnClick={() => {}}
-                        updateTasks={() =>
-                          setTasksForSelectedProject(
-                            userTasks.filter(
-                              (d) => d.project === selectedProject
-                            )
-                          )
-                        }
-                        handleApproveTask={handleApproveTask}
-                        taskIsBeingApproved={tasksBeingApproved.find(task => task._id === singleTaskItem._id)}
-                        newTaskItem={true}
-                        tasks={tasksForTheDay && Array.isArray(tasksForTheDay) ? tasksForTheDay : []}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        width: 'max-content',
+                      }}
+                    >
+                      <LoadingSpinner
+                        width={'16px'}
+                        height={'16px'}
                       />
-                    </> 
+                      <p className="task__Title" style={{ margin: 0 }}>Loading tasks...</p>
+                    </div>
                     :
-                    <p className="empty__task__Content">
-                      No task found for today
-                    </p>
-                  ) : (
-                    React.Children.toArray(
-                      tasksDate.map((d, i) => {
-                        return (
+                    tasksDate.length === 0 ? (
+                      singleTaskItem ? <>
+                        {
+                          !singleTaskItem || !(tasksForTheDay && Array.isArray(tasksForTheDay)) ?
+                          <>
+                            <p className="empty__task__Content">
+                              No task found for today
+                            </p>
+                          </>
+                          :
                           <CandidateTaskItem
-                            currentTask={updatedTasks.find(task => task._id === d._id) ? updatedTasks.find(task => task._id === d._id) : d}
-                            taskNum={i + 1}
+                            currentTask={updatedTasks.find(task => task._id === singleTaskItem._id) ? updatedTasks.find(task => task._id === singleTaskItem._id) : singleTaskItem}
                             candidatePage={candidateAfterSelectionScreen}
-                            handleEditBtnClick={() => {}}
+                            handleEditBtnClick={() => { }}
                             updateTasks={() =>
                               setTasksForSelectedProject(
                                 userTasks.filter(
@@ -321,12 +365,42 @@ const CreateTaskScreen = ({
                               )
                             }
                             handleApproveTask={handleApproveTask}
-                            taskIsBeingApproved={tasksBeingApproved.find(task => task._id === d._id)}
+                            taskIsBeingApproved={tasksBeingApproved.find(task => task._id === singleTaskItem._id)}
+                            newTaskItem={true}
+                            tasks={tasksForTheDay && Array.isArray(tasksForTheDay) ? tasksForTheDay : []}
                           />
-                        );
-                      })
+                        }
+                        
+                      </>
+                        :
+                        <p className="empty__task__Content">
+                          No task found for today
+                        </p>
+                    ) : (
+                      React.Children.toArray(
+                        tasksDate.map((d, i) => {
+                          return (
+                            <CandidateTaskItem
+                              currentTask={updatedTasks.find(task => task._id === d._id) ? updatedTasks.find(task => task._id === d._id) : d}
+                              taskNum={i + 1}
+                              candidatePage={candidateAfterSelectionScreen}
+                              handleEditBtnClick={() => { }}
+                              updateTasks={() =>
+                                setTasksForSelectedProject(
+                                  userTasks.filter(
+                                    (d) => d.project === selectedProject
+                                  )
+                                )
+                              }
+                              handleApproveTask={handleApproveTask}
+                              taskIsBeingApproved={tasksBeingApproved.find(task => task._id === d._id)}
+                              newTaskItem={d.user_id ? true : false}
+                              tasks={d.tasksAdded ? d.tasksAdded : []}
+                            />
+                          );
+                        })
+                      )
                     )
-                  )
                 }
               </div>
             </div>

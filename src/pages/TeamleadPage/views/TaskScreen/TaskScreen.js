@@ -17,6 +17,9 @@ import styled from "styled-components";
 import LoadingSpinner from "../../../../components/LoadingSpinner/LoadingSpinner";
 import Navbar from "../CreateMembersTask/component/Navbar";
 import { getSettingUserProject } from "../../../../services/hrServices";
+import { getCandidateTasksV2 } from "../../../../services/teamleadServices";
+import { extractNewTasksAndAddExtraDetail } from "../../util/extractNewTasks";
+import Button from "../../../AdminPage/components/Button/Button";
 
 const TaskScreen = ({
   handleAddTaskBtnClick,
@@ -39,14 +42,26 @@ const TaskScreen = ({
   const [project, setproject] = useState(null);
   const [tasksofuser, settasksofuser] = useState([]);
   const [taskdetail2, settaskdetail2] = useState([]);
-  const [value, onChange] = useState(new Date());
+  const [value, setValue] = useState(new Date());
+  const [value1, setValue1] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const [singleTaskLoading, setSingleTaskLoading] = useState(false);
   const [ tasksForTheDay, setTasksForTheDay ] = useState(null);
   const [ allProjects, setAllProjects ] = useState([]);
   const [ params, setParams ] = useSearchParams();
+  const [ tasksForProjectLoading, setTasksForProjectLoading ] = useState(false);
 
-  console.log(assignedProject);
+
+  const currentDate = new Date();
+  console.log(currentDate);
+  const dateToCompare = new Date(value1);
+  console.log(value);
+  const isToday = (
+    dateToCompare.getDate() === currentDate.getDate() &&
+    dateToCompare.getMonth() === currentDate.getMonth() &&
+    dateToCompare.getFullYear() === currentDate.getFullYear()
+  );
+  console.log({ isToday });
   useEffect(() => {
     setLoading(true);
     setproject(assignedProject[0]);
@@ -55,15 +70,15 @@ const TaskScreen = ({
       getCandidateTask(currentUser.portfolio_info[0].org_id),
       loadProjects && getSettingUserProject(),
     ]).then(res => {
-        setUserTasks(
-          res[0]?.data?.response?.data?.filter(
-            (v) => v.applicant === currentUser.userinfo.username
-          )
-        );
-        setLoading(false);
+      setUserTasks(
+        res[0]?.data?.response?.data?.filter(
+          (v) => v.applicant === currentUser.userinfo.username
+        )
+      );
+      setLoading(false);
 
-        if (loadProjects) {
-          const list = res[1]?.data
+      if (loadProjects) {
+        const list = res[1]?.data
           ?.filter(
             (project) =>
               project?.data_type === currentUser.portfolio_info[0].data_type &&
@@ -74,14 +89,14 @@ const TaskScreen = ({
               )
           ).reverse();
 
-          setAllProjects(
-            list.length < 1  ? []
+        setAllProjects(
+          list.length < 1 ? []
             :
             list[0]?.project_list
-          )
+        )
 
-          list.length > 0 && setproject(list[0]?.project_list[0]);
-        }
+        list.length > 0 && setproject(list[0]?.project_list[0]);
+      }
     }).catch(err => {
       setLoading(false);
     })
@@ -89,7 +104,6 @@ const TaskScreen = ({
   }, []);
 
   useEffect(() => {
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     settaskdetail2(
       userTasks.filter((d) => {
         const dateTime =
@@ -115,20 +129,41 @@ const TaskScreen = ({
   }, [value, userTasks]);
 
   useEffect(() => {
-    if (!project) return;
+    if (!project || tasksForProjectLoading) return;
 
-    const projectsMatching = userTasks.filter(
-      (task) => task?.project === project ||
-      task?.user_id === currentUser.userinfo.userID
-    );
-    const datesUserHasTaskForProject = [
-      ...new Set(
-        projectsMatching.map((task) => [new Date(task.task_created_date)])
-      ).values(),
-    ].flat();
-    setDatesToStyle(datesUserHasTaskForProject);
+    const dataToPost = {
+      "company_id": currentUser.portfolio_info[0].org_id,
+      "data_type": currentUser.portfolio_info[0].data_type,
+      "project": project,
+    }
 
-    settaskdetail2(projectsMatching);
+    setTasksForProjectLoading(true);
+
+    const previousTasks = userTasks.filter(t => !t.task && !t.user_id && t.project);
+
+    getCandidateTasksV2(dataToPost).then(res => {
+      setTasksForProjectLoading(false);
+      const foundTasksForCandidate = extractNewTasksAndAddExtraDetail(res.data.task_details, res.data.task)?.filter(item => item.user_id === currentUser.userinfo.userID && item.project === project);
+      
+      const projectsMatching = [
+        ...previousTasks.filter(
+          (task) => task?.project === project
+        ),
+        ...foundTasksForCandidate
+      ]
+      console.log(projectsMatching);
+      const datesUserHasTaskForProject = [
+        ...new Set(
+          projectsMatching.map((task) => [new Date(task.task_created_date)])
+        ).values(),
+      ].flat();
+      setDatesToStyle(datesUserHasTaskForProject);
+  
+      settaskdetail2(projectsMatching.filter(item => item.task_created_date === value));
+    }).catch(err => {
+      console.log(err);
+      setTasksForProjectLoading(false);
+    })
   }, [project]);
 
   useEffect(() => {
@@ -195,6 +230,7 @@ const TaskScreen = ({
     // Add class to tiles in month view only
     if (view === "month") {
       // Check if a date React-Calendar wants to check is on the list of dates to add class to
+      if (tasksForProjectLoading) return ''
       if (datesToStyle.find((dDate) => isSameDay(dDate, date))) {
         return "task__Indicator";
       }
@@ -203,7 +239,7 @@ const TaskScreen = ({
 
   const handleDateChange = async (dateSelected) => {
     setDaysInMonth(getDaysInMonth(dateSelected));
-
+    setValue1(dateSelected)
     // setTasksToShow(userTasks.filter(task => new Date(task.created).toDateString() === dateSelected.toDateString()));
     settaskdetail2(
       userTasks.filter(
@@ -251,6 +287,9 @@ const TaskScreen = ({
     width: 32%;
     margin-right: auto;
     margin-left: auto;
+
+    
+
     a {
       border-radius: 10px;
       background: #f3f8f4;
@@ -274,6 +313,19 @@ const TaskScreen = ({
       box-shadow: 0px 2.79922px 25px rgba(0, 87, 52, 0.67);
       color: #fff;
     }
+
+
+    @media only screen and (max-width: 1000px) {
+      width: 90%;
+
+      a{
+        font-size: 0.8rem;
+      }
+
+      
+
+    }
+
   `;
 
   const [panding, setPanding] = useState(true);
@@ -289,9 +341,9 @@ const TaskScreen = ({
     <>
       {
         showBackBtn && <>
-          <Navbar 
-            title={'Your tasks'} 
-            removeButton={true} 
+          <Navbar
+            title={'Your tasks'}
+            removeButton={true}
           />
         </>
       }
@@ -299,10 +351,10 @@ const TaskScreen = ({
         <NavLink
           className={`${panding ? "link-isActive" : "link-notactive"}`}
           to={
-            isGrouplead ? 
-            "/user-tasks?tab=pending"
-            :
-            "/task?tab=pending"
+            isGrouplead ?
+              "/user-tasks?tab=pending"
+              :
+              "/task?tab=pending"
           }
           onClick={clickToPandingApproval}
         >
@@ -311,10 +363,10 @@ const TaskScreen = ({
         <NavLink
           className={`${panding ? "link-notactive" : "link-isActive"}`}
           to={
-            isGrouplead ? 
-            "/user-tasks?tab=approval"
-            :
-            "/task?tab=approval"
+            isGrouplead ?
+              "/user-tasks?tab=approval"
+              :
+              "/task?tab=approval"
           }
           onClick={clickToApproved}
         >
@@ -336,19 +388,19 @@ const TaskScreen = ({
 
         <AssignedProjectDetails
           assignedProject={
-            project ? project 
-            :
-            loadProjects ?
-            allProjects[0]
-            : 
-            assignedProject[0]
+            project ? project
+              :
+              loadProjects ?
+                allProjects[0]
+                :
+                assignedProject[0]
           }
           showTask={true}
           availableProjects={
             loadProjects ?
-            allProjects
-            :
-            assignedProject
+              allProjects
+              :
+              assignedProject
           }
           removeDropDownIcon={false}
           handleSelectionClick={(e) => setproject(e)}
@@ -366,7 +418,7 @@ const TaskScreen = ({
               />
               <div className="tasks__Wrapper">
                 {
-                  singleTaskLoading ? <>
+                  tasksForProjectLoading ? <>
                     <div
                       style={{
                         display: 'flex',
@@ -378,60 +430,103 @@ const TaskScreen = ({
                         width={'16px'}
                         height={'16px'}
                       />
+                      <p className="task__Title" style={{ margin: 0 }}>Filtering tasks...</p>
+                    </div>
+                  </> :
+                  singleTaskLoading ? <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }}
+                    >
+                      <LoadingSpinner
+                        width={'16px'}
+                        height={'16px'}
+                      />
                       <p className="task__Title" style={{ margin: 0 }}>Loading tasks...</p>
                     </div>
-                    
+
                   </> :
-                  <>
-                    {taskdetail2.length > 0 && (
-                      <>
-                        <p className="task__Title">Tasks Added</p>
-                      </>
-                    )}
-                    <ul>
-                      {
-                        taskdetail2.length > 0 ?
-                          tasksForTheDay && Array.isArray(tasksForTheDay) ? 
-                            tasksForTheDay.filter(task => task.project === project && task.is_active && task.is_active === true).length < 1 ? <>
-                              <p className="task__Title">{!project ? "No project selected" : "No tasks found for today"}</p>
-                            </> :
-                            <>
-                              {
-                                React.Children.toArray(tasksForTheDay.filter(task => task.project === project && task.is_active && task.is_active === true).map(task => {
-                                  return <div style={{ color: "#000", fontWeight: 500, fontSize: "1rem" }}>
-                                    {new Date(task.task_created_date).toLocaleString(
-                                      "default",
-                                      { month: "long" }
-                                    )}
-                                    <p style={{ display: "inline", marginLeft: "0.2rem" }}>{new Date(task.task_created_date).getDate()}</p>
-        
-                                    <p style={{ display: "inline", marginLeft: "0.7rem", fontSize: "0.9rem" }}>
-                                      {task.task} <span style={{ color: "#B8B8B8" }}> from {task.start_time} to {task.end_time}</span>
-                                    </p>
+                    <>
+                      {taskdetail2.length > 0 && (
+                        <>
+                          <p className="task__Title">Tasks Added</p>
+                        </>
+                      )}
+                      <ul>
+                        {
+                          taskdetail2.length > 0 ?
+                            tasksForTheDay && Array.isArray(tasksForTheDay) ?
+                              tasksForTheDay.filter(task => task.project === project && task.is_active && task.is_active === true).length < 1 ? <>
+                                <p className="task__Title">{!project ? "No project selected" : "No tasks found for today"}</p>
+
+                                {
+                                  project && <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    {
+                                      isToday ? "" : <Button
+                                        text={"Request to update"}
+                                        className={'approve__Task__Btn'}
+                                      />
+                                    }
                                   </div>
-                                }))
-                              }
+                                }
+                              </> :
+                                <>
+                                  {
+                                    React.Children.toArray(tasksForTheDay.filter(task => task.project === project && task.is_active && task.is_active === true).map(task => {
+                                      return <div style={{ color: "#000", fontWeight: 500, fontSize: "1rem" }}>
+                                        {new Date(task.task_created_date).toLocaleString(
+                                          "default",
+                                          { month: "long" }
+                                        )}
+                                        <p style={{ display: "inline", marginLeft: "0.2rem" }}>{new Date(task.task_created_date).getDate()}</p>
+
+                                        <p style={{ display: "inline", marginLeft: "0.7rem", fontSize: "0.9rem" }}>
+                                          {task.task} <span style={{ color: "#B8B8B8" }}> from {task.start_time} to {task.end_time}</span>
+                                        </p>
+                                      </div>
+                                    }))
+                                  }
+                                </>
+                              :
+
+                              taskdetail2.map((d, i) => (
+                                <div style={{ color: "#000", fontWeight: 500, fontSize: "1rem" }} key={i}>
+                                  {new Date(d.task_created_date).toLocaleString(
+                                    "default",
+                                    { month: "long" }
+                                  )}
+                                  <p style={{ display: "inline", marginLeft: "0.2rem" }}>{new Date(d.task_created_date).getDate()}</p>
+
+                                  <p style={{ display: "inline", marginLeft: "0.7rem", fontSize: "0.9rem" }}>
+                                    {d.task}
+                                  </p>
+                                </div>
+                              ))
+                            :
+                            <>
+                            {"No Tasks Found For Today"}
+                            {/* {
+                              !project ? 
+                              <p className="task__Title">{"No project selected"}</p>
+                              :
+                              <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                {
+                                  isToday ? "" : <Button
+                                    text={"Request UpdateTask"}
+                                    className={'approve__Task__Btn'}
+                                  />
+                                }
+
+                                {console.log({ task: taskdetail2 })}
+                              </div>
+                            } */}
                             </>
-                          :
-
-                          taskdetail2.map((d, i) => (
-                          <div style={{ color: "#000", fontWeight: 500, fontSize: "1rem" }} key={i}>
-                            {new Date(d.task_created_date).toLocaleString(
-                              "default",
-                              { month: "long" }
-                            )}
-                            <p style={{ display: "inline", marginLeft: "0.2rem" }}>{new Date(d.task_created_date).getDate()}</p>
-
-                            <p style={{ display: "inline", marginLeft: "0.7rem", fontSize: "0.9rem" }}>
-                              {d.task}
-                            </p>
-                          </div>
-                        ))
-                        : 
-                        "No Tasks Found For Today"
-                      }
-                    </ul> 
-                  </>
+                        }
+                      </ul>
+                    </>
                 }
               </div>
             </>
