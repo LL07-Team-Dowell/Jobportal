@@ -74,6 +74,9 @@ import ClaimVouchar from "./pages/TeamleadPage/views/ClaimVouchar/ClaimVouchar";
 import { PageUnderConstruction } from "./pages/UnderConstructionPage/ConstructionPage";
 import TaskScreen from "./pages/TeamleadPage/views/TaskScreen/TaskScreen";
 import ReportPages from "./pages/AdminPage/views/Reports/reportspages/ReportPages";
+import DetailedIndividual from "./pages/AdminPage/views/Reports/detailedIndividual/DetailedIndividual";
+import TaskReports from "./pages/AdminPage/views/Reports/TaskReports";
+import IndividualTaskReports from "./pages/AdminPage/views/Reports/individualTaskReport/individualTaskReport";
 
 function App() {
   console.log = () => { };
@@ -546,10 +549,22 @@ function App() {
         />
         <Route
           path="/report/detailed-individual-report"
+          element={<DetailedIndividual />}
+        />
+        <Route
+          path="/report/task-report"
           element={
-            <>
-              <h1>Detailed individual report</h1>
-            </>
+            <JobContextProvider>
+              <TaskReports />
+            </JobContextProvider>
+          }
+        />
+        <Route
+          path="/report/individual-task-report"
+          element={
+            <JobContextProvider>
+              <IndividualTaskReports />
+            </JobContextProvider>
           }
         />
         <Route

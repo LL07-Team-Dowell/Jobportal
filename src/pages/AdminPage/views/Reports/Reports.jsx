@@ -1,8 +1,14 @@
 import React from "react";
 import StaffJobLandingLayout from "../../../../layouts/StaffJobLandingLayout/StaffJobLandingLayout";
-import { generateReport } from "../../../../services/adminServices";
+import { CSVLink, CSVDownload } from "react-csv";
+
+import {
+  generateReport,
+  getJobsFromAdmin,
+} from "../../../../services/adminServices";
 import { useEffect } from "react";
 import { useState } from "react";
+import { MdArrowBackIosNew } from "react-icons/md";
 import "./style.scss";
 // chart.js
 import {
@@ -19,17 +25,24 @@ import { Doughnut, Bar } from "react-chartjs-2";
 import LoadingSpinner from "../../../../components/LoadingSpinner/LoadingSpinner";
 import { toast } from "react-toastify";
 import { AiOutlineClose } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
+import { useCurrentUserContext } from "../../../../contexts/CurrentUserContext";
 // register chart.js
 ChartJs.register(ArcElement, Tooltip, Legend);
 
 ChartJs.register(ArcElement, BarElement, CategoryScale, LinearScale);
 const AdminReports = ({ subAdminView }) => {
+  const navigate = useNavigate();
   // states
   const [selectOptions, setSelectOptions] = useState("");
   const [data, setdata] = useState({});
   const [loading, setLoading] = useState(false);
-  const [firstDate, setFirstDate] = useState("");
-  const [lastDate, setLastDate] = useState("");
+  const [firstDate, setFirstDate] = useState(
+    formatDateFromMilliseconds(new Date().getTime())
+  );
+  const [lastDate, setLastDate] = useState(
+    formatDateFromMilliseconds(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)
+  );
   const [showCustomTimeModal, setShowCustomTimeModal] = useState(false);
   console.log({ selectOptions, lastDate, firstDate });
   // handle functions
@@ -62,14 +75,14 @@ const AdminReports = ({ subAdminView }) => {
       });
   };
   //   useEffect
+
   useEffect(() => {
     setLoading(true);
     const data = {
-      start_date: formatDateFromMilliseconds(new Date().getTime()),
-      end_date: formatDateFromMilliseconds(
-        new Date().getTime() - 7 * 24 * 60 * 60 * 1000
-      ),
+      start_date: firstDate,
+      end_date: lastDate,
     };
+
     generateReport(data)
       .then((resp) => {
         setLoading(false);
@@ -81,6 +94,9 @@ const AdminReports = ({ subAdminView }) => {
         setLoading(false);
       });
   }, []);
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
   console.log(data.hiring_rate);
   if (loading)
     return (
@@ -103,6 +119,15 @@ const AdminReports = ({ subAdminView }) => {
     >
       <div className="reports__container">
         <div className="reports__container_header">
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <button className="back" onClick={() => navigate(-1)}>
+              <MdArrowBackIosNew />
+            </button>
+            <CSVLink data={[Object.keys(data), Object.values(data)]}>
+              Download Me
+            </CSVLink>
+          </div>
+
           <div>
             <p>Get insights into your organizations</p>
             <select
@@ -122,8 +147,9 @@ const AdminReports = ({ subAdminView }) => {
         <div className="graphs">
           <div style={{ marginBottom: 20 }} className="graph__Item">
             <h6>jobs</h6>
-            {data.number_active_jobs === 0 &&
-            data.number_inactive_jobs === 0 ? null : (
+            {data.no_of_active_jobs === 0 && data.no_of_inactive_jobs === 0 ? (
+              <h4>there is no data between start and end date</h4>
+            ) : (
               <div style={{ width: 400, height: 300 }}>
                 <Doughnut
                   data={{
@@ -132,8 +158,8 @@ const AdminReports = ({ subAdminView }) => {
                       {
                         label: "Poll",
                         data: [
-                          data.number_active_jobs,
-                          data.number_inactive_jobs,
+                          data.no_of_active_jobs,
+                          data.no_of_inactive_jobs,
                         ],
                         backgroundColor: ["#005734", "#D3D3D3"],
                         borderColor: ["#005734", "#D3D3D3"],
@@ -143,211 +169,188 @@ const AdminReports = ({ subAdminView }) => {
                 ></Doughnut>
               </div>
             )}
-            {/* <div style={{ width: 400, height: 300 }}>
-              <Doughnut
-                data={{
-                  labels: ["active jobs", "inactive jobs"],
-                  datasets: [
-                    {
-                      label: "Poll",
-                      data: [
-                        data.number_active_jobs,
-                        data.number_inactive_jobs,
-                      ],
-                      backgroundColor: ["#005734", "#D3D3D3"],
-                      borderColor: ["#005734", "#D3D3D3"],
-                    },
-                  ],
-                }}
-              ></Doughnut>
-            </div> */}
+            <div>most applied job: {data.most_applied_job?.job_title}</div>
+            <div>least applied job: {data.least_applied_job?.job_title}</div>
           </div>
           <div className="graph__Item">
             <h6>applications</h6>
             <div className="application">
-              <div style={{ width: 400, height: 300 }}>
-                <Doughnut
-                  data={{
-                    labels: [
-                      "job applications",
-                      "no job applications from start date to end date",
-                    ],
-                    datasets: [
-                      {
-                        label: "Poll",
-                        data: [
-                          data.job_applications,
-                          data.nojob_applications_from_start_date_to_end_date,
-                        ],
-                        backgroundColor: ["#D3D3D3", "#005734"],
-                        borderColor: ["#D3D3D3", "#005734"],
-                      },
-                    ],
-                  }}
-                ></Doughnut>
-              </div>
-              {/* <div>hiring rate:{data.hiring_rate}</div> */}
-              <div style={{ width: 400, height: 300 }}>
-                <Doughnut
-                  data={{
-                    labels: ["hiring rate", "hiring total"],
-                    datasets: [
-                      {
-                        label: "Poll",
-                        data: [extractNumber(data.hiring_rate), 100],
-                        backgroundColor: ["#D3D3D3", "#005734"],
-                        borderColor: ["#D3D3D3", "#005734"],
-                      },
-                    ],
-                  }}
-                ></Doughnut>
-              </div>
+              {!(
+                data.job_applications ||
+                data.nojob_applications_from_start_date_to_end_date
+              ) ? (
+                <h4>there is no data between start and end date</h4>
+              ) : (
+                <div style={{ width: 400, height: 300 }}>
+                  <Doughnut
+                    data={{
+                      labels: [
+                        "job applications",
+                        "no job applications from start date to end date",
+                      ],
+                      datasets: [
+                        {
+                          label: "Poll",
+                          data: [
+                            data.job_applications,
+                            data.nojob_applications_from_start_date_to_end_date,
+                          ],
+                          backgroundColor: ["#D3D3D3", "#005734"],
+                          borderColor: ["#D3D3D3", "#005734"],
+                        },
+                      ],
+                    }}
+                  ></Doughnut>
+                </div>
+              )}
+              {!extractNumber(data.hiring_rate) ? (
+                <h4>there is no data between start and end date</h4>
+              ) : (
+                <div style={{ width: 400, height: 300 }}>
+                  <Doughnut
+                    data={{
+                      labels: ["hiring rate", "hiring total"],
+                      datasets: [
+                        {
+                          label: "Poll",
+                          data: [
+                            extractNumber(data.hiring_rate),
+                            100 - extractNumber(data.hiring_rate),
+                          ],
+                          backgroundColor: ["#D3D3D3", "#005734"],
+                          borderColor: ["#D3D3D3", "#005734"],
+                        },
+                      ],
+                    }}
+                  ></Doughnut>{" "}
+                </div>
+              )}
             </div>
           </div>
 
           <div style={{ marginBottom: 20 }} className="graph__Item">
             <h6>candidates</h6>
             <div className="candidates_graph">
-              <div style={{ width: 400, height: 300 }}>
-                <Doughnut
-                  data={{
-                    labels: [
-                      "hired candidates",
-                      "rejected candidates",
-                      "probationary candidates",
-                      "rehire andidates",
-                      "selected candidates",
-                    ],
-                    datasets: [
-                      {
-                        label: "Poll",
-                        data: [
-                          data.hired_candidates,
-                          data.rejected_candidates,
-                          data.probationary_candidates,
-                          data.rehire_candidates,
-                          data.selected_candidates,
-                        ],
-                        backgroundColor: [
-                          "#005734",
-                          "red",
-                          "black",
-                          "yellow",
-                          "pink",
-                          "blue",
-                        ],
-                        borderColor: [
-                          "#005734",
-                          "red",
-                          "black",
-                          "yellow",
-                          "pink",
-                          "blue",
-                        ],
-                      },
-                    ],
-                  }}
-                ></Doughnut>
-              </div>
-
-              <div style={{ width: 400, height: 300 }}>
-                <Bar
-                  data={{
-                    labels: [
-                      "hired candidates",
-                      "rejected candidates",
-                      "probationary candidates",
-                      "rehire andidates",
-                      "selected candidates",
-                    ],
-                    datasets: [
-                      {
-                        label: "Poll",
-                        data: [
-                          data.hired_candidates,
-                          data.rejected_candidates,
-                          data.probationary_candidates,
-                          data.rehire_candidates,
-                          data.selected_candidates,
-                        ],
-                        backgroundColor: [
-                          "#005734",
-                          "red",
-                          "black",
-                          "yellow",
-                          "pink",
-                          "blue",
-                        ],
-                        borderColor: [
-                          "#005734",
-                          "red",
-                          "black",
-                          "yellow",
-                          "pink",
-                          "blue",
-                        ],
-                      },
-                    ],
-                  }}
-                ></Bar>
-              </div>
+              {!(
+                data.hired ||
+                data.rejected ||
+                data.probationary_candidates ||
+                data.rehired ||
+                data.selected
+              ) ? (
+                <h4>there is no data between start and end date</h4>
+              ) : (
+                <div style={{ width: 400, height: 300 }}>
+                  <Bar
+                    data={{
+                      labels: [
+                        "hired candidates",
+                        "rejected candidates",
+                        "probationary candidates",
+                        "rehire candidates",
+                        "selected candidates",
+                      ],
+                      datasets: [
+                        {
+                          label: "Poll",
+                          data: [
+                            data.hired,
+                            data.rejected,
+                            data.probationary_candidates,
+                            data.rehired,
+                            data.selected,
+                          ],
+                          backgroundColor: [
+                            "#005734",
+                            "#9146FF",
+                            "#d3d3d3",
+                            "black",
+                            "pink",
+                            "blue",
+                          ],
+                          borderColor: [
+                            "#005734",
+                            "#9146FF",
+                            "#d3d3d3",
+                            "black",
+                            "pink",
+                            "blue",
+                          ],
+                        },
+                      ],
+                    }}
+                  ></Bar>
+                </div>
+              )}
             </div>
           </div>
 
           <div style={{ marginBottom: 20 }} className="graph__Item">
             <h6>Teams and tasks</h6>
-            <div style={{ width: 400, height: 300 }}>
-              <Bar
-                data={{
-                  labels: ["Teams", "team tasks", "individual tasks"],
-                  datasets: [
-                    {
-                      label: ["Teams", "team tasks", "individual tasks"],
-                      data: [data.teams, data.team_tasks, data.tasks],
-                      backgroundColor: ["#D3D3D3", "#005734", "black"],
-                      borderColor: ["#D3D3D3", "#005734", "black"],
-                    },
-                  ],
-                }}
-              ></Bar>
-            </div>
+            {!(data.teams || data.team_tasks || data.tasks) ? (
+              <h4>there is no data between start and end date</h4>
+            ) : (
+              <div style={{ width: 400, height: 300 }}>
+                <Bar
+                  data={{
+                    labels: ["Teams", "team tasks", "individual tasks"],
+                    datasets: [
+                      {
+                        label: "Poll",
+                        data: [data.teams, data.team_tasks, data.tasks],
+                        backgroundColor: ["#D3D3D3", "#005734", "black"],
+                        borderColor: ["#D3D3D3", "#005734", "black"],
+                      },
+                    ],
+                  }}
+                ></Bar>
+              </div>
+            )}
           </div>
           <div className="job_applications graph__Item">
             <h6>applications</h6>
             <div>
               <div>
-                <div style={{ width: 400, height: 300 }}>
-                  <Doughnut
-                    data={{
-                      labels: ["tasks completed on time", "tasks"],
-                      datasets: [
-                        {
-                          label: "Poll",
-                          data: [data.tasks_completed_on_time, data.tasks],
-                          backgroundColor: ["#D3D3D3", "#005734"],
-                          borderColor: ["#D3D3D3", "#005734"],
-                        },
-                      ],
-                    }}
-                  ></Doughnut>
-                </div>
+                {!(data.tasks_completed || data.tasks) ? (
+                  <h4>there is no data between start and end date</h4>
+                ) : (
+                  <div style={{ width: 400, height: 300 }}>
+                    <Doughnut
+                      data={{
+                        labels: ["tasks completed", "tasks"],
+                        datasets: [
+                          {
+                            label: "Poll",
+                            data: [data.tasks_completed, data.tasks],
+                            backgroundColor: ["#D3D3D3", "#005734"],
+                            borderColor: ["#D3D3D3", "#005734"],
+                          },
+                        ],
+                      }}
+                    ></Doughnut>
+                  </div>
+                )}
               </div>
               <div>
-                <div style={{ width: 400, height: 300 }}>
-                  <Doughnut
-                    data={{
-                      labels: ["team tasks completed", "tasks"],
-                      datasets: [
-                        {
-                          label: "Poll",
-                          data: [data.team_tasks_completed, data.tasks],
-                          backgroundColor: ["#D3D3D3", "#005734"],
-                          borderColor: ["#D3D3D3", "#005734"],
-                        },
-                      ],
-                    }}
-                  ></Doughnut>
-                </div>
+                {!(data.tasks_completed_on_time || data.tasks) ? (
+                  <h4>there is no data between start and end date</h4>
+                ) : (
+                  <div style={{ width: 400, height: 300 }}>
+                    <Doughnut
+                      data={{
+                        labels: ["tasks completed on time", "tasks"],
+                        datasets: [
+                          {
+                            label: "Poll",
+                            data: [data.tasks_completed_on_time, data.tasks],
+                            backgroundColor: ["#D3D3D3", "#005734"],
+                            borderColor: ["#D3D3D3", "#005734"],
+                          },
+                        ],
+                      }}
+                    ></Doughnut>
+                  </div>
+                )}
               </div>
             </div>
           </div>
