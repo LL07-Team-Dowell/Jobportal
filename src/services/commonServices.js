@@ -24,14 +24,18 @@ export const postUserLiveStatus = async (data) => {
     return await liveStatusBackendAxiosInstance.post("en/live_status", data)
 }
 
-export const getAllCompanyUserSubProject = async (companyId) => {
+export const getAllCompanyUserSubProject = async (companyId, companyDataType) => {
     return new Promise(async (resolve, reject) => {
         try {
             const res = (await currentBackendAxiosInstance.get(`settingusersubproject/`)).data;
-            const projectForCompany = res?.data?.filter(item => item.company_id === companyId);
+            const projectForCompany = res?.data?.filter(item => item.company_id === companyId)?.filter(item => item.data_type === companyDataType);
             resolve(projectForCompany)
         } catch (error) {
             reject({ error })
         }    
     })
+}
+
+export const generateCommonAdminReport = async (data) => {
+    return await currentBackendAxiosInstance.post(`generate_report/`, data);
 }
