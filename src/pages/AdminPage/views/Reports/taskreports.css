@@ -1,7 +1,7 @@
 .task__reports__container {
   padding: 20px;
   padding-bottom: 40px;
-  width: 85%;
+  width: 94%;
   margin: 0 auto;
 }
 
@@ -39,6 +39,10 @@
 .task__report__header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 
@@ -58,6 +62,8 @@ table th {
   text-align: center;
 }
 
+
+
 /* Style for table rows */
 table tr:nth-child(even) {
   background-color: #f2f2f2;
@@ -67,6 +73,7 @@ table tr:nth-child(even) {
 table td {
   padding: 10px;
   border-bottom: 1px solid #ddd;
+  text-align: center;
 }
 
 /* Hover effect on table rows */
@@ -77,12 +84,27 @@ table tr:hover {
 .select__task__report__project {
   align-items: center;
   background-color: #fff;
-  border: 1px solid #005734;
+  /* border: 1px solid #005734; */
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   gap: 1rem;
-  padding: 0.6rem 0.8rem;
-  width: -webkit-max-content;
-  width: max-content;
+  padding: 0.2rem 0.2rem;
+  /* width: -webkit-max-content;
+  width: max-content; */
+  width: 50%;
+}
+
+.select__task__report__project > div {
+  width: 100%;
+}
+
+.task__select__Project {
+  width: 80%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
 }

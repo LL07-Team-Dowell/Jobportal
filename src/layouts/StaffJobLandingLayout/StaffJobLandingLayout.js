@@ -26,6 +26,8 @@ import { IoShareSocial } from "react-icons/io5";
 import ShareJobModal from "../../components/ShareJobModal/ShareJobModal";
 import PublicAccountConfigurationModal from "../../pages/HrPage/component/PublicAccountConfigurationModal/PublicAccountConfigurationModal";
 import { testingRoles } from "../../utils/testingRoles";
+import teamManagementLogo from "../../assets/images/team-management-logo.png";
+import { MdPublic } from "react-icons/md";
 
 const StaffJobLandingLayout = ({
   children,
@@ -62,12 +64,15 @@ const StaffJobLandingLayout = ({
   layoutBgColor,
   isProductLink,
   isGrouplead,
+  isReportLink,
 }) => {
   const isLargeScreen = useMediaQuery("(min-width: 992px)");
   const { currentUser } = useCurrentUserContext();
   const [isSuperUser, setIsSuperUser] = useState(false);
 
   useEffect(() => {
+    if (!currentUser) return
+
     const teamManagementProduct = currentUser?.portfolio_info?.find(
       (portfolio) => portfolio.product === teamManagementProductName
     );
@@ -101,6 +106,23 @@ const StaffJobLandingLayout = ({
             </Link>
           )}
           {adminView ? (
+            !currentUser ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem'}}>
+                  <img 
+                    src={teamManagementLogo} 
+                    alt="team management" 
+                    style={{ width: '8rem' }}
+                  />  
+                  <h2>Team management</h2>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                  <MdPublic className="icon" />
+                  <span style={{ fontSize: 13 }}>Public user</span>
+                </div>
+              </>
+            )
+            :
             adminAlternativePageActive ? (
               <div
                 className="admin__View__Title__Container"
@@ -152,15 +174,15 @@ const StaffJobLandingLayout = ({
               handleSearchChange={setSearchValue}
             />
           )}
-          {hideTitleBar ? (
+          {(hideTitleBar || !currentUser) ? (
             <></>
           ) : (
             <>
               <div className="jobs__Layout__Icons__Container">
                 <Link to={"/user"}>
-                  {currentUser.userinfo.profile_img ? (
+                  {currentUser?.userinfo?.profile_img ? (
                     <img
-                      src={currentUser.userinfo.profile_img}
+                      src={currentUser?.userinfo?.profile_img}
                       alt="#"
                       style={{
                         width: "30px",
@@ -185,7 +207,7 @@ const StaffJobLandingLayout = ({
             accountView ? "account" : ""
           }`}
         >
-          {!hideSideBar && (
+          {!hideSideBar && currentUser && (
             <NewSideNavigationBar
               className={hideTitleBar ? "full__Height" : ""}
               links={
@@ -247,6 +269,7 @@ const StaffJobLandingLayout = ({
                   : () => {}
               }
               isProductLink={isProductLink}
+              isReportLink={isReportLink}
             />
           )}
 
@@ -263,7 +286,11 @@ const StaffJobLandingLayout = ({
           <div
             className={`jobs__Layout__Content ${
               adminView ? "full__Width" : ""
-            }`}
+            }
+            ${
+              !currentUser ? "no__User" : ""
+            }
+            `}
             style={{
               backgroundColor: layoutBgColor ? layoutBgColor : "#fff",
             }}
