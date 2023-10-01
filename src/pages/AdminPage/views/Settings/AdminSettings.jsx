@@ -16,6 +16,7 @@ import { IoFilterOutline } from "react-icons/io5";
 import TableRow from "./TableRow";
 import { getSettingUserProject } from "../../../../services/hrServices";
 import { AiOutlineSearch } from "react-icons/ai";
+import { teamManagementProductName } from "../../../../utils/utils";
 
 export const rolesDict = { 
   "Dept_Lead": 'Account', 
@@ -25,6 +26,7 @@ export const rolesDict = {
   "group_lead": "Group Lead", 
   "super_admin": "Super Admin",
   "candidate": "Candidate",
+  'Viewer': 'Viewer',
 };
 
 const rolesNamesDict = {
@@ -35,6 +37,7 @@ const rolesNamesDict = {
   "Group Lead": "group_lead", 
   "Super Admin": "super_admin",
   "Candidate": "candidate",
+  "Viewer": "Viewer",
 }
 
 const AdminSettings = () => {
@@ -96,7 +99,7 @@ const AdminSettings = () => {
     const currentSessionId = sessionStorage.getItem("session_id");
 
     if (!currentSessionId) return setLoading2(false)
-    const teamManagementProduct = currentUser?.portfolio_info.find(item => item.product === "Team Management");
+    const teamManagementProduct = currentUser?.portfolio_info.find(item => item.product === teamManagementProductName);
     if (!teamManagementProduct) return setLoading2(false)
 
     const dataToPost = {
@@ -254,7 +257,7 @@ const AdminSettings = () => {
 
   const submit = () => {
     const { org_id, org_name, data_type, owner_name } = options1[0];
-    const teamManagementProduct = currentUser.portfolio_info.find(item => item.product === "Team Management");
+    const teamManagementProduct = currentUser.portfolio_info.find(item => item.product === teamManagementProductName);
     if (!teamManagementProduct) return
     setLoading(true);
     axios.post('https://100098.pythonanywhere.com/settinguserprofileinfo/', {
@@ -271,7 +274,7 @@ const AdminSettings = () => {
   }
   const submit2 = () => {
     const { org_id, org_name, data_type, owner_name } = options1[0];
-    const teamManagementProduct = currentUser.portfolio_info.find(item => item.product === "Team Management");
+    const teamManagementProduct = currentUser.portfolio_info.find(item => item.product === teamManagementProductName);
     if (!teamManagementProduct) return
     setLoading(true);
     axios.post('https://100098.pythonanywhere.com/settinguserprofileinfo/', {

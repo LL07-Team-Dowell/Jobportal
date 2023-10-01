@@ -1,0 +1,45 @@
+.update-task {
+    box-shadow: 0px 2.79922px 25px rgba(0, 87, 52, 0.67);
+    padding: 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.update-task form div {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0;
+}
+
+.update-task form .request-buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+.request-buttons button {
+    border: none;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 0.2rem;
+    margin-right: 0.5rem !important;
+    background-color: rgb(2, 68, 2);
+    border: 1px solid rgb(2, 68, 2);
+    color: white;
+    font-size: 1rem !important;
+    transition: 0.3s ease-in-out;
+    cursor: pointer !important;
+}
+
+.request-buttons button:hover {
+    border: 1px solid rgb(2, 68, 2);
+    background-color: white;
+    color: black;
+}
+
+.request-buttons button.cancel {
+    background-color: transparent;
+    color: black;
+}
