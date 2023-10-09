@@ -14,7 +14,7 @@ const SingleTask = ({
   taskCompleted,
   taskId,
 }) => {
-  console.log(taskCompleted);
+  console.log({ taskCompleted });
   const { currentUser } = useCurrentUserContext();
   const [loading, setLoading] = useState(false);
   const completeTaskFunction = () => {
@@ -64,6 +64,7 @@ const SingleTask = ({
             taskname={title}
             status={taskCompleted}
             memberassign={members}
+            description={detail}
             onClose={handleViewDetails}
           />
         )}
@@ -82,8 +83,13 @@ const SingleTask = ({
                   <span>{e[0].toUpperCase()}</span>
                 ))}
               </div>
-              <div className='team-screen-task-progress-data-circle'>
-                <span>00%</span>
+              <div
+                className={`team-screen-task-progress-data-circle ${
+                  taskCompleted &&
+                  "team-screen-task-progress-data-circle-complete"
+                }`}
+              >
+                <span>{taskCompleted ? "100" : "00"}%</span>
               </div>
             </div>
           </div>
@@ -95,18 +101,18 @@ const SingleTask = ({
           >
             {"View details"}
           </button>
-          <button
-            className='team-screen-task-progress-detail-btn'
-            onClick={completeTaskFunction}
-          >
-            {loading ? (
-              <LoadingSpinner width={30} height={30} color={"white"} />
-            ) : taskCompleted ? (
-              "completed"
-            ) : (
-              "mark as done"
-            )}
-          </button>
+          {taskCompleted ? null : (
+            <button
+              className='team-screen-task-progress-detail-btn'
+              onClick={completeTaskFunction}
+            >
+              {loading ? (
+                <LoadingSpinner width={30} height={30} color={"white"} />
+              ) : (
+                "mark as done"
+              )}
+            </button>
+          )}
         </div>
       </div>
       <hr />

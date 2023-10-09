@@ -5,9 +5,14 @@ import { fetchThread, postComment, updateSingleComment } from "../../../../../..
 import { useCurrentUserContext } from "../../../../../../../contexts/CurrentUserContext";
 import LoadingSpinner from "../../../../../../../components/LoadingSpinner/LoadingSpinner";
 import LittleLoading from "../../../../../../CandidatePage/views/ResearchAssociatePage/littleLoading";
+import { toast } from "react-toastify";
+import { formatDateForAPI } from "../../../../../../../helpers/helpers";
 
 
 const Wrapper = styled.div`
+max-height: 300px;
+overflow-y: scroll;
+
 .comment-container {
   display: flex;
   gap: 1rem;
@@ -85,61 +90,75 @@ textarea {
 
 `
 
-const ThreadComment = ({ comments, commentInput, user, threadId, loading }) => {
+const ThreadComment = ({ comments, commentInput, user, updateComments, threadId, loading }) => {
   const userName = user.trim();
   const initials = userName.charAt(0).toUpperCase();
   const [text, setText] = useState("");
   const { currentUser } = useCurrentUserContext();
   const [loadingcmnt, setLoadingcmnt] = useState(false);
-  const [updateComment, setUpdateComment] = useState([]);
+  // const [updateComment, setUpdateComment] = useState([]);
   const [editIndex, setEditIndex] = useState();
   const [updateCommentInput, setUpdateCommentInput] = useState("")
-
+  // const [threads, setThreads] = useState([])
   console.log(currentUser.portfolio_info[0].username);
   const handleChange = (e) => {
     setText(e.target.value);
   };
-  useEffect(() => {
-    setUpdateComment([...comments].reverse());
-  }, []);
 
-
-  console.log({ "updatecomment": updateComment });
-  //Handle Comment
   const handleComment = async () => {
-    setLoadingcmnt(true);
+    // setLoadingcmnt(true);
+    const newComment = {
+      created_by: currentUser.userinfo.username,
+      comment: text,
+      thread_id: threadId,
+    };
     try {
-      const commentData = {
-        created_by: user,
-        comment: text,
-        thread_id: threadId,
-      };
-      const response = await postComment(commentData);
-      console.log(response);
-      // Update the state with the new comment
-      if (response.status == 201) {
-        setUpdateComment((prevComments) => [...prevComments].reverse(), commentData);
-        setText("")
-      }
-      // Clear the input field and reset loading
-      setText('');
+      const newCommentRes = (await postComment(newComment)).data;
+      console.log(newCommentRes);
+      // setThreads(updatedThreads);
+      toast.success("Comment added successfully");
       setLoadingcmnt(false);
+      setText("")
+      updateComments({
+        ...newComment,
+        created_date: formatDateForAPI(new Date(), "report"),
+        _id: newCommentRes.info.inserted_id
+      })
     } catch (error) {
-      console.error('Failed to create comment:', error.message);
+      console.log(error);
+      setLoadingcmnt(false);
+      toast.error('Dont like Ayoola')
     }
   };
+
 
 
   const handleUpdate = (comment) => {
     const document_id = comment._id;
     const created_by = comment.created_by;
+
+    // Make an API request to update the comment
     updateSingleComment({
       comment: updateCommentInput,
       document_id: document_id,
-      created_by: created_by
-    }).then(resp => console.log(resp))
-    setEditIndex(null)
-  }
+      created_by: created_by,
+    })
+      .then((resp) => {
+        console.log(resp);
+        if (resp.status === 200) {
+          // Update the state with the edited comment
+          // setUpdateComment((prevComments) =>
+          //   prevComments.map((c) =>
+          //     c._id === comment._id ? { ...c, comment: updateCommentInput } : c
+          //   )
+          // );
+          setEditIndex(null);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to update comment:", error.message);
+      });
+  };
 
 
   return (
@@ -163,7 +182,7 @@ const ThreadComment = ({ comments, commentInput, user, threadId, loading }) => {
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", width: "100%" }}>
-        {updateComment.reverse().map((comment, index) => {
+        {comments.reverse().map((comment, index) => {
           return (
             <div className="comment-container" key={comment._id}>
               <div className="avatar-container">
@@ -177,7 +196,7 @@ const ThreadComment = ({ comments, commentInput, user, threadId, loading }) => {
                       className="comment-text"
                       style={{ paddingLeft: "5px", border: "1px solid black" }}
                       defaultValue={comment.comment}
-                      onChange={(e) => setUpdateCommentInput(e.target.value)}
+                    // onChange={(e) => setUpdateCommentInput(e.target.value)}
                     />
                   ) : (
                     <input className="comment-text" defaultValue={comment.comment} disabled />

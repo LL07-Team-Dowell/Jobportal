@@ -25,7 +25,7 @@ import { useCurrentUserContext } from "../../../../../contexts/CurrentUserContex
 import { generateCommonAdminReport } from "../../../../../services/commonServices";
 import Select from "react-select";
 import { getSettingUserProfileInfo } from "../../../../../services/settingServices";
-import { rolesDict } from "../../Settings/AdminSettings";
+import { rolesDict, rolesNamesDict } from "../../Settings/AdminSettings";
 import { formatDateForAPI } from "../../../../../helpers/helpers";
 
 export const chartOptions = {
@@ -103,18 +103,39 @@ export default function DetailedIndividual({ isPublicReportUser }) {
     setSelectedUserRoleSetting(null);
 
     const foundCandidate = candidates2.find((item) => item._id === id);
+    const foundUserSettingItem = settingsUserList?.find(
+      (value) =>
+        value?.profile_info[value?.profile_info?.length - 1]
+          ?.profile_title === foundCandidate?.portfolio_name
+    );
+    const currentUserSetting = foundUserSettingItem?.profile_info[
+      foundUserSettingItem?.profile_info?.length - 1
+    ];
+
     console.log(foundCandidate);
+    console.log(currentUserSetting);
+
+    const payloadForIndividualReport = {
+      report_type: "Individual",
+      year: new Date().getFullYear().toString(),
+      applicant_id: id,
+      company_id: foundCandidate?.company_id,
+    }
+
+    const payloadForIndividualTaskReport = {
+      report_type: "Individual Task",
+      username: foundCandidate?.username,
+      company_id: foundCandidate?.company_id,
+    }
+
+    if (currentUserSetting?.Role === rolesNamesDict.Teamlead) {
+      payloadForIndividualReport.role = "Teamlead";
+      payloadForIndividualReport.applicant_username = foundCandidate?.username;
+    }
 
     Promise.all([
-      generateCommonAdminReport({
-        report_type: "Individual",
-        year: new Date().getFullYear().toString(),
-        applicant_id: id,
-      }),
-      generateCommonAdminReport({
-        report_type: "Individual Task",
-        username: foundCandidate?.username,
-      }),
+      generateCommonAdminReport(payloadForIndividualReport),
+      generateCommonAdminReport(payloadForIndividualTaskReport),
     ])
       .then((resp) => {
         console.log({ id });
@@ -155,17 +176,9 @@ export default function DetailedIndividual({ isPublicReportUser }) {
         setProjectSelectedForSubprojectBox(resp[1].data?.response[0]?.project);
         setProjectSelectedForTasksBox(null);
 
-        const foundUserSettingItem = settingsUserList?.find(
-          (value) =>
-            value?.profile_info[value?.profile_info?.length - 1]
-              ?.profile_title === resp[0]?.data?.personal_info?.portfolio_name
-        );
-
         if (foundUserSettingItem) {
           setSelectedUserRoleSetting(
-            foundUserSettingItem?.profile_info[
-              foundUserSettingItem?.profile_info?.length - 1
-            ]
+            currentUserSetting
           );
         }
         setSecondLoadng(false);
@@ -704,6 +717,7 @@ export default function DetailedIndividual({ isPublicReportUser }) {
                                     <th>Time finished</th>
                                     <th>Work log</th>
                                     <th>Work log type</th>
+                                    <th>Work log approved</th>
                                     <th>sub project</th>
                                   </tr>
                                   {React.Children.toArray (
@@ -740,6 +754,7 @@ export default function DetailedIndividual({ isPublicReportUser }) {
                                               <td className={task.is_active &&  task.is_active === true ? "" : "deleted"}>{task.end_time}</td>
                                               <td className={task.is_active &&  task.is_active === true ? "" : "deleted"}>{task.task}</td>
                                               <td className={task.is_active &&  task.is_active === true ? "" : "deleted"}>{task.task_type}</td>
+                                              <td className={task.is_active &&  task.is_active === true ? task.approved ? "approved" : "not__Approved" : "deleted"}>{task.approved ? 'Yes' : 'No'}</td>
                                               <td className={task.is_active &&  task.is_active === true ? "" : "deleted"}>{task.subproject}</td>
                                             </tr>
                                           </tbody>
@@ -756,8 +771,7 @@ export default function DetailedIndividual({ isPublicReportUser }) {
                           <p
                             style={{ fontSize: "0.9rem", textAlign: "center" }}
                           >
-                            Select a project to get a detailed report on work logs
-                            added
+                            Select a project to get a detailed report on work logs added
                           </p>
                         </>
                       )}

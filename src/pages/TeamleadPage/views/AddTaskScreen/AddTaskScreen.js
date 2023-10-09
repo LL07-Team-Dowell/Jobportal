@@ -14,6 +14,8 @@ import LoadingSpinner from "../../../../components/LoadingSpinner/LoadingSpinner
 import { IoRefresh } from "react-icons/io5";
 import SubprojectSelectWithSearch from "../../../../components/SubprojectSelectWithSearch/SubprojectSelectWithSearch";
 import useListenToKeyStrokeInElement from "../../../../hooks/useListenToKeyStrokeInElement";
+import { formatSubprojectStringItemToHTML } from "../../util/formatSubprojectStringItemToHTML";
+import ContentEditable from "react-contenteditable";
 
 const AddTaskScreen = ({
   teamMembers,
@@ -48,7 +50,7 @@ const AddTaskScreen = ({
   const [taskName, setTaskName] = useState("");
   const [details, setDetails] = useState("");
   const [tasks, setTasks] = useState([]);
-  console.log({ tasks });
+  // console.log({ tasks });
   const [taskId, setTaskId] = useState("");
   const [isCreatingTask, setIsCreatingTask] = useState(true);
   const [showSubmitTaskInfo, setShowSubmitTaskInfo] = useState(false);
@@ -65,6 +67,11 @@ const AddTaskScreen = ({
       :
       true
   );
+  const textareaRef = useRef();
+  const subprojectRef = useRef();
+  const [ showSubprojectSelections, setShowSubprojectSelections ] = useState(false);
+  const [ formattedTaskName, setFormattedTaskName ] = useState('');
+  
 
   //   var conditions
   const inputsAreFilled = taskStartTime && taskEndTime && taskName && taskType;
@@ -138,11 +145,25 @@ const AddTaskScreen = ({
     setEditLoading(true);
   };
 
+  function removeSpaces(inputString) {
+    // Use a regular expression to replace all spaces with an empty string
+    return inputString.replace(/\s/g, '');
+  }
+  
+  function isStringValid(inputString) {
+    const trimmedString = inputString.trim();
+    const words = trimmedString.split(/\s+/);
+    return trimmedString.length >= 25 && words.length >= 5;
+  }
+
   //   importand fuction
   const addNewTask = () => {
     if (optionValue.length < 1) return toast.info("Please select a project before proceding");
     if (inputsAreFilled) {
-      if (taskEndTime === '00:00') return toast.info("You can only update tasks for today")
+      console.log({ TASKSS: tasks.find(task => task.task === taskName) })
+      if (tasks.find(task => task?.task?.toLocaleLowerCase().trim() === taskName.toLocaleLowerCase().trim() && task.is_active) !== undefined) return toast.info('You cannot add the same log')
+      if (!isStringValid(taskName)) return toast.info('The log entered should be more than 25 characters and more than 5 words.')
+      if (taskEndTime === '00:00') return toast.info("You can only update work logs for today")
       if (duration <= 15) {
         if (taskStartTime > taskEndTime) return toast.info('Work log start time must be less than its end time');
         if (!taskDetailForToday) return addTaskForToday(taskStartTime, taskEndTime, taskName, details);
@@ -161,7 +182,9 @@ const AddTaskScreen = ({
   const updateTask = async () => {
     if (inputsAreFilled) {
       if (duration <= 15) {
-        if (taskEndTime === '00:00') return toast.info("You can only update tasks for today")
+        if (tasks.find(task => task?.task?.toLocaleLowerCase().trim() === taskName.toLocaleLowerCase().trim() && task.is_active) !== undefined) return toast.info('You cannot add the same log')
+        if (!isStringValid(taskName)) return toast.info('The log entered should be more than 25 characters and more than 5 words.')
+        if (taskEndTime === '00:00') return toast.info("You can only update work logs for today")
         if (taskStartTime > taskEndTime) return toast.info('Work log start time must be less than its end time');
 
         setLoading(true);
@@ -254,7 +277,7 @@ const AddTaskScreen = ({
     const seconds = dateObj.getSeconds();
 
     const formattedDate = `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
-    console.log(formattedDate);
+    // console.log(formattedDate);
     return formattedDate;
   }
 
@@ -264,7 +287,7 @@ const AddTaskScreen = ({
   }
 
   const formattedDate = convertDateFormat(time);
-  console.log(formattedDate);
+  // console.log(formattedDate);
 
   // console.log(time);
   // useClickOutside(ref, () => { closeTaskScreen(); !afterSelectionScreen && setEditPage(false) });
@@ -287,6 +310,7 @@ const AddTaskScreen = ({
       setTaskEndTime(newEndTime);
     }
   }, [taskStartTime])
+
   useEffect(() => {
     if (taskDetailForToday) {
       setTaskDetailForTodayLoading(false);
@@ -351,6 +375,10 @@ const AddTaskScreen = ({
   }, [taskName, optionValue, taskStartTime, taskEndTime, taskType]);
 
   useEffect(() => {
+    setFormattedTaskName(formatSubprojectStringItemToHTML(taskName));
+  }, [taskName])
+
+  useEffect(() => {
     if (afterSelectionScreen) {
       setNewTaskDetails((prevValue) => {
         return { ...prevValue, username: currentUser.userinfo.username };
@@ -392,7 +420,39 @@ const AddTaskScreen = ({
       updateTask()
     }
   )
-  console.log({ taskStartTime });
+
+  useListenToKeyStrokeInElement(
+    textareaRef,
+    '@',
+    () => {
+      if (subprojectSelected) return
+
+      setShowSubprojectSelections(true);
+    },
+    true
+  )
+
+  useListenToKeyStrokeInElement(
+    textareaRef,
+    'Backspace',
+    () => {
+      const currentTaskName = taskName.slice(-4) === '<br>' ?
+        taskName.slice(0, -5)
+      :
+      taskName.slice(0, -1);
+
+      const userIsDeletingSubproject = currentTaskName.slice(-3) === '</p';
+
+      if (userIsDeletingSubproject) {
+        handleCancelSubprojectSelection();
+        setShowSubprojectSelections(true);
+        return
+      }
+    },
+    true
+  )
+
+  // console.log({ taskStartTime });
 
   const addTaskForToday = async (startTime, endTime, task, details, updateTask = false) => {
     const today = new Date();
@@ -445,7 +505,12 @@ const AddTaskScreen = ({
         setTasks(copyOfTasksForToday.tasks);
         clearAllInputs();
         setTaskId("");
-
+        setTaskStartTime(endTime);
+        const [hours, minutes] = endTime.split(':').map(Number);
+        const newMinutes = (minutes + 15) % 60;
+        const newHours = hours + Math.floor((minutes + 15) / 60);
+        const newEndTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+        setTaskEndTime(newEndTime);
         return
       }
 
@@ -476,7 +541,6 @@ const AddTaskScreen = ({
 
         setLoading(false);
         setDisabled(false);
-
         setTasks(listsOfTasksForToday?.reverse());
         clearAllInputs();
         setTaskId("");
@@ -517,6 +581,23 @@ const AddTaskScreen = ({
       toast.error('Something went wrong while trying to submit your work logs. Please try again later')
       setSavingLoading(false);
     }
+  }
+
+  const handleSelectSubprojectFromListing = (subprojectPassed, projectPassed, idPassed) => {
+    setSubprojectSelected(subprojectPassed);
+    setoptionValue(projectPassed);
+    
+    const taskNamewithAtCharStripped = taskName.split('@')[0];
+    setTaskName(taskNamewithAtCharStripped.concat(`<@${subprojectPassed}~${projectPassed}~${idPassed}!> `));
+
+    textareaRef?.current?.el?.current?.focus();
+  }
+
+  const handleCancelSubprojectSelection = () => {
+    const [ startIndex, endIndex ] = [ taskName.indexOf('<p><span'), taskName.indexOf('</span></p>')];
+    setSubprojectSelected(null);
+    setoptionValue('');
+    setTaskName(taskName.replace(`${taskName.substring(startIndex, endIndex + 11)}`, '@'))
   }
 
   const handleChange = (e) => {
@@ -781,16 +862,53 @@ const AddTaskScreen = ({
                               </div>
                               <div className="task__Item">
                                 <span className="selectProject">Work log</span>
-                                <textarea
-                                  type={"text"}
-                                  placeholder={"Work log"}
-                                  value={taskName}
-                                  style={{ margin: 0, marginBottom: "0rem" }}
-                                  onChange={({ target }) => setTaskName(target.value)}
-                                  readOnly={loading || !taskDetailForTodayLoaded ? true : false}
-                                  rows={3}
-                                  className="log__textarea"
-                                ></textarea>
+                                <div className="log__Add__New__Wrapper">
+                                  <textarea
+                                    type={"text"}
+                                    placeholder={"Work log"}
+                                    value={taskName}
+                                    style={{ margin: 0, marginBottom: "0rem" }}
+                                    onChange={({ target }) => setTaskName(target.value)}
+                                    readOnly={loading || !taskDetailForTodayLoaded ? true : false}
+                                    rows={3}
+                                    className="log__textarea"
+                                  // cols={40}
+                                  // ref={textareaRef}
+                                  >
+                                  </textarea>
+
+                                  {/* <ContentEditable 
+                                    html={formattedTaskName}
+                                    onChange={({ target }) => setTaskName(target.value)}
+                                    id="new__Log__Textarea"
+                                    ref={textareaRef}
+                                    disabled={loading || !taskDetailForTodayLoaded ? true : false}
+                                  />
+                                  {
+                                    showSubprojectSelections && <div
+                                      className={'log__Add__Subproject'}
+                                      ref={subprojectRef}
+                                    >
+                                      <SubprojectSelectWithSearch
+                                        subprojects={subprojects}
+                                        selectedSubProject={subprojectSelected}
+                                        handleSelectItem={
+                                          (subproject, project, id) => handleSelectSubprojectFromListing(subproject, project, id)
+                                        }
+                                        handleCancelSelection={handleCancelSubprojectSelection}
+                                        selectedProject={optionValue}
+                                        alwaysOnDisplay={true}
+                                        passedInputVal={
+                                          taskName.split('@')[1] ? 
+                                            taskName.split('@')[1]
+                                          :
+                                          ''
+                                        }
+                                        hideSelectionsMade={true}
+                                      />
+                                    </div>
+                                  } */}
+                                </div>
                               </div>
                               <div className="task__Item">
                                 <span className="selectProject">Work log type</span>
@@ -912,7 +1030,7 @@ const AddTaskScreen = ({
                               <tbody>
                                 {tasks.map((task, index) => (
                                   <tr key={task._id}>
-                                    <td>{index + 1}.</td>
+                                    <td>{tasks.length - (index)}.</td>
                                     <td className={task.is_active && task.is_active === true ? "" : "deleted"}>{task.start_time}</td>
                                     <td className={task.is_active && task.is_active === true ? "" : "deleted"}>{task.end_time}</td>
                                     <td className={task.is_active && task.is_active === true ? "" : "deleted"}>{task.task}</td>
