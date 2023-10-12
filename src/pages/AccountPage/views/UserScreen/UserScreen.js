@@ -4,7 +4,7 @@ import { useCurrentUserContext } from "../../../../contexts/CurrentUserContext";
 import "./style.css";
 import { getUserLiveStatus, postUserLiveStatus } from "../../../../services/commonServices";
 import { teamManagementProductName } from "../../../../utils/utils";
-import ClaimVouchar from "../../../TeamleadPage/views/ClaimVouchar/ClaimVouchar";
+import { ClaimVouchar } from "../../../TeamleadPage/views/ClaimVouchar/ClaimVouchar";
 
 
 const UserScreen = () => {
@@ -32,12 +32,14 @@ const UserScreen = () => {
     return <>
         <div className="user__Page__Container account">
             {
-                <ClaimVouchar />
+                <>
+                    <ClaimVouchar />
+                </>
             }
             <div className="user__Intro__Item__Container">
                 <div className="user__Intro__Item">
                     <h2>User Name</h2>
-                    <span>{ currentUser.userinfo.username }</span>    
+                    <span>{currentUser.userinfo.username}</span>
                 </div>
             </div>
             <div className="user__Intro__Item">
@@ -55,7 +57,7 @@ const UserScreen = () => {
                     <span>{currentUser?.userinfo.last_name}</span>
                 </div>
             }
-            <div className="user__Intro__Item" style={{display:"flex",gap:5,alignItems:"center"}}>
+            <div className="user__Intro__Item" style={{ display: "flex", gap: 5, alignItems: "center" }}>
                 <h2>Active Status</h2>
                 <div style={success ? successStatus : failedStatus}></div>
             </div>
@@ -73,10 +75,10 @@ const UserScreen = () => {
 export default UserScreen;
 
 const defaultStatus = {
-    backgroundColor:"gray" ,
-    width:10,
-    height:10,
-    borderRadius:"50%"
+    backgroundColor: "gray",
+    width: 10,
+    height: 10,
+    borderRadius: "50%"
 }
-const successStatus = {...defaultStatus , backgroundColor:"green"} ; 
-const failedStatus = {...defaultStatus , backgroundColor:"red"} ; 
+const successStatus = { ...defaultStatus, backgroundColor: "green" };
+const failedStatus = { ...defaultStatus, backgroundColor: "red" }; 

@@ -318,7 +318,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoIosArrowBack } from "react-icons/io";
 
-import "../../../../AddTaskScreen/style.css";
+import "./style.css";
 import { useNavigate, useParams } from "react-router-dom";
 // import { createCandidateTask } from "../../../../services/candidateServices";
 import { toast } from "react-toastify";
@@ -343,7 +343,7 @@ const AddIssueTeamLead = ({
   const [disabled, setDisabled] = useState(false);
   const { currentUser } = useCurrentUserContext();
   const [selectedTeam, setSelectedTeam] = useState("");
-  const [selectedThreadType, setSelectedThreadType] = useState('bug');
+  const [selectedOption, setSelectedOption] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const navigate = useNavigate();
   const { id } = useParams()
@@ -420,11 +420,14 @@ const AddIssueTeamLead = ({
     }));
   };
 
-  const handleType = (e) => {
-    const selectThreadType = e.target.value
-    setSelectedThreadType(selectThreadType)
-  }
-
+  const handleSecondOptionChange = (e) => {
+    setSelectedOption(e.target.value);
+    setCreateIssue((prev) => {
+      const newCreateIssue = { ...prev };
+      newCreateIssue["thread_type"] = e.target.value;
+      return newCreateIssue;
+    });
+  };
   const handleCandidateTeamChange = (e) => {
     setCreateIssue((prevIssue) => {
       const newCreateIssue = { ...prevIssue };
@@ -590,44 +593,62 @@ const AddIssueTeamLead = ({
           ></textarea>
 
           <span className="selectProject">Step to Reproduce Thread</span>
-          <input
+          <textarea
             placeholder="Enter steps to reproduce thread"
             name={"steps_to_reproduce_thread"}
             value={createIssue.steps_to_reproduce_thread}
             style={{ margin: 0, marginBottom: "0.8rem" }}
             onChange={(e) => handleChange(e.target.value, e.target.name)}
-          ></input>
+          ></textarea>
 
           <span className="selectProject">Expected Product Behavior</span>
-          <input
-            placeholder="Enter steps to reproduce thread"
+          <textarea
+            placeholder="Enter Expected Product Behavior"
             name={"expected_product_behavior"}
             value={createIssue.expected_product_behavior}
             style={{ margin: 0, marginBottom: "0.8rem" }}
             onChange={(e) => handleChange(e.target.value, e.target.name)}
-          ></input>
+          ></textarea>
 
           <span className="selectProject">Actual product behavior</span>
-          <input
-            placeholder="Enter steps to reproduce thread"
+          <textarea
+            placeholder="Enter Actual product behavior"
             name={"actual_product_behavior"}
             value={createIssue.actual_product_behavior}
-            style={{ margin: 0, marginBottom: "0.8rem" }}
+            style={{ margin: 0, marginBottom: "0.8rem 0.8rem" }}
             onChange={(e) => handleChange(e.target.value, e.target.name)}
-          ></input>
+          ></textarea>
 
-          <span className="selectProject">Select Thread Type</span>
-          <br />
-          <select
-            className="addTaskDropDown"
-            style={{ margin: 0, marginBottom: '0.8rem' }}
-            onChange={handleType}
-            value={selectedThreadType} // Use the state variable as the value
-            name="thread_type"
-          >
-            <option value="bug">Bug</option>
-            <option value="suggestion">Suggestion</option>
-          </select>
+          <span className="selectProject">Choose Issue Type</span>
+          <div style={{ display: "flex", gap: "1rem" }}>
+            <label htmlFor="BUG" className="radio">
+              <input
+                className="radio_input dio"
+                type={"radio"}
+                id={"BUG"}
+                name="options"
+                value={"BUG"}
+                checked={selectedOption === "BUG"}
+                onChange={handleSecondOptionChange}
+              />
+              <div className="radio__radio"></div>
+              <p>Bug</p>
+            </label>
+            <label htmlFor="SUGGESTION" className="radio">
+              <input
+                className="radio_input"
+                type={"radio"}
+                id={"SUGGESTION"}
+                name="options"
+                value={"SUGGESTION"}
+                checked={selectedOption === "SUGGESTION"}
+                onChange={handleSecondOptionChange}
+              />
+              <div className="radio__radio"></div>
+              <p>Suggestion</p>
+            </label>
+          </div>
+
 
           <span className="selectProject">
             Add an Image to help explain your issue better (OPTIONAL)

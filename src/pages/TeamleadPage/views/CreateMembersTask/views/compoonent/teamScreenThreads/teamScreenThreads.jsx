@@ -132,17 +132,44 @@ const TeamScreenThreads = ({ status, id }) => {
       const now = new Date();
 
       if (foundThreadBeingUpadted) {
-        foundThreadBeingUpadted.comments.data.unshift({
+        const newCommentToAddToState = {
           ...newComment,
           created_date: dateFormat(now),
           _id: newCommentRes.info.inserted_id,
-        });
+        }
+        foundThreadBeingUpadted.comments.data.push(newCommentToAddToState);
         setThreads(updatedThreads);
+
+        const completedThreads = updatedThreads.filter(
+          (thread) => thread.current_status === "Completed"
+        );
+        const resolvedThreads = updatedThreads.filter(
+          (thread) => thread.current_status === "Resolved"
+        );
+        const inProgressThreads = updatedThreads.filter(
+          (thread) =>
+            thread.current_status === "In progress" ||
+            thread.current_status === "Created"
+        );
+
+        setCompletedThreads(completedThreads);
+        setResolvedThreads(resolvedThreads);
+        setInProgressThreads(inProgressThreads);
+
+        // switch to comments to show user new comment
+        setCommentsVisibility((prevVisibility) => ({
+          ...prevVisibility,
+          [foundThreadBeingUpadted._id]: true,
+        }))
+        setFormVisibility((prevVisibility) => ({
+          ...prevVisibility,
+          [foundThreadBeingUpadted._id]: false,
+        }))
       }
     } catch (error) {
       console.log(error);
       setLoadingcmnt(false);
-      toast.error("Error");
+      toast.error("An error occured while trying to add your comment. Please try again later");
     }
   };
 
@@ -172,47 +199,9 @@ const TeamScreenThreads = ({ status, id }) => {
       })
       .catch((error) => {
         console.error("Failed to update comment:", error.message);
+        setLoadingcmnt(false);
+        toast.error("An error occured while trying to update your comment. Please try again later");
       });
-  };
-
-  const editComment = async (text, commentId, id) => {
-    const editComments = {
-      comment: text,
-      document_id: commentId,
-    };
-
-    try {
-      const editedComment = (await updateComment(editComments)).data;
-      console.log(editedComment);
-    } catch (error) {
-      console.log(error);
-    }
-
-    // const updatedThreads = threads.map((thread) => {
-    //   if (thread._id === threadId) {
-    //     const updatedComments = thread.comments.map((comment) =>
-    //       comment._id === commentId ? { ...comment, comment: text } : comment
-    //     );
-    //     return {
-    //       ...thread,
-    //       comments: updatedComments,
-    //     };
-    //   }
-    //   return thread;
-    // });
-    // setThreads(updatedThreads);
-    // setEditingCommentId(commentId);
-    // setEditingCommentText(text);
-  };
-
-  const saveEditedComment = (commentId, threadId) => {
-    editComment(editingCommentText, commentId, threadId);
-    setEditingCommentId(null);
-    setEditingCommentText("");
-  };
-
-  const handleEdit = (text, commentId, threadId) => {
-    editComment(text, commentId, threadId);
   };
 
   const handleClose = (threadId) => {
@@ -299,7 +288,32 @@ const TeamScreenThreads = ({ status, id }) => {
                   return (
                     <div className="team-screen-threads-card">
                       <div className="thread-card">
-                      {thread.thread_type}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "end",
+                            width: "100%",
+                            marginBottom: "0.5rem",
+                          }}
+                        >
+                          <p
+                            style={{
+                              backgroundColor:
+                                thread.thread_type === "BUG"
+                                  ? "red"
+                                  : thread.thread_type === "SUGGESTION"
+                                  ? "green"
+                                  : null,
+                              color: "#fff",
+                              fontSize: "0.8rem",
+                              fontWeight: "600",
+                              padding: "0.3rem 0.5rem",
+                              borderRadius: "1.5rem",
+                            }}
+                          >
+                            {thread.thread_type}
+                          </p>
+                        </div>
                         {showModalStates[thread._id] && (
                           <div
                             className="modal-cont"
@@ -347,13 +361,6 @@ const TeamScreenThreads = ({ status, id }) => {
                             }}
                           >
                             {thread.thread_title}
-                            <br></br>
-                            {thread.steps_to_reproduce_thread}
-                            <br></br>
-                            {thread.expected_product_behavior}
-                            <br></br>
-                            {thread.actual_product_behavior}
-                            <br></br>
                           </p>
                           <div>
                             <p>Assigned to : {assignedTeamName}</p>
@@ -368,7 +375,24 @@ const TeamScreenThreads = ({ status, id }) => {
                               textTransform: "capitalize",
                             }}
                           >
-                            {thread.thread}
+                            <p>Details:</p>
+                            <p style={{ color: "#005734" }}>{thread.thread}</p>
+                            <br></br>
+                            <p>Steps to Reproduce:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.steps_to_reproduce_thread}
+                            </p>
+                            <br></br>
+                            <p>Expected Behavior:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.expected_product_behavior}
+                            </p>
+                            <br></br>
+                            <p>Actual Behavior:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.actual_product_behavior}
+                            </p>
+                            <br></br>
                           </p>
                           <div>
                             <div
@@ -454,19 +478,31 @@ const TeamScreenThreads = ({ status, id }) => {
                               <p className="comments">
                                 <FaRegComments
                                   onClick={() =>
-                                    setFormVisibility((prevVisibility) => ({
-                                      ...prevVisibility,
-                                      [thread._id]: !prevVisibility[thread._id],
-                                    }))
+                                    {
+                                      setFormVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: !prevVisibility[thread._id],
+                                      }));
+                                      setCommentsVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: false,
+                                      }))
+                                    }
                                   }
                                 />
                                 &bull;
                                 <span
                                   onClick={() =>
-                                    setCommentsVisibility((prevVisibility) => ({
-                                      ...prevVisibility,
-                                      [thread._id]: !prevVisibility[thread._id],
-                                    }))
+                                    {
+                                      setCommentsVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: !prevVisibility[thread._id],
+                                      }));
+                                      setFormVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: false,
+                                      }));
+                                    }
                                   }
                                 >{`${thread.comments.data.length} Comment${
                                   thread.comments.data.length !== 1 ? "s" : ""
@@ -524,7 +560,7 @@ const TeamScreenThreads = ({ status, id }) => {
                               Comments
                             </h3>
                             {React.Children.toArray(
-                              thread.comments.data.map((comment, index) => {
+                              [...thread.comments.data].reverse().map((comment, index) => {
                                 return (
                                   <div
                                     style={{
@@ -546,6 +582,9 @@ const TeamScreenThreads = ({ status, id }) => {
                                     <div className="candidate-comments-section">
                                       <p className="user-candidate">
                                         {comment.created_by}
+                                        <p className="date">
+                                          {dateFormat(comment.created_date)}
+                                        </p>
                                       </p>
                                       {editIndex === index ? (
                                         <input
@@ -571,7 +610,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                       {editIndex === index ? (
                                         <>
                                           <div className="button">
-                                            {currentUser.portfolio_info[0]
+                                            {currentUser.userinfo
                                               .username ===
                                               comment.created_by &&
                                               (loadingcmnt ? (
@@ -598,7 +637,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                       ) : (
                                         <>
                                           <div className="button">
-                                            {currentUser.portfolio_info[0]
+                                            {currentUser.userinfo
                                               .username ===
                                               comment.created_by && (
                                               <button
@@ -648,7 +687,32 @@ const TeamScreenThreads = ({ status, id }) => {
                   return (
                     <div className="team-screen-threads-card">
                       <div className="thread-card">
-                      {thread.thread_type}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "end",
+                            width: "100%",
+                            marginBottom: "0.5rem",
+                          }}
+                        >
+                          <p
+                            style={{
+                              backgroundColor:
+                                thread.thread_type === "BUG"
+                                  ? "red"
+                                  : thread.thread_type === "SUGGESTION"
+                                  ? "green"
+                                  : null,
+                              color: "#fff",
+                              fontSize: "0.8rem",
+                              fontWeight: "600",
+                              padding: "0.3rem 0.5rem",
+                              borderRadius: "1.5rem",
+                            }}
+                          >
+                            {thread.thread_type}
+                          </p>
+                        </div>
                         {showModalStates[thread._id] && (
                           <div
                             className="modal-cont"
@@ -710,13 +774,23 @@ const TeamScreenThreads = ({ status, id }) => {
                               textTransform: "capitalize",
                             }}
                           >
-                            {thread.thread}
+                            <p>Details:</p>
+                            <p style={{ color: "#005734" }}>{thread.thread}</p>
                             <br></br>
-                            {thread.steps_to_reproduce_thread}
+                            <p>Steps to Reproduce:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.steps_to_reproduce_thread}
+                            </p>
                             <br></br>
-                            {thread.expected_product_behavior}
+                            <p>Expected Behavior:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.expected_product_behavior}
+                            </p>
                             <br></br>
-                            {thread.actual_product_behavior}
+                            <p>Actual Behavior:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.actual_product_behavior}
+                            </p>
                             <br></br>
                           </p>
                           <div>
@@ -747,7 +821,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                 />
                               </div>
                               <div className="progress">
-                                {currentUser.portfolio_info[0].username ===
+                                {currentUser.userinfo.username ===
                                   thread.created_by &&
                                 thread.current_status === "In progress" ? (
                                   <div
@@ -786,7 +860,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                 />
                               </div>
                               <div className="progress">
-                                {currentUser.portfolio_info[0].username ===
+                                {currentUser.userinfo.username ===
                                   thread.created_by &&
                                 thread.current_status === "Completed" ? (
                                   <div
@@ -825,7 +899,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                 />
                               </div>
                               <div className="progress">
-                                {currentUser.portfolio_info[0].username ===
+                                {currentUser.userinfo.username ===
                                   thread.created_by &&
                                 thread.current_status === "Resolved" ? (
                                   <div
@@ -867,20 +941,32 @@ const TeamScreenThreads = ({ status, id }) => {
                             <div className="comments-section">
                               <p className="comments">
                                 <FaRegComments
-                                  onClick={() =>
-                                    setFormVisibility((prevVisibility) => ({
-                                      ...prevVisibility,
-                                      [thread._id]: !prevVisibility[thread._id],
-                                    }))
+                                  onClick={() => 
+                                    {
+                                      setFormVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: !prevVisibility[thread._id],
+                                      }))
+                                      setCommentsVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: false,
+                                      }))
+                                    }
                                   }
                                 />
                                 &bull;
                                 <span
-                                  onClick={() =>
-                                    setCommentsVisibility((prevVisibility) => ({
-                                      ...prevVisibility,
-                                      [thread._id]: !prevVisibility[thread._id],
-                                    }))
+                                  onClick={() => 
+                                    {
+                                      setCommentsVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: !prevVisibility[thread._id],
+                                      }))
+                                      setFormVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: false,
+                                      }));
+                                    }
                                   }
                                 >{`${thread.comments.data.length} Comment${
                                   thread.comments.data.length !== 1 ? "s" : ""
@@ -937,7 +1023,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                 Comments
                               </h3>
                               {React.Children.toArray(
-                                thread.comments.data.map((comment, index) => {
+                                [...thread.comments.data].reverse().map((comment, index) => {
                                   return (
                                     <div
                                       style={{
@@ -960,7 +1046,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                         <p className="user-candidate">
                                           {comment.created_by}
                                           <p className="date">
-                                            {comment.created_date}
+                                            {dateFormat(comment.created_date)}
                                           </p>
                                         </p>
                                         {editIndex === index ? (
@@ -987,7 +1073,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                         {editIndex === index ? (
                                           <>
                                             <div className="button">
-                                              {currentUser.portfolio_info[0]
+                                              {currentUser.userinfo
                                                 .username ===
                                                 comment.created_by &&
                                                 (loadingcmnt ? (
@@ -1015,7 +1101,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                         ) : (
                                           <>
                                             <div className="button">
-                                              {currentUser.portfolio_info[0]
+                                              {currentUser.userinfo
                                                 .username ===
                                                 comment.created_by && (
                                                 <button
@@ -1066,7 +1152,32 @@ const TeamScreenThreads = ({ status, id }) => {
                   return (
                     <div className="team-screen-threads-card">
                       <div className="thread-card">
-                      {thread.thread_type}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "end",
+                            width: "100%",
+                            marginBottom: "0.5rem",
+                          }}
+                        >
+                          <p
+                            style={{
+                              backgroundColor:
+                                thread.thread_type === "BUG"
+                                  ? "red"
+                                  : thread.thread_type === "SUGGESTION"
+                                  ? "green"
+                                  : null,
+                              color: "#fff",
+                              fontSize: "0.8rem",
+                              fontWeight: "600",
+                              padding: "0.3rem 0.5rem",
+                              borderRadius: "1.5rem",
+                            }}
+                          >
+                            {thread.thread_type}
+                          </p>
+                        </div>
                         {showModalStates[thread._id] && (
                           <div
                             className="modal-cont"
@@ -1114,13 +1225,6 @@ const TeamScreenThreads = ({ status, id }) => {
                             }}
                           >
                             {thread.thread_title}
-                            <br></br>
-                            {thread.steps_to_reproduce_thread}
-                            <br></br>
-                            {thread.expected_product_behavior}
-                            <br></br>
-                            {thread.actual_product_behavior}
-                            <br></br>
                           </p>
                           <div>
                             <p>Assigned to : {assignedTeamName}</p>
@@ -1135,7 +1239,24 @@ const TeamScreenThreads = ({ status, id }) => {
                               textTransform: "capitalize",
                             }}
                           >
-                            {thread.thread}
+                            <p>Details:</p>
+                            <p style={{ color: "#005734" }}>{thread.thread}</p>
+                            <br></br>
+                            <p>Steps to Reproduce:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.steps_to_reproduce_thread}
+                            </p>
+                            <br></br>
+                            <p>Expected Behavior:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.expected_product_behavior}
+                            </p>
+                            <br></br>
+                            <p>Actual Behavior:</p>
+                            <p style={{ color: "#005734" }}>
+                              {thread.actual_product_behavior}
+                            </p>
+                            <br></br>
                           </p>
                           <div>
                             <div
@@ -1215,20 +1336,32 @@ const TeamScreenThreads = ({ status, id }) => {
                             <div className="comments-section">
                               <p className="comments">
                                 <FaRegComments
-                                  onClick={() =>
-                                    setFormVisibility((prevVisibility) => ({
-                                      ...prevVisibility,
-                                      [thread._id]: !prevVisibility[thread._id],
-                                    }))
+                                  onClick={() => 
+                                    {
+                                      setFormVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: !prevVisibility[thread._id],
+                                      }))
+                                      setCommentsVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: false,
+                                      }))
+                                    }
                                   }
                                 />
                                 &bull;
                                 <span
                                   onClick={() =>
-                                    setCommentsVisibility((prevVisibility) => ({
-                                      ...prevVisibility,
-                                      [thread._id]: !prevVisibility[thread._id],
-                                    }))
+                                    {
+                                      setCommentsVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: !prevVisibility[thread._id],
+                                      }))
+                                      setFormVisibility((prevVisibility) => ({
+                                        ...prevVisibility,
+                                        [thread._id]: false,
+                                      }))
+                                    }
                                   }
                                 >{`${thread.comments.data.length} Comment${
                                   thread.comments.data.length !== 1 ? "s" : ""
@@ -1286,7 +1419,7 @@ const TeamScreenThreads = ({ status, id }) => {
                               Comments
                             </h3>
                             {React.Children.toArray(
-                              thread.comments.data.map((comment, index) => {
+                              [...thread.comments.data].reverse().map((comment, index) => {
                                 return (
                                   <div
                                     style={{
@@ -1308,6 +1441,9 @@ const TeamScreenThreads = ({ status, id }) => {
                                     <div className="candidate-comments-section">
                                       <p className="user-candidate">
                                         {comment.created_by}
+                                        <p className="date">
+                                          {dateFormat(comment.created_date)}
+                                        </p>
                                       </p>
                                       {editIndex === index ? (
                                         <input
@@ -1333,7 +1469,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                       {editIndex === index ? (
                                         <>
                                           <div className="button">
-                                            {currentUser.portfolio_info[0]
+                                            {currentUser.userinfo
                                               .username ===
                                               comment.created_by &&
                                               (loadingcmnt ? (
@@ -1360,7 +1496,7 @@ const TeamScreenThreads = ({ status, id }) => {
                                       ) : (
                                         <>
                                           <div className="button">
-                                            {currentUser.portfolio_info[0]
+                                            {currentUser.userinfo
                                               .username ===
                                               comment.created_by && (
                                               <button

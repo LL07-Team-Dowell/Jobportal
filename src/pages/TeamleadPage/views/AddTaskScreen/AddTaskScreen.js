@@ -16,6 +16,8 @@ import SubprojectSelectWithSearch from "../../../../components/SubprojectSelectW
 import useListenToKeyStrokeInElement from "../../../../hooks/useListenToKeyStrokeInElement";
 import { formatSubprojectStringItemToHTML } from "../../util/formatSubprojectStringItemToHTML";
 import ContentEditable from "react-contenteditable";
+import { formatDateForAPI } from "../../../../helpers/helpers";
+import { getCurrentTimeFromDowell } from "../../../../services/dowellTimeServices";
 
 const AddTaskScreen = ({
   teamMembers,
@@ -40,9 +42,12 @@ const AddTaskScreen = ({
   const [disabled, setDisabled] = useState(true);
   const navigate = useNavigate();
   const { currentUser } = useCurrentUserContext();
-  const [time, settime] = useState(new Date().toString());
-  const TimeValue = `${time.split(" ")[0]} ${time.split(" ")[1]} ${time.split(" ")[2]
-    } ${time.split(" ")[3]}`;
+  // const [time, settime] = useState(new Date().toString());
+  // const [ TimeValue, setTimeValue ] = useState(new Date());
+  // const TimeValue = `${time.split(" ")[0]} ${time.split(" ")[1]} ${time.split(" ")[2]
+  //   } ${time.split(" ")[3]}`;
+  const time = new Date().toString();
+  const [ TimeValue, setTimeValue ] = useState(`${time.split(" ")[0]} ${time.split(" ")[1]} ${time.split(" ")[2]} ${time.split(" ")[3]}`);
   const [optionValue, setoptionValue] = useState("");
   const [taskStartTime, setTaskStartTime] = useState("");
   const [taskEndTime, setTaskEndTime] = useState("");
@@ -162,7 +167,7 @@ const AddTaskScreen = ({
     if (inputsAreFilled) {
       console.log({ TASKSS: tasks.find(task => task.task === taskName) })
       if (tasks.find(task => task?.task?.toLocaleLowerCase().trim() === taskName.toLocaleLowerCase().trim() && task.is_active) !== undefined) return toast.info('You cannot add the same log')
-      if (!isStringValid(taskName)) return toast.info('The log entered should be more than 25 characters and more than 5 words.')
+      if (!isStringValid(taskName)) return toast.info('The log entered should have at least 25 characters and at least 5 words.')
       if (taskEndTime === '00:00') return toast.info("You can only update work logs for today")
       if (duration <= 15) {
         if (taskStartTime > taskEndTime) return toast.info('Work log start time must be less than its end time');
@@ -184,7 +189,7 @@ const AddTaskScreen = ({
       if (duration <= 15) {
         const tasksExcludingCurrentTaskBeingEdited = tasks.filter(task => task._id !== taskId);
         if (tasksExcludingCurrentTaskBeingEdited.find(task => task?.task?.toLocaleLowerCase().trim() === taskName.toLocaleLowerCase().trim() && task.is_active) !== undefined) return toast.info('You cannot add the same log')
-        if (!isStringValid(taskName)) return toast.info('The log entered should be more than 25 characters and more than 5 words.')
+        if (!isStringValid(taskName)) return toast.info('The log entered should have at least 25 characters and at least 5 words.')
         if (taskEndTime === '00:00') return toast.info("You can only update work logs for today")
         if (taskStartTime > taskEndTime) return toast.info('Work log start time must be less than its end time');
 
@@ -287,7 +292,7 @@ const AddTaskScreen = ({
     return diffInMs / (1000 * 60);
   }
 
-  const formattedDate = convertDateFormat(time);
+  // const formattedDate = convertDateFormat(time);
   // console.log(formattedDate);
 
   // console.log(time);
@@ -322,44 +327,56 @@ const AddTaskScreen = ({
     setTaskDetailForTodayLoading(true);
     setTaskDetailForTodayLoaded(false);
 
-    const today = new Date();
-    const [year, month, day] = [today.getFullYear(), today.getMonth() + 1, today.getDate()];
-    const todayDate = `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
-
-    const dataToPost = {
-      "company_id": currentUser.portfolio_info[0].org_id,
-      "user_id": currentUser.userinfo.userID,
-      "data_type": currentUser.portfolio_info[0].data_type,
-      "task_created_date": todayDate,
+    const data = {
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     }
 
-    getCandidateTasksOfTheDayV2(dataToPost).then(res => {
-      const [parentTaskAddedForToday, listsOfTasksForToday] = [
-        res.data.task_details.find(task =>
-          task.task_created_date === todayDate &&
-          task.applicant === currentUser.userinfo.username &&
-          task.task_added_by === currentUser.userinfo.username &&
-          task.data_type === currentUser.portfolio_info[0].data_type &&
-          task.company_id === currentUser.portfolio_info[0].org_id
-        )
-        ,
-        res.data.task
-      ]
+    getCurrentTimeFromDowell(data).then(res => {
+      const today = res.data?.current_time;
+      const todayInDateString = new Date(today).toDateString();
 
-      if (parentTaskAddedForToday && listsOfTasksForToday.length > 0) {
-        setTaskDetailForToday({
-          parentTask: parentTaskAddedForToday,
-          tasks: listsOfTasksForToday,
-        })
-        setTasks(listsOfTasksForToday?.reverse());
+      setTimeValue(`${todayInDateString.split(" ")[0]} ${todayInDateString.split(" ")[1]} ${todayInDateString.split(" ")[2]} ${todayInDateString.split(" ")[3]}`);
+      const todayDate = formatDateForAPI(today);
+  
+      const dataToPost = {
+        "company_id": currentUser.portfolio_info[0].org_id,
+        "user_id": currentUser.userinfo.userID,
+        "data_type": currentUser.portfolio_info[0].data_type,
+        "task_created_date": todayDate,
       }
-
-      setTaskDetailForTodayLoaded(true);
-      setTaskDetailForTodayLoading(false);
+  
+      getCandidateTasksOfTheDayV2(dataToPost).then(res => {
+        const [parentTaskAddedForToday, listsOfTasksForToday] = [
+          res.data.task_details.find(task =>
+            task.task_created_date === todayDate &&
+            task.applicant === currentUser.userinfo.username &&
+            task.task_added_by === currentUser.userinfo.username &&
+            task.data_type === currentUser.portfolio_info[0].data_type &&
+            task.company_id === currentUser.portfolio_info[0].org_id
+          )
+          ,
+          res.data.task
+        ]
+  
+        if (parentTaskAddedForToday && listsOfTasksForToday.length > 0) {
+          setTaskDetailForToday({
+            parentTask: parentTaskAddedForToday,
+            tasks: listsOfTasksForToday,
+          })
+          setTasks(listsOfTasksForToday?.reverse());
+        }
+  
+        setTaskDetailForTodayLoaded(true);
+        setTaskDetailForTodayLoading(false);
+  
+      }).catch(err => {
+        console.log(err);
+        setTaskDetailForTodayLoading(false);
+      })
 
     }).catch(err => {
-      console.log(err);
       setTaskDetailForTodayLoading(false);
+      toast.info('An error occured while trying to determine your current time')
     })
 
   }, [])
@@ -455,10 +472,14 @@ const AddTaskScreen = ({
 
   // console.log({ taskStartTime });
 
-  const addTaskForToday = async (startTime, endTime, task, details, updateTask = false) => {
-    const today = new Date();
-    const [year, month, day] = [today.getFullYear(), today.getMonth() + 1, today.getDate()];
-    const todayDate = `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
+  const makeAPICallToAddTasks = async (
+    today,
+    startTime,
+    endTime,
+    task,
+    updateTask,
+  ) => {
+    const todayDate = formatDateForAPI(today);
 
     const dataToPost = {
       "project": optionValue,
@@ -481,9 +502,6 @@ const AddTaskScreen = ({
       "data_type": currentUser.portfolio_info[0].data_type,
       "task_created_date": todayDate,
     }
-
-    setLoading(true);
-    setDisabled(true);
 
     try {
 
@@ -555,6 +573,36 @@ const AddTaskScreen = ({
     } catch (error) {
       console.log(error);
       toast.error('Something went wrong while trying to add your work log. Please try again later')
+      setLoading(false);
+      setDisabled(false);
+    }
+  }
+
+  const addTaskForToday = async (startTime, endTime, task, details, updateTask = false) => {
+  
+    setLoading(true);
+    setDisabled(true);
+
+
+    // fetching time from dowell clock to prevent manipulation by changing system date/time
+    try {
+      const data = {
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      }
+      const dowellClockResponse = (await getCurrentTimeFromDowell(data)).data;
+      
+      makeAPICallToAddTasks(
+        dowellClockResponse?.current_time, 
+        startTime, 
+        endTime, 
+        task,
+        updateTask
+      );
+
+    } catch (error) {
+      console.log('Fetching time from dowell failed', error);
+      toast.error('An error occurred while trying to determine your current time. Please try adding later.')
+      
       setLoading(false);
       setDisabled(false);
     }

@@ -39,14 +39,14 @@ const TaskScreen = ({
   const { currentUser } = useCurrentUserContext();
   const { userTasks, setUserTasks } = useCandidateTaskContext();
   const navigate = useNavigate();
-  const [tasksToShow, setTasksToShow] = useState([]);
-  const [daysInMonth, setDaysInMonth] = useState(0);
-  const [currentMonth, setCurrentMonth] = useState("");
+  // const [tasksToShow, setTasksToShow] = useState([]);
+  // const [daysInMonth, setDaysInMonth] = useState(0);
+  // const [currentMonth, setCurrentMonth] = useState("");
   const [datesToStyle, setDatesToStyle] = useState([]);
 
   const [project, setproject] = useState(null);
   console.log(project);
-  const [tasksofuser, settasksofuser] = useState([]);
+  // const [tasksofuser, settasksofuser] = useState([]);
   const [taskdetail2, settaskdetail2] = useState([]);
   const [value, setValue] = useState(new Date());
   const [value1, setValue1] = useState(new Date());
@@ -82,16 +82,29 @@ const TaskScreen = ({
     setproject(assignedProject[0]);
     setValue1(new Date());
     setDatesToStyle([]);
+    setTasksForTheDay(null);
+
+    const dateFormattedForAPI = formatDateForAPI(new Date());
+    const dataToPost = {
+      "company_id": currentUser.portfolio_info[0].org_id,
+      "user_id": currentUser.userinfo.userID,
+      "data_type": currentUser.portfolio_info[0].data_type,
+      "task_created_date": dateFormattedForAPI,
+    }
 
     Promise.all([
-      getCandidateTask(currentUser.portfolio_info[0].org_id),
+      // getCandidateTask(currentUser.portfolio_info[0].org_id),
+      getCandidateTasksOfTheDayV2(dataToPost),
       getAllCompanyUserSubProject(currentUser.portfolio_info[0].org_id, currentUser.portfolio_info[0].data_type),
       loadProjects && getSettingUserProject(),
     ]).then(res => {
+      // setUserTasks(
+      //   res[0]?.data?.response?.data?.filter(
+      //     (v) => v.applicant === currentUser.userinfo.username
+      //   )
+      // );
       setUserTasks(
-        res[0]?.data?.response?.data?.filter(
-          (v) => v.applicant === currentUser.userinfo.username
-        )
+        res[0]?.data?.task_details
       );
       setLoading(false);
       setAllSubprojects(res[1]);
@@ -123,32 +136,44 @@ const TaskScreen = ({
   }, []);
 
   useEffect(() => {
+    // settaskdetail2(
+    //   userTasks.filter((d) => {
+    //     const dateTime =
+    //       d.task_created_date.split(" ")[0] +
+    //       " " +
+    //       d.task_created_date.split(" ")[1] +
+    //       " " +
+    //       d.task_created_date.split(" ")[2] +
+    //       " " +
+    //       d.task_created_date.split(" ")[3];
+    //     const calendatTime =
+    //       value.toString().split(" ")[0] +
+    //       " " +
+    //       value.toString().split(" ")[1] +
+    //       " " +
+    //       value.toString().split(" ")[2] +
+    //       " " +
+    //       value.toString().split(" ")[3];
+    //     console.log({ dateTime, calendatTime });
+    //     return dateTime === calendatTime;
+    //   })
+    // );
+    
     settaskdetail2(
-      userTasks.filter((d) => {
-        const dateTime =
-          d.task_created_date.split(" ")[0] +
-          " " +
-          d.task_created_date.split(" ")[1] +
-          " " +
-          d.task_created_date.split(" ")[2] +
-          " " +
-          d.task_created_date.split(" ")[3];
-        const calendatTime =
-          value.toString().split(" ")[0] +
-          " " +
-          value.toString().split(" ")[1] +
-          " " +
-          value.toString().split(" ")[2] +
-          " " +
-          value.toString().split(" ")[3];
-        console.log({ dateTime, calendatTime });
-        return dateTime === calendatTime;
-      })
+      userTasks.filter((d) => 
+        formatDateForAPI(d.task_created_date) ===
+        formatDateForAPI(value)
+      )
     );
   }, [value, userTasks]);
 
   useEffect(() => {
-    if (!project || tasksForProjectLoading) return;
+    if (!project || tasksForProjectLoading) {
+      setTasksForTheDay(null);
+      setDatesToStyle([]);
+      setSubprojectSelected('');
+      return;
+    }
 
     const dataToPost = {
       "company_id": currentUser.portfolio_info[0].org_id,
@@ -180,7 +205,11 @@ const TaskScreen = ({
       ].flat();
       setDatesToStyle(datesUserHasTaskForProject);
 
-      settaskdetail2(projectsMatching.filter(item => item.task_created_date === value));
+      settaskdetail2(
+        projectsMatching.filter(item => 
+          formatDateForAPI(item.task_created_date) === formatDateForAPI(value)
+        )
+      );
     }).catch(err => {
       console.log(err);
       setTasksForProjectLoading(false);
@@ -228,15 +257,15 @@ const TaskScreen = ({
   //   setCurrentMonth(today.toLocaleDateString("en-us", { month: "long" }));
   // }, []);
 
-  useEffect(() => {
-    setTasksToShow(
-      userTasks.filter(
-        (task) =>
-          formatDateForAPI(task.task_created_date) ===
-          formatDateForAPI(new Date())
-      )
-    );
-  }, [userTasks]);
+  // useEffect(() => {
+  //   setTasksToShow(
+  //     userTasks.filter(
+  //       (task) =>
+  //         formatDateForAPI(task.task_created_date) ===
+  //         formatDateForAPI(new Date())
+  //     )
+  //   );
+  // }, [userTasks]);
 
   useEffect(() => {
     const tab = params.get('tab');
@@ -259,7 +288,7 @@ const TaskScreen = ({
   };
 
   const handleDateChange = async (dateSelected) => {
-    setDaysInMonth(getDaysInMonth(dateSelected));
+    // setDaysInMonth(getDaysInMonth(dateSelected));
     setValue1(new Date(dateSelected))
     // setTasksToShow(userTasks.filter(task => new Date(task.created).toDateString() === dateSelected.toDateString()));
     settaskdetail2(
@@ -269,9 +298,10 @@ const TaskScreen = ({
           formatDateForAPI(new Date(dateSelected))
       )
     );
-    setCurrentMonth(
-      new Date(dateSelected).toLocaleDateString("en-us", { month: "long" })
-    );
+
+    // setCurrentMonth(
+    //   new Date(dateSelected).toLocaleDateString("en-us", { month: "long" })
+    // );
 
     setSingleTaskLoading(true);
     setTasksForTheDay(null);
