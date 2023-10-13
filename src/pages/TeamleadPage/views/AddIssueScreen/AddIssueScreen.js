@@ -309,7 +309,7 @@ const AddIssueScreen = ({
               style={{ display: "block" }}
             />
           )}
-          {candidateView && teams && (
+          {candidateView && (
             <>
               <span className="selectProject">
                 Select Team you want to create this issue in
@@ -324,7 +324,7 @@ const AddIssueScreen = ({
               >
                 <option value="">Select Team</option>
                 {/* Dynamically populate the options */}
-                {teams.map((team) => (
+                {teams?.map((team) => (
                   <option key={team._id} value={team._id}>
                     {team.team_name}
                   </option>
