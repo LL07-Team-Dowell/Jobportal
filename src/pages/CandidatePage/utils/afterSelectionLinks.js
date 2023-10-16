@@ -5,6 +5,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import { FiSend } from "react-icons/fi";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { AiOutlinePlus } from "react-icons/ai";
+import { RiFileList3Line } from "react-icons/ri";
 
 export const afterSelectionLinks = [
   {
@@ -22,6 +23,11 @@ export const afterSelectionLinks = [
     icon: <AiOutlineTeam />,
     linkAddress: "/teams",
   },
+  // {
+  //   text: "Log Requests",
+  //   icon: <RiFileList3Line />,
+  //   linkAddress: "/work-log-request",
+  // },
   {
     text: "User",
     icon: <FiUser />,

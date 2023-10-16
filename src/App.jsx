@@ -81,10 +81,12 @@ import TeamReport from "./pages/AdminPage/views/Reports/TeamReoprt/TeamReport";
 import { reportOptionsPermitted } from "./components/ShareJobModal/ShareJobModal";
 import LeaderboardReport from "./pages/AdminPage/views/Reports/LeaderboardReport/LeaderboardReport";
 import WorkLogRequest from "./pages/TeamleadPage/views/WorkLogRequest/WorkLogRequest";
+import WorkLogRequestCandidate from "./pages/CandidatePage/views/WorkLogRequest/WorkLogRequest";
 import { teamManagementProductName } from "./utils/utils";
+import LogRequest from "./pages/TeamleadPage/views/WorkLogRequest/LogRequestNav";
 
 function App() {
-  console.log = () => { };
+  console.log = () => {};
 
   const {
     currentUser,
@@ -927,7 +929,7 @@ function App() {
           element={
             <CandidateTaskContextProvider>
               <ValuesProvider>
-                <WorkLogRequest />
+                <LogRequest />
               </ValuesProvider>
             </CandidateTaskContextProvider>
           }
@@ -1517,6 +1519,16 @@ function App() {
               </TeamCandidateProvider>
             </CandidateTaskContextProvider>
           </NavigationContextProvider>
+        }
+      />
+      <Route
+        path='/work-log-request'
+        element={
+          <ResponsesContextProvider>
+            <candidateValuesProvider>
+              <WorkLogRequestCandidate />
+            </candidateValuesProvider>
+          </ResponsesContextProvider>
         }
       />
       <Route

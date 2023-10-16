@@ -80,7 +80,7 @@ const TeamScreenTasks = () => {
         <Navbar
           title={team?.team_name.toString()}
           removeButton={true}
-          addTeamTask={true}
+          addTeamTask={team?.created_by === currentUser?.userinfo?.username ? true : false}
           handleAddTeamTaskFunction={() => setShowCreateTask(true)}
           addTeamTaskTitle='Add Task'
         />
@@ -93,7 +93,7 @@ const TeamScreenTasks = () => {
         tasks={tasks}
         setTasks={setTasks}
       />
-      {showCreatTask && (
+      {showCreatTask && team?.created_by === currentUser.userinfo.username && (
         <CreateTask
           id={id}
           setTasks={setTasks}
