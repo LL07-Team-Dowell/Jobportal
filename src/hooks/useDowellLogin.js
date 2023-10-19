@@ -10,6 +10,7 @@ import { dowellLoginUrl } from "../services/axios";
 import { getSettingUserProfileInfo } from "../services/settingServices";
 import { teamManagementProductName } from "../utils/utils";
 import { toast } from "react-toastify";
+import { useCurrentUserContext } from "../contexts/CurrentUserContext";
 
 export default function useDowellLogin(
   updateCurrentUserState,
@@ -33,6 +34,7 @@ export default function useDowellLogin(
   const currentProductUserDetails = sessionStorage.getItem("product_user");
   const currentReportsSession = sessionStorage.getItem("reports_user_session");
   const currentReportsUserDetails = sessionStorage.getItem("reports_user");
+  const { currentUser } = useCurrentUserContext();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -175,6 +177,7 @@ export default function useDowellLogin(
             console.log('aaa', res);
           }).catch(err => {
             // unauthorized
+            if (!currentUser) return
             updateCurrentAuthSessionStatus(true);
             toast.info('Login session expired. Redirecting to login...')
           });
@@ -315,6 +318,7 @@ export default function useDowellLogin(
             console.log('aaa', res);
           }).catch(err => {
             // unauthorized
+            if (!currentUser) return
             updateCurrentAuthSessionStatus(true);
             toast.info('Login session expired. Redirecting to login...')
           });
@@ -386,6 +390,7 @@ export default function useDowellLogin(
           console.log('aaa', res);
         }).catch(err => {
           // unauthorized
+          if (!currentUser) return
           updateCurrentAuthSessionStatus(true);
           toast.info('Login session expired. Redirecting to login...')
         });
@@ -450,6 +455,7 @@ export default function useDowellLogin(
         console.log('aaa', res);
       }).catch(err => {
         // unauthorized
+        if (!currentUser) return
         updateCurrentAuthSessionStatus(true);
         toast.info('Login session expired. Redirecting to login...')
       });
