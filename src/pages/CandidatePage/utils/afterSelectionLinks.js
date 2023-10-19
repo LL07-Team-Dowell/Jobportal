@@ -19,15 +19,15 @@ export const afterSelectionLinks = [
     linkAddress: "/task",
   },
   {
+    text: "Log Requests",
+    icon: <RiFileList3Line />,
+    linkAddress: "/work-log-request",
+  },
+  {
     text: "Teams",
     icon: <AiOutlineTeam />,
     linkAddress: "/teams",
   },
-  // {
-  //   text: "Log Requests",
-  //   icon: <RiFileList3Line />,
-  //   linkAddress: "/work-log-request",
-  // },
   // {
   //   text: "User",
   //   icon: <FiUser />,

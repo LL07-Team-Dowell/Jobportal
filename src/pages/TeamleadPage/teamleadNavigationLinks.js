@@ -15,11 +15,11 @@ export const teamleadNavigationLinks = [
     icon: <ImStack />,
     text: "Work logs",
   },
-  // {
-  //   linkAddress: "/request",
-  //   icon: <RiFileList3Line />,
-  //   text: "Log requests",
-  // },
+  {
+    linkAddress: "/request",
+    icon: <RiFileList3Line />,
+    text: "Log requests",
+  },
   {
     linkAddress: "/create-task",
     icon: <GiTeamIdea />,
