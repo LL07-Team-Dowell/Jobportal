@@ -16,15 +16,22 @@ import { useCurrentUserContext } from "../../contexts/CurrentUserContext";
 import { teamManagementProductName } from "../../utils/utils";
 import { testingRoles } from "../../utils/testingRoles";
 import HorizontalBarLoader from "../../components/HorizontalBarLoader/HorizontalBarLoader";
+import useCheckCurrentAuthStatus from "../../hooks/useCheckCurrentAuthStatus";
 
 const JobLandingLayout = ({ children, user, afterSelection, hideSideNavigation, hideSearch }) => {
     const [ searchValue, setSearchValue ] = useState("");
     const isLargeScreen = useMediaQuery("(min-width: 992px)");
     const [ screenTitle, setScreenTitle ] = useState("Work logs");
     const location = useLocation();
-    const { currentUser, currentAuthSessionExpired } = useCurrentUserContext();
+    const { 
+      currentUser, 
+      currentAuthSessionExpired, 
+      setCurrentAuthSessionExpired 
+    } = useCurrentUserContext();
     const [ isSuperUser, setIsSuperUser ] = useState(false);
 
+    useCheckCurrentAuthStatus(currentUser, setCurrentAuthSessionExpired);
+    
     useEffect(() => {
         
         if (location.pathname.includes("teams")) return setScreenTitle("Teams");

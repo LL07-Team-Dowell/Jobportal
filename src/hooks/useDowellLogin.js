@@ -2,19 +2,16 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   generateAuthToken,
-  getAuthStatus,
   getUserInfoFromLoginAPI,
   getUserInfoFromPortfolioAPI,
 } from "../services/authServices";
 import { dowellLoginUrl } from "../services/axios";
 import { getSettingUserProfileInfo } from "../services/settingServices";
 import { teamManagementProductName } from "../utils/utils";
-import { toast } from "react-toastify";
 
 export default function useDowellLogin(
   updateCurrentUserState,
   updatePageLoading,
-  updateCurrentAuthSessionStatus,
   updatePublicUserState,
   updateDetailsForPublicUser,
   updateNoUserDetailFound,
@@ -166,20 +163,6 @@ export default function useDowellLogin(
         if (currentLocalUserDetails) {
           const parsedUserDetails = JSON.parse(currentLocalUserDetails);
 
-          // GET USER'S CURRENT AUTH STATUS
-          getAuthStatus({
-            name: `${parsedUserDetails?.userinfo?.first_name} ${parsedUserDetails?.userinfo?.last_name}`,
-            email: parsedUserDetails?.userinfo?.email,
-          }).then(res => {
-            // STILL AUTHORIZED
-            console.log('aaa', res);
-          }).catch(err => {
-            // unauthorized
-            if (!parsedUserDetails) return
-            updateCurrentAuthSessionStatus(true);
-            toast.info('Login session expired. Redirecting to login...')
-          });
-
           updateCurrentUserState(parsedUserDetails);
           updatePageLoading(false);
           return
@@ -314,20 +297,6 @@ export default function useDowellLogin(
         if (currentLocalUserDetails) {
           const parsedUserDetails = JSON.parse(currentLocalUserDetails);
 
-          // GET USER'S CURRENT AUTH STATUS
-          getAuthStatus({
-            name: `${parsedUserDetails?.userinfo?.first_name} ${parsedUserDetails?.userinfo?.last_name}`,
-            email: parsedUserDetails?.userinfo?.email,
-          }).then(res => {
-            // STILL AUTHORIZED
-            console.log('aaa', res);
-          }).catch(err => {
-            // unauthorized
-            if (!parsedUserDetails) return
-            updateCurrentAuthSessionStatus(true);
-            toast.info('Login session expired. Redirecting to login...')
-          });
-
           updateCurrentUserState(parsedUserDetails);
           updatePageLoading(false);
           return
@@ -355,13 +324,16 @@ export default function useDowellLogin(
               "company_id": foundTeamManagementProductInPortfolio?.org_id,
             }).then(res => {
               sessionStorage.setItem('token', res?.data?.access_token);
+              
+              sessionStorage.setItem('user', JSON.stringify(currentUserDetails));
+              updateCurrentUserState(currentUserDetails);
+              updatePageLoading(false);
             }).catch(err => {
               console.log('Failed to get token', err);
+              sessionStorage.setItem('user', JSON.stringify(currentUserDetails));
+              updateCurrentUserState(currentUserDetails);
+              updatePageLoading(false);
             })
-
-            sessionStorage.setItem('user', JSON.stringify(currentUserDetails));
-            updateCurrentUserState(currentUserDetails);
-            updatePageLoading(false);
           })
           .catch((err) => {
             console.log(err);
@@ -385,20 +357,6 @@ export default function useDowellLogin(
 
       if (currentLocalUserDetails) {
         const parsedUserDetails = JSON.parse(currentLocalUserDetails);
-
-        // GET USER'S CURRENT AUTH STATUS
-        getAuthStatus({
-          name: `${parsedUserDetails?.userinfo?.first_name} ${parsedUserDetails?.userinfo?.last_name}`,
-          email: parsedUserDetails?.userinfo?.email,
-        }).then(res => {
-          // STILL AUTHORIZED
-          console.log('aaa', res);
-        }).catch(err => {
-          // unauthorized
-          if (!parsedUserDetails) return
-          updateCurrentAuthSessionStatus(true);
-          toast.info('Login session expired. Redirecting to login...')
-        });
 
         updateCurrentUserState(parsedUserDetails);
         updatePageLoading(false);
@@ -428,13 +386,16 @@ export default function useDowellLogin(
             "company_id": foundTeamManagementProductInPortfolio?.org_id,
           }).then(res => {
             sessionStorage.setItem('token', res?.data?.access_token);
+
+            sessionStorage.setItem('user', JSON.stringify(currentUserDetails));
+            updateCurrentUserState(currentUserDetails);
+            updatePageLoading(false);
           }).catch(err => {
             console.log('Failed to get token', err);
+            sessionStorage.setItem('user', JSON.stringify(currentUserDetails));
+            updateCurrentUserState(currentUserDetails);
+            updatePageLoading(false);
           })
-
-          sessionStorage.setItem('user', JSON.stringify(currentUserDetails));
-          updateCurrentUserState(currentUserDetails);
-          updatePageLoading(false);
         })
         .catch((err) => {
           console.log(err);
@@ -450,20 +411,6 @@ export default function useDowellLogin(
 
     if (currentLocalUserDetails) {
       const parsedUserDetails = JSON.parse(currentLocalUserDetails);
-
-      // GET USER'S CURRENT AUTH STATUS
-      getAuthStatus({
-        name: `${parsedUserDetails?.userinfo?.first_name} ${parsedUserDetails?.userinfo?.last_name}`,
-        email: parsedUserDetails?.userinfo?.email,
-      }).then(res => {
-        // STILL AUTHORIZED
-        console.log('aaa', res);
-      }).catch(err => {
-        // unauthorized
-        if (!parsedUserDetails) return
-        updateCurrentAuthSessionStatus(true);
-        toast.info('Login session expired. Redirecting to login...')
-      });
 
       updateCurrentUserState(parsedUserDetails);
       updatePageLoading(false);
