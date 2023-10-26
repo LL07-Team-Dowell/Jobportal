@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Jobportal/static/css/main.20f3dbd8.css",
-    "main.js": "/Jobportal/static/js/main.805e32a2.js",
+    "main.css": "/Jobportal/static/css/main.3181654c.css",
+    "main.js": "/Jobportal/static/js/main.99c55210.js",
     "static/js/703.0953db91.chunk.js": "/Jobportal/static/js/703.0953db91.chunk.js",
     "static/js/513.e6c6bb6a.chunk.js": "/Jobportal/static/js/513.e6c6bb6a.chunk.js",
     "static/js/787.7ad4c28f.chunk.js": "/Jobportal/static/js/787.7ad4c28f.chunk.js",
@@ -17,6 +17,7 @@
     "static/media/tasks-done.jpg": "/Jobportal/static/media/tasks-done.554339ff1fd5f15b610d.jpg",
     "static/media/employee.png": "/Jobportal/static/media/employee.650ea1fae32bd34c3b30.png",
     "static/media/research.png": "/Jobportal/static/media/research.3d0398e3fa80a4b77b82.png",
+    "static/media/auth-login.jpg": "/Jobportal/static/media/auth-login.062b2fa24f9fb13c324c.jpg",
     "static/media/hero_img.png": "/Jobportal/static/media/hero_img.0e8f1743a47b4c9e9e62.png",
     "static/media/dowell-logo.png": "/Jobportal/static/media/dowell-logo.85d017e6d34ecfcf0163.png",
     "static/media/freelancer.png": "/Jobportal/static/media/freelancer.60ff66d3110c58ad8c12.png",
@@ -41,14 +42,14 @@
     "static/media/backpage.svg": "/Jobportal/static/media/backpage.777e44e1d75059e9da029b6bd7a7b0ad.svg",
     "static/media/plus.svg": "/Jobportal/static/media/plus.f5b29c665e44f20081d19591213d336e.svg",
     "static/media/selectorArrow.svg": "/Jobportal/static/media/selectorArrow.f38bb34f6d4cf04e456f542b92a487d0.svg",
-    "main.20f3dbd8.css.map": "/Jobportal/static/css/main.20f3dbd8.css.map",
-    "main.805e32a2.js.map": "/Jobportal/static/js/main.805e32a2.js.map",
+    "main.3181654c.css.map": "/Jobportal/static/css/main.3181654c.css.map",
+    "main.99c55210.js.map": "/Jobportal/static/js/main.99c55210.js.map",
     "703.0953db91.chunk.js.map": "/Jobportal/static/js/703.0953db91.chunk.js.map",
     "513.e6c6bb6a.chunk.js.map": "/Jobportal/static/js/513.e6c6bb6a.chunk.js.map",
     "787.7ad4c28f.chunk.js.map": "/Jobportal/static/js/787.7ad4c28f.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.20f3dbd8.css",
-    "static/js/main.805e32a2.js"
+    "static/css/main.3181654c.css",
+    "static/js/main.99c55210.js"
   ]
 }
