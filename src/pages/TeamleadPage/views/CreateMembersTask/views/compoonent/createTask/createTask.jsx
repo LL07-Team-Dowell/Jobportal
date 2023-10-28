@@ -67,13 +67,7 @@ const CreateTask = ({ id, members, unShowCreateTask, setTasks, tasks }) => {
         undefined
       )
         return toast.error("do not pass the same subtask!");
-      if (
-        name &&
-        description &&
-        inputMembers.length > 0 &&
-        date &&
-        subTask.length > 0
-      ) {
+      if (name && description && inputMembers.length > 0 && date) {
         setloading(true);
         createTeamTask({
           assignee: inputMembers.map((v) => v.member),
@@ -95,7 +89,7 @@ const CreateTask = ({ id, members, unShowCreateTask, setTasks, tasks }) => {
                 description: description,
                 completed: false,
                 due_date: new Date().toDateString(),
-                _id: new Date().getTime().toString(),
+                _id: resp.data.response.inserted_id,
                 assignee: inputMembers.map((v) => v.member),
                 subtasks: arrayToObject(subTask),
               },
@@ -299,7 +293,7 @@ const SubTasks = ({ subTasks, setSubTasks }) => {
               key={`input__${index}`}
             />
             <button onClick={() => deleteSubTasks(s)}>
-              <Close fontSize="0.75rem" />
+              <Close fontSize='0.75rem' />
             </button>
           </div>
         </>
