@@ -72,6 +72,8 @@ const AdminDashboard = ({ subAdminView }) => {
         setSubProjectsLoaded,
         subProjectsLoading,
         setSubProjectsLoading,
+        totalWorklogCountInOrg,
+        setTotalWorklogCountInOrg,
     } = useJobContext();
     const { currentUser } = useCurrentUserContext();
     const navigate = useNavigate();
@@ -92,6 +94,7 @@ const AdminDashboard = ({ subAdminView }) => {
         setApplications,
         setApplicationsLoaded,
         setJobs,
+        setTotalWorklogCountInOrg,
         setDashboardDataLoaded
     )
 
@@ -160,7 +163,7 @@ const AdminDashboard = ({ subAdminView }) => {
                     <MainStatCard 
                         icon={<FaUsers />}
                         title={'Total Applications'}
-                        dataLoading={!dashboardDataLoaded}
+                        dataLoading={!applicationsLoaded}
                         dataLoaded={applicationsLoaded}
                         data={applications?.length}
                         action={subAdminView ? null : '/all-applications'}
@@ -180,11 +183,15 @@ const AdminDashboard = ({ subAdminView }) => {
                         dataLoaded={projectsLoaded}
                         data={projectsAdded[0]?.project_list?.length}
                         action={'/add'}
+                        locationState={'showProject'}
                     />
                     <MainStatCard 
                         icon={<ImStack />}
                         title={'Total Logs'}
                         action={'/logs'}
+                        dataLoading={!dashboardDataLoaded}
+                        dataLoaded={dashboardDataLoaded}
+                        data={totalWorklogCountInOrg}
                     />
                 </section>
                 <section className={styles.stat__overview}>
@@ -223,7 +230,7 @@ const AdminDashboard = ({ subAdminView }) => {
                         <div className={styles.applications__WRap__Items}>
                             {
                                 applicationsLoaded ?
-                                    React.Children.toArray(applications.reverse().slice(0, 4).map((application, index) => {
+                                    React.Children.toArray(applications.slice(0, 4).map((application, index) => {
                                         return <ApplicationCardItem 
                                             application={application}
                                             greyJobCardColor={(index + 1) % 2 === 0 ? true : false}
@@ -231,7 +238,7 @@ const AdminDashboard = ({ subAdminView }) => {
                                     }))
                                 :
                                     <ApplicationCardItem 
-                                        loading={applicationsLoaded}
+                                        loading={!applicationsLoaded}
                                     />
                             }
                         </div>

@@ -10,7 +10,8 @@ const MainStatCard = ({
     dataLoaded, 
     title, 
     icon, 
-    action 
+    action,
+    locationState,
 }) => {
     const navigate = useNavigate();
 
@@ -24,7 +25,7 @@ const MainStatCard = ({
                     <p className={styles.title}>
                         {title}
                     </p>
-                    <p className={`${styles.count} ${dataLoading ? skeletonStyles.skeleton : ''}`}>
+                    <p className={`${styles.count} ${dataLoading ? skeletonStyles.skeleton : ''}`} style={{ height: dataLoading ? '2rem' : 'max-content' }}>
                         {
                             dataLoading ? <></> :
                             dataLoaded ? 
@@ -43,7 +44,7 @@ const MainStatCard = ({
                             dataLoading ? 
                                 () => {} 
                             : 
-                            () => navigate(action)
+                            () => navigate(action, locationState ? { state: { [locationState]: true }} : {})
                         }
                     >
                         <span>View</span>
