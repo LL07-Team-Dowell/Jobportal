@@ -1371,8 +1371,8 @@ function App() {
           }
         />
 
-        <Route 
-          path="/log-requests"
+        <Route
+          path='/log-requests'
           element={
             <CandidateContextProvider>
               <ValuesProvider>
@@ -1381,7 +1381,7 @@ function App() {
             </CandidateContextProvider>
           }
         />
-        
+
         <Route
           path='/create-task/create-new-team/'
           element={
