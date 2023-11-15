@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Jobportal/static/css/main.74a7fab7.css",
-    "main.js": "/Jobportal/static/js/main.87114314.js",
+    "main.css": "/Jobportal/static/css/main.6e01ed72.css",
+    "main.js": "/Jobportal/static/js/main.ef5fb131.js",
     "static/js/703.0953db91.chunk.js": "/Jobportal/static/js/703.0953db91.chunk.js",
     "static/js/513.e6c6bb6a.chunk.js": "/Jobportal/static/js/513.e6c6bb6a.chunk.js",
     "static/js/787.7ad4c28f.chunk.js": "/Jobportal/static/js/787.7ad4c28f.chunk.js",
@@ -37,20 +37,18 @@
     "index.html": "/Jobportal/index.html",
     "static/media/two.svg": "/Jobportal/static/media/two.4f6941aab9441d8b597d6c1afda97737.svg",
     "static/media/three.svg": "/Jobportal/static/media/three.ab11d27551c92a2147da2ef6e744320a.svg",
-    "static/media/search.svg": "/Jobportal/static/media/search.b412dcfd897c832e02ec6718f69a7427.svg",
+    "static/media/search.svg": "/Jobportal/static/media/search.1933fe83aa3c36a7c70c24becfc4cd22.svg",
     "static/media/one.svg": "/Jobportal/static/media/one.abdd2ec6e726dc94acbbd4cc0ed89714.svg",
     "static/media/arrowright.svg": "/Jobportal/static/media/arrowright.8a3c10467b0e2d35029396ceb599082d.svg",
-    "static/media/backpage.svg": "/Jobportal/static/media/backpage.777e44e1d75059e9da029b6bd7a7b0ad.svg",
-    "static/media/plus.svg": "/Jobportal/static/media/plus.f5b29c665e44f20081d19591213d336e.svg",
     "static/media/selectorArrow.svg": "/Jobportal/static/media/selectorArrow.f38bb34f6d4cf04e456f542b92a487d0.svg",
-    "main.74a7fab7.css.map": "/Jobportal/static/css/main.74a7fab7.css.map",
-    "main.87114314.js.map": "/Jobportal/static/js/main.87114314.js.map",
+    "main.6e01ed72.css.map": "/Jobportal/static/css/main.6e01ed72.css.map",
+    "main.ef5fb131.js.map": "/Jobportal/static/js/main.ef5fb131.js.map",
     "703.0953db91.chunk.js.map": "/Jobportal/static/js/703.0953db91.chunk.js.map",
     "513.e6c6bb6a.chunk.js.map": "/Jobportal/static/js/513.e6c6bb6a.chunk.js.map",
     "787.7ad4c28f.chunk.js.map": "/Jobportal/static/js/787.7ad4c28f.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.74a7fab7.css",
-    "static/js/main.87114314.js"
+    "static/css/main.6e01ed72.css",
+    "static/js/main.ef5fb131.js"
   ]
 }
