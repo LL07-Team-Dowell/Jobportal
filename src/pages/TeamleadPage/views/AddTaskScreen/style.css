@@ -413,6 +413,7 @@
   color: white;
   text-transform: capitalize;
   font-size: 0.875rem;
+  font-weight: 600;
 }
 
 #customers button {
@@ -465,4 +466,20 @@
 
 .dio{
   display: none;
+}
+.Information_notes_subprojects{
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  gap: 5px;
+  font-family: "Inter", sans-serif;
+}
+.Information_notes_subprojects_button{
+  border: none;
+  border-radius: 10px;
+  padding: 10px 10px;
+  text-align: center;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  margin-top: 5px;
 }
