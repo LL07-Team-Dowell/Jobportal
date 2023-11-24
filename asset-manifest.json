@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Jobportal/static/css/main.405263e7.css",
-    "main.js": "/Jobportal/static/js/main.dbcad510.js",
+    "main.css": "/Jobportal/static/css/main.1206a8d6.css",
+    "main.js": "/Jobportal/static/js/main.2e474cb6.js",
     "static/js/703.0953db91.chunk.js": "/Jobportal/static/js/703.0953db91.chunk.js",
     "static/js/513.e6c6bb6a.chunk.js": "/Jobportal/static/js/513.e6c6bb6a.chunk.js",
     "static/js/787.7ad4c28f.chunk.js": "/Jobportal/static/js/787.7ad4c28f.chunk.js",
@@ -28,27 +28,27 @@
     "static/media/developr-img.png": "/Jobportal/static/media/developr-img.a10dc9e765d77a07b460.png",
     "static/media/Socialmedia2.png": "/Jobportal/static/media/Socialmedia2.ad1874f592f3f8aa8e7b.png",
     "static/media/team-management-logo.png": "/Jobportal/static/media/team-management-logo.ad1874f592f3f8aa8e7b.png",
-    "static/media/system3.svg": "/Jobportal/static/media/system3.20030fb7486d26d4de2bb5801bef28b0.svg",
-    "static/media/ux-design-1.svg": "/Jobportal/static/media/ux-design-1.d4fa3c20f5867b7d37c2ca065eef45c9.svg",
-    "static/media/database-1.svg": "/Jobportal/static/media/database-1.8d97ecac3cefa37328f862c2d859a2da.svg",
-    "static/media/message.svg": "/Jobportal/static/media/message.8bca43a946cbdaaa14794d2f760c6bd1.svg",
-    "static/media/addbtn.svg": "/Jobportal/static/media/addbtn.542f2b467194095005fce122892072aa.svg",
-    "static/media/deletebtn.svg": "/Jobportal/static/media/deletebtn.f548f5f668192ef4bd81d176138b9245.svg",
+    "static/media/system3.svg": "/Jobportal/static/media/system3.4c89f2349cf48ce02680571d5675c613.svg",
+    "static/media/ux-design-1.svg": "/Jobportal/static/media/ux-design-1.f5d2e75a2b6add7f5b38a20045457334.svg",
+    "static/media/database-1.svg": "/Jobportal/static/media/database-1.f04ef9f48c74abc750caa9655497e62d.svg",
+    "static/media/message.svg": "/Jobportal/static/media/message.06a54c44c6dc67e923827707b412c598.svg",
+    "static/media/addbtn.svg": "/Jobportal/static/media/addbtn.d1079ad492abf96056e8cdf950c73bbd.svg",
+    "static/media/deletebtn.svg": "/Jobportal/static/media/deletebtn.0adf3ae7dcbc677ebe309c75e99fc2b9.svg",
     "index.html": "/Jobportal/index.html",
-    "static/media/two.svg": "/Jobportal/static/media/two.75956cc15cded2d8521fe0b89b49092d.svg",
-    "static/media/three.svg": "/Jobportal/static/media/three.e1feaa3093ae7dc082f7ee95e8440244.svg",
-    "static/media/search.svg": "/Jobportal/static/media/search.f377b6739141309e280ea9d09dc72c83.svg",
-    "static/media/one.svg": "/Jobportal/static/media/one.753d0770ae2971551babee9e0dc76db8.svg",
-    "static/media/arrowright.svg": "/Jobportal/static/media/arrowright.3183a1e7f0272a1b61b6287b2ba19164.svg",
-    "static/media/selectorArrow.svg": "/Jobportal/static/media/selectorArrow.a2bb23a6d3ef612222ea1181867b9561.svg",
-    "main.405263e7.css.map": "/Jobportal/static/css/main.405263e7.css.map",
-    "main.dbcad510.js.map": "/Jobportal/static/js/main.dbcad510.js.map",
+    "static/media/two.svg": "/Jobportal/static/media/two.4f6941aab9441d8b597d6c1afda97737.svg",
+    "static/media/three.svg": "/Jobportal/static/media/three.ab11d27551c92a2147da2ef6e744320a.svg",
+    "static/media/search.svg": "/Jobportal/static/media/search.1933fe83aa3c36a7c70c24becfc4cd22.svg",
+    "static/media/one.svg": "/Jobportal/static/media/one.abdd2ec6e726dc94acbbd4cc0ed89714.svg",
+    "static/media/arrowright.svg": "/Jobportal/static/media/arrowright.8a3c10467b0e2d35029396ceb599082d.svg",
+    "static/media/selectorArrow.svg": "/Jobportal/static/media/selectorArrow.f38bb34f6d4cf04e456f542b92a487d0.svg",
+    "main.1206a8d6.css.map": "/Jobportal/static/css/main.1206a8d6.css.map",
+    "main.2e474cb6.js.map": "/Jobportal/static/js/main.2e474cb6.js.map",
     "703.0953db91.chunk.js.map": "/Jobportal/static/js/703.0953db91.chunk.js.map",
     "513.e6c6bb6a.chunk.js.map": "/Jobportal/static/js/513.e6c6bb6a.chunk.js.map",
     "787.7ad4c28f.chunk.js.map": "/Jobportal/static/js/787.7ad4c28f.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.405263e7.css",
-    "static/js/main.dbcad510.js"
+    "static/css/main.1206a8d6.css",
+    "static/js/main.2e474cb6.js"
   ]
 }
