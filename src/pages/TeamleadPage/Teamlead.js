@@ -82,7 +82,7 @@ const Teamlead = ({ isGrouplead }) => {
   const [cardPagination, setCardPagination] = useState(0);
   const [cardPagination2, setCardPagination2] = useState(0);
   const [cardPagination3, setCardPagination3] = useState(0);
-  const [ logRequestDate, setLogRequestDate ] = useState(null);
+  const [logRequestDate, setLogRequestDate] = useState(null);
 
   useEffect(() => {
     if (cardPagination || cardPagination2 || cardPagination3) {
@@ -333,7 +333,7 @@ const Teamlead = ({ isGrouplead }) => {
             job.data_type === currentUser?.portfolio_info[0].data_type &&
             job.is_active
         )
-        .filter(job => !job.is_internal);
+          .filter(job => !job.is_internal);
         console.log(jobsMatchingCurrentCompany);
         setJobs(jobsMatchingCurrentCompany);
 
@@ -478,10 +478,10 @@ const Teamlead = ({ isGrouplead }) => {
 
       const validDatePassed = new Date(location.state?.log_request_date);
       if (typeof validDatePassed == 'Invalid Date') return;
-  
+
       setLogRequestDate(location.state?.log_request_date);
       setShowAddTaskModalForGrouplead(true);
-  
+
       // RESET STATE TO PREVENT ADD TASK MODAL FROM POPPING UP AFTER EVERY RELOAD
       if (isGrouplead) window.history.replaceState({}, document.title, '/Jobportal/#/')
       if (!isGrouplead) window.history.replaceState({}, document.title, '/Jobportal/#/task')
@@ -896,16 +896,16 @@ const Teamlead = ({ isGrouplead }) => {
               <button
                 className="refresh-container-teamlead desktop"
               >
-                <div className="refresh-btn refresh-btn-teamlead" onClick={loading ? () => {} : () => handleRefreshForCandidateTask()}
+                <div className="refresh-btn refresh-btn-teamlead" onClick={loading ? () => { } : () => handleRefreshForCandidateTask()}
                 >
                   {
-                    loading ? 
-                      <LoadingSpinner 
-                        width={'0.8rem'} 
-                        height={'0.8rem'} 
-                      /> 
-                    :
-                    <IoMdRefresh />
+                    loading ?
+                      <LoadingSpinner
+                        width={'0.8rem'}
+                        height={'0.8rem'}
+                      />
+                      :
+                      <IoMdRefresh />
                   }
                   <p>Refresh</p>
                 </div>
@@ -928,7 +928,7 @@ const Teamlead = ({ isGrouplead }) => {
                     <button
                       className="refresh-container-teamlead desktop"
                     >
-                      <div className="refresh-btn refresh-btn-teamlead" onClick={loading ? () => {} : section === "all-tasks" ? () => handleRefreshForCandidateTask() : () => handleRefreshForCandidateApplicationsForTeamlead()}
+                      <div className="refresh-btn refresh-btn-teamlead" onClick={loading ? () => { } : section === "all-tasks" ? () => handleRefreshForCandidateTask() : () => handleRefreshForCandidateApplicationsForTeamlead()}
                       >
                         <IoMdRefresh />
                         <p>Refresh</p>

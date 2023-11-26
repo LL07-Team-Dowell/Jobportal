@@ -28,19 +28,19 @@ const AfterSelectionScreen = ({ assignedProjects }) => {
   const { section } = useNavigationContext();
   const { setUserTasks } = useCandidateTaskContext();
   const [candidateTeams, setCandidateTeams] = useState([]);
-  const [ candidateAssignedProjects, setCandidateAssignedProjects ] = useState([]);
-  const [ allProjects, setAllProjects ] = useState([]);
-  const [ allSubProjects, setAllSubprojects ] = useState([]);
-  const [ logRequestDate, setLogRequestDate ] = useState(null);
+  const [candidateAssignedProjects, setCandidateAssignedProjects] = useState([]);
+  const [allProjects, setAllProjects] = useState([]);
+  const [allSubProjects, setAllSubprojects] = useState([]);
+  const [logRequestDate, setLogRequestDate] = useState(null);
   const { state } = useLocation();
 
   useEffect(() => {
     if (assignedProjects.length < 1) {
       setCandidateAssignedProjects(
-        currentUser?.candidateAssignmentDetails?.assignedProjects ? 
+        currentUser?.candidateAssignmentDetails?.assignedProjects ?
           currentUser?.candidateAssignmentDetails?.assignedProjects
-        :
-        []
+          :
+          []
       )
     } else {
       setCandidateAssignedProjects(assignedProjects)
@@ -55,24 +55,24 @@ const AfterSelectionScreen = ({ assignedProjects }) => {
         res[0]?.data?.response?.data?.filter((team) =>
           team?.members.includes(currentUser.userinfo.username)
         )
-        .filter((team) => team?.data_type === currentUser.portfolio_info[0].data_type)
+          .filter((team) => team?.data_type === currentUser.portfolio_info[0].data_type)
       );
 
       const list = res[1]?.data
-      ?.filter(
-        (project) =>
-          project?.data_type === currentUser.portfolio_info[0].data_type &&
-          project?.company_id === currentUser.portfolio_info[0].org_id &&
-          project.project_list &&
-          project.project_list.every(
-            (listing) => typeof listing === "string"
-          )
-      ).reverse();
+        ?.filter(
+          (project) =>
+            project?.data_type === currentUser.portfolio_info[0].data_type &&
+            project?.company_id === currentUser.portfolio_info[0].org_id &&
+            project.project_list &&
+            project.project_list.every(
+              (listing) => typeof listing === "string"
+            )
+        ).reverse();
 
       setAllProjects(
-        list.length < 1  ? []
-        :
-        list[0]?.project_list
+        list.length < 1 ? []
+          :
+          list[0]?.project_list
       );
 
       setAllSubprojects(res[2].reverse());
@@ -94,7 +94,7 @@ const AfterSelectionScreen = ({ assignedProjects }) => {
     // RESET STATE TO PREVENT ADD TASK MODAL FROM POPPING UP AFTER EVERY RELOAD
     window.history.replaceState({}, '/Jobportal/#/')
   }, [state])
-  
+
 
   return (
     <>

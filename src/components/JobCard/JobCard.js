@@ -14,23 +14,23 @@ import { useCurrentUserContext } from "../../contexts/CurrentUserContext";
 import { useEffect } from "react";
 
 
-const JobCard = ({ 
-    job, 
-    subtitle, 
-    candidateViewJob, 
-    disableActionBtn, 
-    buttonText, 
-    handleBtnClick, 
-    showCandidateAppliedJob, 
-    showCandidateDeclinedJob, 
-    showCandidateInterview, 
-    guestUser, 
+const JobCard = ({
+    job,
+    subtitle,
+    candidateViewJob,
+    disableActionBtn,
+    buttonText,
+    handleBtnClick,
+    showCandidateAppliedJob,
+    showCandidateDeclinedJob,
+    showCandidateInterview,
+    guestUser,
     interviewDetails,
-    viewJobApplicationDetails, 
-    applicationsCount, 
-    candidateCardView, 
-    candidateData, 
-    jobAppliedFor, 
+    viewJobApplicationDetails,
+    applicationsCount,
+    candidateCardView,
+    candidateData,
+    jobAppliedFor,
     taskView,
     className,
     showOnboardingInfo,
@@ -39,7 +39,7 @@ const JobCard = ({
 }) => {
     // console.log(job);
     const id = crypto.randomUUID();
-    const [ link, setLink ] = useState(null);
+    const [link, setLink] = useState(null);
     const { currentUser } = useCurrentUserContext();
 
     useEffect(() => {
@@ -53,9 +53,9 @@ const JobCard = ({
             session_id,
             portfolio_id,
         ] = [
-            sessionStorage.getItem('session_id'),
-            sessionStorage.getItem('portfolio_id'),
-        ]
+                sessionStorage.getItem('session_id'),
+                sessionStorage.getItem('portfolio_id'),
+            ]
 
         if (currentUser?.settings_for_profile_info) return setLink(`${window.location.origin}/Jobportal/#/?session_id=${session_id}&id=${portfolio_id}&redirect_url=${externalLink}`)
 
@@ -68,37 +68,37 @@ const JobCard = ({
             {
                 link &&
                 <>
-                    <Link 
-                        className="external__Link" 
-                        to={link} 
-                        target="_blank" 
+                    <Link
+                        className="external__Link"
+                        to={link}
+                        target="_blank"
                         rel="noreferrer noopener"
                         data-tooltip-id={id}
                         data-tooltip-content={'Open in new tab'}
                     >
                         <HiOutlineExternalLink />
                     </Link>
-                    <Tooltip 
+                    <Tooltip
                         id={id}
                     />
-                </> 
+                </>
             }
             <h2>
                 <b>
                     {changeToTitleCase(
-                        job ? 
-                            job.job_title 
-                        : 
-                        candidateData ? 
-                            taskView ? 
-                                candidateData.applicantName ? 
-                                    candidateData.applicantName 
-                                : 
-                                candidateData.applicant 
-                            : 
-                            candidateData.applicant 
-                        : 
-                        ""
+                        job ?
+                            job.job_title
+                            :
+                            candidateData ?
+                                taskView ?
+                                    candidateData.applicantName ?
+                                        candidateData.applicantName
+                                        :
+                                        candidateData.applicant
+                                    :
+                                    candidateData.applicant
+                                :
+                                ""
                     )}
                 </b>
             </h2>
@@ -110,7 +110,7 @@ const JobCard = ({
                 <div className="detail__Item">
                     <span className="dot"></span>
                     <span className="job__Highlight__Item">Duration: </span>
-                    <span>{job.time_interval.length>20 ? job.time_interval.slice(0,20)+"...":job.time_interval}</span>
+                    <span>{job.time_interval.length > 20 ? job.time_interval.slice(0, 20) + "..." : job.time_interval}</span>
                 </div>
                 <div className="vertical__Seperator"></div>
                 <div className="detail__Item">
@@ -124,11 +124,11 @@ const JobCard = ({
                     <span className="job__Highlight__Item">Pay: </span>
                     <span>
                         {
-                            job.payment ? 
-                                `${job.payment}${job.paymentInterval ? ' / ' + job.paymentInterval : ""}` 
-                                : 
+                            job.payment ?
+                                `${job.payment}${job.paymentInterval ? ' / ' + job.paymentInterval : ""}`
+                                :
                                 "Not specified"
-                            }
+                        }
                     </span>
                 </div>
             </div>

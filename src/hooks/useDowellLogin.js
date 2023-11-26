@@ -99,7 +99,7 @@ export default function useDowellLogin(
       return
     }
 
-    
+
     // INITIAL LOAD FOR PRODUCT USER
     if (publicView && publicView === 'product' && companyId && jobCompanyDataType) {
       updatePageLoading(false);
@@ -156,7 +156,7 @@ export default function useDowellLogin(
       navigate('/');
       return
     }
-  
+
 
     // FOR LOGGED IN USERS
     if (!session_id && !portfolio_id) {
@@ -187,9 +187,9 @@ export default function useDowellLogin(
                 "data_type": currentUserDetails?.portfolio_info[0]?.data_type,
                 "company_id": currentUserDetails?.portfolio_info[0]?.org_id,
               })).data;
-              
+
               sessionStorage.setItem('token', access_token);
-              
+
               try {
                 const settingsResponse = await getSettingUserProfileInfo();
                 const settingForCurrentUserOrg = settingsResponse?.data
@@ -200,8 +200,8 @@ export default function useDowellLogin(
                       currentUserDetails.portfolio_info[0].org_id
                   )
                   .filter(
-                    (setting) => 
-                      setting.data_type === 
+                    (setting) =>
+                      setting.data_type ===
                       currentUserDetails.portfolio_info[0].data_type
                   );
 
@@ -223,7 +223,7 @@ export default function useDowellLogin(
                   return;
                 } else {
                   //USER HAS ROLE CONFIGURED
-                  sessionStorage.setItem('user', JSON.stringify({...currentUserDetails, settings_for_profile_info: userHasRoleConfigured }));
+                  sessionStorage.setItem('user', JSON.stringify({ ...currentUserDetails, settings_for_profile_info: userHasRoleConfigured }));
                   updateCurrentUserState({
                     ...currentUserDetails,
                     settings_for_profile_info: userHasRoleConfigured,
@@ -240,7 +240,7 @@ export default function useDowellLogin(
                 updateCurrentUserState(currentUserDetails);
                 updatePageLoading(false);
               }
-              
+
             } catch (error) {
               console.log('fetch token error: ', error);
               sessionStorage.setItem('user', JSON.stringify(currentUserDetails));
@@ -311,7 +311,7 @@ export default function useDowellLogin(
         getUserInfoFromLoginAPI({ session_id: currentLocalSessionId })
           .then(async (res) => {
             const currentUserDetails = res.data;
-            
+
             if (currentUserDetails.message || currentUserDetails.msg) {
               updateNoUserDetailFound(true);
               updatePageLoading(true);
@@ -331,7 +331,7 @@ export default function useDowellLogin(
               "company_id": foundTeamManagementProductInPortfolio?.org_id,
             }).then(res => {
               sessionStorage.setItem('token', res?.data?.access_token);
-              
+
               sessionStorage.setItem('user', JSON.stringify(currentUserDetails));
               updateCurrentUserState(currentUserDetails);
               updatePageLoading(false);
@@ -440,7 +440,7 @@ export default function useDowellLogin(
 
           return;
         }
-        
+
         // NEW IMPLEMENTATION WITH TOKEN
         try {
           const { access_token } = (await generateAuthToken({
@@ -449,9 +449,9 @@ export default function useDowellLogin(
             "data_type": currentUserDetails?.portfolio_info[0]?.data_type,
             "company_id": currentUserDetails?.portfolio_info[0]?.org_id,
           })).data;
-          
+
           sessionStorage.setItem('token', access_token);
-          
+
           try {
             const settingsResponse = await getSettingUserProfileInfo();
             const settingForCurrentUserOrg = settingsResponse?.data
@@ -462,8 +462,8 @@ export default function useDowellLogin(
                   currentUserDetails.portfolio_info[0].org_id
               )
               .filter(
-                (setting) => 
-                  setting.data_type === 
+                (setting) =>
+                  setting.data_type ===
                   currentUserDetails.portfolio_info[0].data_type
               );
 
@@ -485,7 +485,7 @@ export default function useDowellLogin(
               return;
             } else {
               //User has role configured
-              sessionStorage.setItem('user', JSON.stringify({...currentUserDetails, settings_for_profile_info: userHasRoleConfigured}));
+              sessionStorage.setItem('user', JSON.stringify({ ...currentUserDetails, settings_for_profile_info: userHasRoleConfigured }));
               updateCurrentUserState({
                 ...currentUserDetails,
                 settings_for_profile_info: userHasRoleConfigured,
@@ -502,7 +502,7 @@ export default function useDowellLogin(
             updateCurrentUserState(currentUserDetails);
             updatePageLoading(false);
           }
-          
+
         } catch (error) {
           console.log('fetch token error: ', error);
           sessionStorage.setItem('user', JSON.stringify(currentUserDetails));

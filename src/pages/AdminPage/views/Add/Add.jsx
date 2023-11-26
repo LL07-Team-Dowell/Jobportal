@@ -423,8 +423,11 @@ const AddProjectPopup = ({ projects, unshowProjectPopup }) => {
       )
       .sort((a, b) => a.project_name.localeCompare(b.project_name));
     setDisplayedProjects(projectsToDisplay);
-    
-    if (projectsAdded[0]?.inactive_project_list && Array.isArray(projectsAdded[0]?.inactive_project_list)) {
+
+    if (
+      projectsAdded[0]?.inactive_project_list &&
+      Array.isArray(projectsAdded[0]?.inactive_project_list)
+    ) {
       setInactiveProjects(projectsAdded[0]?.inactive_project_list);
     }
 
@@ -542,7 +545,7 @@ const AddProjectPopup = ({ projects, unshowProjectPopup }) => {
         >
           Select Projects{" "}
         </h2>
-        <h3 style={{ marginBottom: '0.4rem '}}>Active Projects</h3>
+        <h3 style={{ marginBottom: "0.4rem " }}>Active Projects</h3>
         <div className='added-members-input'>
           {React.Children.toArray(
             inputProjects?.map((v) => (
@@ -564,7 +567,7 @@ const AddProjectPopup = ({ projects, unshowProjectPopup }) => {
           />
         </div>
         <br />
-        <h3 style={{ marginBottom: '0.4rem '}}>Inactive Projects</h3>
+        <h3 style={{ marginBottom: "0.4rem " }}>Inactive Projects</h3>
         <div className='added-members-input'>
           {React.Children.toArray(
             inactiveProjects?.map((v) => (
@@ -919,12 +922,14 @@ const AddSubProjectPopup = ({ projects, unshowProjectPopup }) => {
 
 const Modal = ({ project, removeFunction, inActiveFunction, showModal }) => {
   return (
-    <Overlay className={'remove__Overlay'}>
+    <Overlay className={"remove__Overlay"}>
       <div className='modal'>
         <p>Do you want to remove this project or render it inactive?</p>
         <div>
           <button onClick={() => removeFunction(project)}>Remove</button>
-          <button onClick={() => inActiveFunction(project)}>Make inactive</button>
+          <button onClick={() => inActiveFunction(project)}>
+            Make inactive
+          </button>
         </div>
       </div>
     </Overlay>
