@@ -131,7 +131,6 @@ const StaffJobLandingLayout = ({
         <AuthOverlay />
       }
       <nav style={{ display: hideTitleBar ? "none" : "block" }}>
-
         <div
           className={`staff__Jobs__Layout__Navigation__Container ${adminView ? "admin" : ""
             }`}

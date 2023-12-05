@@ -77,7 +77,6 @@ const JobLandingLayout = ({ children, user, afterSelection, hideSideNavigation, 
         <AuthOverlay />
       }
       <nav>
-
         <div className="jobs__Layout__Navigation__Container">
           {isLargeScreen && (
             <Link to={"/"} className="jobs__Layout__Link__Item">
