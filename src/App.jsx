@@ -106,9 +106,12 @@ import CandidateRenewContract from "./pages/CandidatePage/views/CandidateRenewCo
 import ProjectLeadAgendaPage from "./pages/ProjectLeadPage/views/Agenda/ProjectLeadAgendaPage";
 import TeamLeadAgendaPage from "./pages/TeamleadPage/views/Agenda/TeamLeadAgendaPage";
 import AdminAgendaPage from "./pages/AdminPage/views/Agenda/AdminAgendaPage";
+import AgendaReport from "./pages/AdminPage/views/Agenda/AgendaReportPage/AgendaReport";
+import AttendanceReport from "./pages/HrPage/views/AttendanceReport/AttendanceReport";
 
 function App() {
-  console.log = () => {};
+  console.log = () => { };
+
   const {
     currentUser,
     isPublicUser,
@@ -126,7 +129,6 @@ function App() {
     reportsUserDetails,
     setReportsUserDetails,
   } = useCurrentUserContext();
-  console.log({ currentUser });
 
   const [loading, setLoading] = useState(true);
   const [candidateHired, setCandidateHired] = useState(false);
@@ -815,6 +817,18 @@ function App() {
           }
         />
         <Route
+          path='/report/agenda-report'
+          element={
+            <JobContextProvider>
+              <CandidateTaskContextProvider>
+                <ValuesProvider>
+                  <AgendaReport />
+                </ValuesProvider>
+              </CandidateTaskContextProvider>
+            </JobContextProvider>
+          }
+        />
+        <Route
           path='/report/team-report'
           element={
             <JobContextProvider>
@@ -1076,6 +1090,16 @@ function App() {
     return (
       <Routes>
         <Route path='/logout' element={<Logout />} />
+        <Route
+          path='/attendance-report'
+          element={
+            <HrJobScreenAllTasksContextProvider>
+              <ValuesProvider>
+                <AttendanceReport />
+              </ValuesProvider>
+            </HrJobScreenAllTasksContextProvider>
+          }
+        />
 
         <Route
           path='/'
@@ -1124,6 +1148,7 @@ function App() {
             </Route>
           </Route>
         </Route>
+       
 
         <Route path='*' element={<ErrorPage />} />
       </Routes>

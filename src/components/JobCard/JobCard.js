@@ -12,6 +12,7 @@ import { Tooltip } from "react-tooltip";
 import { useState } from "react";
 import { useCurrentUserContext } from "../../contexts/CurrentUserContext";
 import { useEffect } from "react";
+import { FaCircle } from "react-icons/fa";
 
 
 const JobCard = ({
@@ -36,6 +37,7 @@ const JobCard = ({
     showOnboardingInfo,
     externalLinkingEnabled,
     externalLink,
+    showIndicatorForHR,
 }) => {
     // console.log(job);
     const id = crypto.randomUUID();
@@ -83,7 +85,7 @@ const JobCard = ({
                     />
                 </>
             }
-            <h2>
+            <h2 style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
                 <b>
                     {changeToTitleCase(
                         job ?
@@ -101,6 +103,12 @@ const JobCard = ({
                                 ""
                     )}
                 </b>
+                {
+                    showIndicatorForHR &&
+                    <div>
+                        <FaCircle color='#005734' size={'0.7rem'} />
+                    </div>
+                }
             </h2>
             {subtitle && <span className="subtitle__Item"><span>{subtitle}</span><span>- UX Living Lab</span></span>}
         </div>

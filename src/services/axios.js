@@ -70,14 +70,14 @@ const dowellTimeAxiosInstance = axios.create({
     baseURL: dowellTimeBaseUrl,
 })
 
-export {
-    authAxiosInstance,
-    otherAuthAxiosInstance,
-    formerBackendAxiosInstance,
-    dowellLoginUrl,
+export { 
+    authAxiosInstance, 
+    otherAuthAxiosInstance, 
+    formerBackendAxiosInstance, 
+    dowellLoginUrl, 
     dowellLogoutUrl,
-    mailAxiosInstance,
-    communityAxiosInstance,
+    mailAxiosInstance, 
+    communityAxiosInstance, 
     locationAxiosInstance,
     currentBackendAxiosInstance,
     liveStatusBackendAxiosInstance,

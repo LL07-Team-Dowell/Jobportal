@@ -19,133 +19,133 @@ import useCheckCurrentAuthStatus from "../../hooks/useCheckCurrentAuthStatus";
 import AuthOverlay from "../../components/AuthOverlay/AuthOverlay";
 
 const JobLandingLayout = ({ children, user, afterSelection, hideSideNavigation, hideSearch }) => {
-  const [searchValue, setSearchValue] = useState("");
-  const isLargeScreen = useMediaQuery("(min-width: 992px)");
-  const [screenTitle, setScreenTitle] = useState("Work logs");
-  const location = useLocation();
-  const {
-    currentUser,
-    currentAuthSessionExpired,
-    setCurrentAuthSessionExpired
-  } = useCurrentUserContext();
-  const [isSuperUser, setIsSuperUser] = useState(false);
+    const [ searchValue, setSearchValue ] = useState("");
+    const isLargeScreen = useMediaQuery("(min-width: 992px)");
+    const [ screenTitle, setScreenTitle ] = useState("Work logs");
+    const location = useLocation();
+    const { 
+      currentUser, 
+      currentAuthSessionExpired, 
+      setCurrentAuthSessionExpired 
+    } = useCurrentUserContext();
+    const [ isSuperUser, setIsSuperUser ] = useState(false);
 
-  useCheckCurrentAuthStatus(currentUser, setCurrentAuthSessionExpired);
+    useCheckCurrentAuthStatus(currentUser, setCurrentAuthSessionExpired);
+    
+    useEffect(() => {
+        
+        if (location.pathname.includes("teams")) return setScreenTitle("Teams");
+        if (location.pathname.includes("user")) return setScreenTitle("Profile");
+        if (location.pathname.includes("team-screen-member")) return setScreenTitle("");
+        if (location.pathname.includes("work-log-request")) return setScreenTitle("Work log requests");
+        
+        setScreenTitle("Work logs")
 
-  useEffect(() => {
+    }, [location])
 
-    if (location.pathname.includes("teams")) return setScreenTitle("Teams");
-    if (location.pathname.includes("user")) return setScreenTitle("Profile");
-    if (location.pathname.includes("team-screen-member")) return setScreenTitle("");
-    if (location.pathname.includes("work-log-request")) return setScreenTitle("Work log requests");
+    useEffect(() => {
+        if (!currentUser) return
+        
+        const teamManagementProduct = currentUser?.portfolio_info?.find(portfolio => portfolio.product === teamManagementProductName);
+        
+        if (
+            (
+                currentUser.settings_for_profile_info && 
+                currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role === testingRoles.superAdminRole
+            ) ||
+            (
+                currentUser.isSuperAdmin
+            )
+        ) return setIsSuperUser(true); 
 
-    setScreenTitle("Work logs")
+        if (!teamManagementProduct || teamManagementProduct.member_type !== 'owner') return setIsSuperUser(false);
 
-  }, [location])
+        setIsSuperUser(true);
+    }, [currentUser])
 
-  useEffect(() => {
-    if (!currentUser) return
+    const handleChatIconClick = () => toast.info("Still in development")
 
-    const teamManagementProduct = currentUser?.portfolio_info?.find(portfolio => portfolio.product === teamManagementProductName);
+    const handleLogin = (e) => {
+        e.preventDefault();
+        window.location.href = dowellLoginUrl + window.location.hash.replace("#", "");
+    }
 
-    if (
-      (
-        currentUser.settings_for_profile_info &&
-        currentUser.settings_for_profile_info.profile_info[currentUser.settings_for_profile_info.profile_info.length - 1].Role === testingRoles.superAdminRole
-      ) ||
-      (
-        currentUser.isSuperAdmin
-      )
-    ) return setIsSuperUser(true);
-
-    if (!teamManagementProduct || teamManagementProduct.member_type !== 'owner') return setIsSuperUser(false);
-
-    setIsSuperUser(true);
-  }, [currentUser])
-
-  const handleChatIconClick = () => toast.info("Still in development")
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    window.location.href = dowellLoginUrl + window.location.hash.replace("#", "");
-  }
-
-  return (
-    <>
-      {
-        currentAuthSessionExpired &&
-        <AuthOverlay />
-      }
-      <nav>
-        <div className="jobs__Layout__Navigation__Container">
-          {isLargeScreen && (
-            <Link to={"/"} className="jobs__Layout__Link__Item">
-              <img src={logo} alt={"dowell logo"} />
-            </Link>
-          )}
-          {afterSelection ? (
-            <TitleNavigationBar title={screenTitle} hideBackBtn={true} />
-          ) : hideSearch ? (
-            <></>
-          ) : (
-            <SearchBar
-              placeholder={"Search for job/project"}
-              searchValue={searchValue}
-              handleSearchChange={setSearchValue}
-            />
-          )}
-          {user && (
-            <div className="jobs__Layout__Icons__Container">
-              {!afterSelection && (
-                <Link to={"/alerts"}>
-                  <TbBellRinging className="icon" />
-                </Link>
-              )}
-              <Link to={"/user"}>
-                {currentUser.userinfo.profile_img ? (
-                  <img
-                    src={currentUser.userinfo.profile_img}
-                    alt="#"
-                    style={{
-                      width: "30px",
-                      borderRadius: "50%",
-                      height: "30px",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <HiOutlineUserCircle className="icon" />
-                )}
+    return (
+      <>
+        {
+          currentAuthSessionExpired && 
+          <AuthOverlay />
+        }
+        <nav>
+          <div className="jobs__Layout__Navigation__Container">
+            {isLargeScreen && (
+              <Link to={"/"} className="jobs__Layout__Link__Item">
+                <img src={logo} alt={"dowell logo"} />
               </Link>
-            </div>
-          )}
-          {
-            !user && <div></div>
-            // <button onClick={handleLogin} className="jobs__Landing__Layout__Login__Btn">
-            //     Login
-            // </button>
-          }
-          <hr />
-        </div>
-      </nav>
-      <main>
-        <div className="jobs__Layout__Content__Container">
-          {!hideSideNavigation && user && (
-            <NewSideNavigationBar
-              links={
-                afterSelection
-                  ? afterSelectionLinks
-                  : loggedInCandidateNavLinks
-              }
-              superUser={isSuperUser}
-            />
-          )}
-          <div className="jobs__Layout__Content">{children}</div>
-          {/* {!afterSelection && <BsFillChatTextFill className="chat__With__CS__Icon" onClick={handleChatIconClick} /> } */}
-        </div>
-      </main>
-    </>
-  );
+            )}
+            {afterSelection ? (
+              <TitleNavigationBar title={screenTitle} hideBackBtn={true} />
+            ) : hideSearch ? (
+              <></>
+            ) : (
+              <SearchBar
+                placeholder={"Search for job/project"}
+                searchValue={searchValue}
+                handleSearchChange={setSearchValue}
+              />
+            )}
+            {user && (
+              <div className="jobs__Layout__Icons__Container">
+                {!afterSelection && (
+                  <Link to={"/alerts"}>
+                    <TbBellRinging className="icon" />
+                  </Link>
+                )}
+                <Link to={"/user"}>
+                  {currentUser.userinfo.profile_img ? (
+                    <img
+                      src={currentUser.userinfo.profile_img}
+                      alt="#"
+                      style={{
+                        width: "30px",
+                        borderRadius: "50%",
+                        height: "30px",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <HiOutlineUserCircle className="icon" />
+                  )}
+                </Link>
+              </div>
+            )}
+            {
+              !user && <div></div>
+              // <button onClick={handleLogin} className="jobs__Landing__Layout__Login__Btn">
+              //     Login
+              // </button>
+            }
+            <hr />
+          </div>
+        </nav>
+        <main>
+          <div className="jobs__Layout__Content__Container">
+            {!hideSideNavigation && user && (
+              <NewSideNavigationBar
+                links={
+                  afterSelection
+                    ? afterSelectionLinks
+                    : loggedInCandidateNavLinks
+                }
+                superUser={isSuperUser}
+              />
+            )}
+            <div className="jobs__Layout__Content">{children}</div>
+            {/* {!afterSelection && <BsFillChatTextFill className="chat__With__CS__Icon" onClick={handleChatIconClick} /> } */}
+          </div>
+        </main>
+      </>
+    );
 }
 
 export default JobLandingLayout;
