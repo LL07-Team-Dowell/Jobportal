@@ -129,6 +129,14 @@
     padding: 0.15rem 0.4rem;
 }
 
+.log__Title p{
+    font-size: 0.975rem;
+}
+
+.log__Title p.log__Count__Info {
+    font-size: 0.85rem;
+}
+
 @media screen and (max-width: 767px) {
     .info__Item {
         margin-top: 0.4rem;

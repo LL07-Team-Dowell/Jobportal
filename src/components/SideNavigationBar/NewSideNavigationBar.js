@@ -8,6 +8,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { useCurrentUserContext } from "../../contexts/CurrentUserContext";
 import { HiOutlineUserCircle } from "react-icons/hi";
 import { useMediaQuery } from "@mui/material";
+import { switchViewItem } from "./util";
 
 const NewSideNavigationBar = ({ 
     className, 
@@ -44,6 +45,12 @@ const NewSideNavigationBar = ({
 
     }, [links, navLinksOpenForUserSet])
 
+    useEffect(() => {
+        if (navLinksOpenForUser?.includes(switchViewItem.id)) return setShowViewsModal(true)
+
+        setShowViewsModal(false)
+    }, [])
+
     const handleNavItemClick = (e, addressToNavigateTo) => {
         e.preventDefault();
         
@@ -52,9 +59,11 @@ const NewSideNavigationBar = ({
         navigate(addressToNavigateTo)
     }
 
-    const handleSuperLinkItemClick = (e) => {
+    const handleSuperLinkItemClick = (e, id) => {
         e.preventDefault();
         setShowViewsModal(!showViewsModal);
+
+        handleParentItemClick(id);
     }
 
     const handleParentItemClick = (id) => {
@@ -125,9 +134,19 @@ const NewSideNavigationBar = ({
                         }
                         {
                             (superUser || userHasOtherRoles) && <li>
-                                <Link to={'/'} onClick={handleSuperLinkItemClick}>
-                                    <FaUsersCog />
-                                    <span>Switch Views</span>
+                                <Link to={'/'} onClick={(e) => handleSuperLinkItemClick(e, switchViewItem.id)}>
+                                    {switchViewItem.icon}
+                                    <span>{switchViewItem.text}</span>
+                                    {
+                                        newSidebarDesign && isLargeScreen && <>
+                                            {
+                                                showViewsModal ? 
+                                                    <IoIosArrowDown className="dropdown__ICon" /> 
+                                                : 
+                                                <FiChevronRight className="dropdown__ICon" />
+                                            }
+                                        </>
+                                    }
                                 </Link>
                             </li>
                         }
