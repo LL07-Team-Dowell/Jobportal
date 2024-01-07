@@ -94,7 +94,7 @@ const JobApplicationScreen = () => {
       arrayToAddTo.current.push(elem);
   };
 
-  const   handleFileChange = async (e) => {
+  const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
     setSelectedFile(selectedFile);
   };
@@ -111,6 +111,7 @@ const JobApplicationScreen = () => {
   console.log(testResult);
   console.log(error);
   console.log({ currentJob });
+
   const netSpeed = (e) => {
     e.preventDefault();
     const email = newApplicationData?.applicant_email;
@@ -119,15 +120,36 @@ const JobApplicationScreen = () => {
 
     getInternetSpeedTest(email)
       .then((res) => {
-        if (res.status === 404) {
+        const speedTestResults = res.data.response.filter(
+          (item) =>
+            new Date(item.DATETIME).toDateString() === new Date().toDateString()
+        );
+
+        const matchingSpeedResult = speedTestResults.find(
+          (item) =>
+            Number(item.UPLOAD.split(" Mbps")[0]) >= 100 &&
+            Number(item.DOWNLOAD.split(" Mbps")[0]) >= 100 &&
+            Number(item.JITTER.split(" Mbps")[0]) <= 30 &&
+            Number(item.LATENCY.split(" Mbps")[0]) <= 50
+        );
+
+        if (speedTestResults.length < 1) {
           setShowInternetSpeedTestModal(true);
         } else {
           toast.success("Speed test upload successful");
+          dispatchToNewApplicationData({
+            type: newJobApplicationDataReducerActions.UPDATE_INTERNET_SPEED,
+            payload: {
+              stateToChange: mutableNewApplicationStateNames.internet_speed,
+              value: matchingSpeedResult.DOWNLOAD,
+            },
+          });
         }
-        console.log(res.data);
+        console.log(res.data.response[0].DOWNLOAD);
       })
       .catch((error) => {
         console.log(error);
+        if (error?.response?.status === 404) setShowInternetSpeedTestModal(true);
       });
   };
 
@@ -1016,21 +1038,11 @@ const JobApplicationScreen = () => {
                         <input
                           aria-label="Internet speed Test"
                           type={"text"}
-                          placeholder={"Enter Your Internet Speed"}
+                          placeholder={"Internet speed Test"}
                           value={newApplicationData.internet_speed}
-                          // readOnly
-                          onChange={(e) =>
-                            dispatchToNewApplicationData({
-                              type: newJobApplicationDataReducerActions.UPDATE_INTERNET_SPEED,
-                              payload: {
-                                stateToChange:
-                                  mutableNewApplicationStateNames.internet_speed,
-                                value: e.target.value,
-                              },
-                            })
-                          }
+                          readOnly
                         />
-                        {/* <button
+                        <button
                           onClick={(e) => netSpeed(e)}
                           style={{
                             padding: "0.3rem",
@@ -1039,7 +1051,7 @@ const JobApplicationScreen = () => {
                           }}
                         >
                           Check
-                        </button> */}
+                        </button>
                       </label>
                     </div>
                     {showInternetSpeedTestModal && (
