@@ -111,7 +111,6 @@ const JobApplicationScreen = () => {
   console.log(testResult);
   console.log(error);
   console.log({ currentJob });
-
   const netSpeed = (e) => {
     e.preventDefault();
     const email = newApplicationData?.applicant_email;
