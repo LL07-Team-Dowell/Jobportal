@@ -87,7 +87,8 @@ const JobApplicationScreen = () => {
   const isLargeScreen = useMediaQuery("(min-width: 992px)");
   const [formPage, setFormPage] = useState(1);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [newApplicationSubmissionLoading, setNewApplicationSubmissionLoading] = useState(false);
+  const [newApplicationSubmissionLoading, setNewApplicationSubmissionLoading] =
+    useState(false);
 
   const addToRefsArray = (elem, arrayToAddTo) => {
     if (elem && !arrayToAddTo.current.includes(elem))
@@ -121,18 +122,20 @@ const JobApplicationScreen = () => {
       .then((res) => {
         const speedTestResults = res.data.response.filter(
           (item) =>
-            new Date(item.DATETIME).toDateString() === new Date().toDateString()
+            new Date(item.details.date).toDateString() ===
+            new Date().toDateString()
         );
+        console.log(speedTestResults);
 
         const matchingSpeedResult = speedTestResults.find(
           (item) =>
-            Number(item.UPLOAD.split(" Mbps")[0]) >= 100 &&
-            Number(item.DOWNLOAD.split(" Mbps")[0]) >= 100 &&
-            Number(item.JITTER.split(" Mbps")[0]) <= 30 &&
-            Number(item.LATENCY.split(" Mbps")[0]) <= 50
+            item.details.upload >= 100 &&
+            item.details.download >= 100 &&
+            item.details.jitter <= 30 &&
+            item.details.latency <= 50
         );
 
-        if (speedTestResults.length < 1) {
+        if (!matchingSpeedResult) {
           setShowInternetSpeedTestModal(true);
         } else {
           toast.success("Speed test upload successful");
@@ -140,15 +143,16 @@ const JobApplicationScreen = () => {
             type: newJobApplicationDataReducerActions.UPDATE_INTERNET_SPEED,
             payload: {
               stateToChange: mutableNewApplicationStateNames.internet_speed,
-              value: matchingSpeedResult.DOWNLOAD,
+              value: matchingSpeedResult.details.download,
             },
           });
         }
-        console.log(res.data.response[0].DOWNLOAD);
+        console.log(res.data.response[0].details);
       })
       .catch((error) => {
         console.log(error);
-        if (error?.response?.status === 404) setShowInternetSpeedTestModal(true);
+        if (error?.response?.status === 404)
+          setShowInternetSpeedTestModal(true);
       });
   };
 
@@ -1246,13 +1250,14 @@ const JobApplicationScreen = () => {
                           onChange={handleFileChange}
                           accept="image/*"
                         />
-                        {selectedFile && selectedFile?.type?.split('/')[0] === 'image' && (
-                          <img
-                            src={URL.createObjectURL(selectedFile)}
-                            alt="Uploaded Preview"
-                            className="certificate__Imgg"
-                          />
-                        )}
+                        {selectedFile &&
+                          selectedFile?.type?.split("/")[0] === "image" && (
+                            <img
+                              src={URL.createObjectURL(selectedFile)}
+                              alt="Uploaded Preview"
+                              className="certificate__Imgg"
+                            />
+                          )}
                       </label>
                     </div>
 
@@ -1348,15 +1353,18 @@ const JobApplicationScreen = () => {
                       onClick={handleSubmitNewApplication}
                       disabled={disableNextBtn ? true : false}
                     >
-                      {
-                        newApplicationSubmissionLoading ?
-                          <LoadingSpinner color={'#fff'} width={'1.2rem'} height={'1.2rem'} /> 
-                        :
+                      {newApplicationSubmissionLoading ? (
+                        <LoadingSpinner
+                          color={"#fff"}
+                          width={"1.2rem"}
+                          height={"1.2rem"}
+                        />
+                      ) : (
                         <>
                           <span>Submit</span>
                           <IoIosArrowRoundForward />
                         </>
-                      }
+                      )}
                     </button>
                   </>
                 )}

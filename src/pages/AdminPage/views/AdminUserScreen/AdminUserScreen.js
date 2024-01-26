@@ -6,6 +6,7 @@ import { getUserLiveStatus, postUserLiveStatus } from "../../../../services/comm
 import React from "react";
 import { teamManagementProductName } from "../../../../utils/utils";
 import { ApproveVouchar, ClaimVouchar } from "../../../TeamleadPage/views/ClaimVouchar/ClaimVouchar";
+import { useState, useEffect } from "react";
 
 const AdminUserScreen = ({ subAdminView }) => {
     const [success, setsuccsess] = React.useState(false);
@@ -21,17 +22,25 @@ const AdminUserScreen = ({ subAdminView }) => {
 
 
     const navigate = useNavigate();
-    const { currentUser } = useCurrentUserContext()
+    const { currentUser, currentUserHiredApplications, currentUserHiredApplicationsLoaded } = useCurrentUserContext()
     console.log(currentUser);
+    const [userProject, setUserProject] = useState('');
+    useEffect(() => {
+        if (currentUserHiredApplicationsLoaded) {
+            setUserProject(currentUserHiredApplications.map(app => app?.project).flat().join(', '));
+        }
+    },
+        [currentUserHiredApplicationsLoaded])
+    // console.log("current>>>>>>>>>>>>>>>",currentUserHiredApplications);
 
     const handleLogout = () => navigate("/logout");
 
     return <>
-        <StaffJobLandingLayout 
-            adminView={true} 
-            handleNavIconClick={() => navigate("/add-job")} 
-            adminAlternativePageActive={true} 
-            pageTitle={"User"} 
+        <StaffJobLandingLayout
+            adminView={true}
+            handleNavIconClick={() => navigate("/add-job")}
+            adminAlternativePageActive={true}
+            pageTitle={"User"}
             subAdminView={subAdminView}
             newSidebarDesign={!subAdminView ? true : false}
         >
@@ -70,6 +79,13 @@ const AdminUserScreen = ({ subAdminView }) => {
                     <h2>Role</h2>
                     <span>Admin</span>
                 </div>
+                {
+                    userProject !== "" &&
+                    <div className="user__Intro__Item">
+                        <h2>Project(s)</h2>
+                        <span>{userProject}</span>
+                    </div>
+                }
                 <button className="logout__Btn" onClick={handleLogout}>
                     Logout
                 </button>

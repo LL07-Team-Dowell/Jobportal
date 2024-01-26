@@ -4,35 +4,24 @@ import styles from "./styles.module.css";
 import { useJobContext } from "../../../../contexts/Jobs";
 import { useCurrentUserContext } from "../../../../contexts/CurrentUserContext";
 import { candidateStatuses } from "../../../CandidatePage/utils/candidateStatuses";
-import EmployeeItem from "./components/EmployeeItem/EmployeeItem";
 import { GoRepoForked } from "react-icons/go";
 import Select from "react-select";
 import TitleItem from "./components/TitleItem/TitleItem";
-import { testCompanyData } from "./utils/testData";
 import CardTile from "./components/CardTile/CardTile";
 import UserIconsInfo from "./components/UsersIconsInfo/UserIconsInfo";
 import { toast } from "react-toastify";
-import Overlay from "../../../../components/Overlay";
-import { AiOutlineClose } from "react-icons/ai";
-import Avatar from "react-avatar";
 import { useCompanyStructureContext } from "../../../../contexts/CompanyStructureContext";
-import { HiMiniArrowLongRight , HiMiniArrowLongLeft } from "react-icons/hi2";
-
-const labelColors = {
-    ceo: '#00C1B7',
-    projectLead: '#FE6A6A',
-    teamlead: '#FF9F4E',
-    groupLead: '#5AA4FB',
-    member: '#FEDD6A',
-}
-
+import LoadingSpinner from "../../../../components/LoadingSpinner/LoadingSpinner";
+import { updateCompanyStructure } from "../../../../services/adminServices";
+import { changeToTitleCase } from "../../../../helpers/helpers";
+import { labelColors } from "./utils/utils";
+import StructureConfigurationModal from "./components/StructureConfigurationModal/StructureConfigurationModal";
+import UserDetailModal from "./components/UserDetailModal/UserDetailModal";
 
 const CompanyStructurePage = () => {
     const {
         applications,
-        setApplications,
         applicationsLoaded,
-        setApplicationsLoaded,
         projectsLoaded,
         projectsAdded,
         subProjectsAdded,
@@ -48,6 +37,9 @@ const CompanyStructurePage = () => {
     const singleProjectsRefs = useRef([]);
     const [ showSelectedUser, setShowSelectedUser ] = useState(false);
     const [ currentSelectedUser, setCurrentSelectedUser ] = useState(null);
+    const [ dataLoading, setDataLoading ] = useState(false);
+    const [ selectedProject, setSelectedProject ] = useState('');
+
     const {
         companyStructure,
         setCompanyStructure,
@@ -64,13 +56,8 @@ const CompanyStructurePage = () => {
     };
 
     useEffect(() => {
-        if (!companyStructureLoaded) return
-        
-        // FOR TESTING
-        setCopyOfStructureData(testCompanyData);
-
-        // setCopyOfStructureData(companyStructure);
-    }, [companyStructure, companyStructureLoaded])
+        if (companyStructureLoaded && !copyOfStructureData) setCopyOfStructureData(companyStructure);
+    }, [companyStructure, companyStructureLoaded, copyOfStructureData])
 
     useEffect(() => {
         let projectRefIsRendered = false;
@@ -147,8 +134,148 @@ const CompanyStructurePage = () => {
     }
 
     const handleCloseStructureModal = () => {
+        if (dataLoading) return
+
         setShowConfigurationModal(false);
+        setCopyOfStructureData(companyStructure);
         setCurrentModalPage(1);
+        setSelectedProject('');
+    }
+
+    const handleGoForward = async () => {
+        switch (currentModalPage) {
+            
+            // CONFIGURING/UPDATING CEO
+            case 1:
+                const initialCeoData = {
+                    company_name: currentUser?.portfolio_info[0]?.org_name,
+                    company_id: currentUser?.portfolio_info[0]?.org_id,
+                    data_type: currentUser?.portfolio_info[0]?.data_type,
+                }
+    
+                if (companyStructure?.ceo){
+                    if (copyOfStructureData?.ceo?.length < 1) return toast.info('Please enter the ceo name');
+                    if (companyStructure?.ceo?.toLocaleLowerCase() === copyOfStructureData?.ceo?.toLocaleLowerCase()) return setCurrentModalPage(currentModalPage + 1);
+    
+                    setDataLoading(true);
+    
+                    try {
+                        const res = (await updateCompanyStructure('update_ceo', { ...initialCeoData, previous_ceo: companyStructure?.ceo, current_ceo: copyOfStructureData?.ceo })).data;
+                        toast.success(changeToTitleCase(res?.message));
+                        
+                        setCompanyStructure(copyOfStructureData);
+                        setDataLoading(false);
+                        setCurrentModalPage(currentModalPage + 1);
+    
+                    } catch (error) {
+                        console.log(error?.response ? error?.response?.data : error?.message);
+                        setDataLoading(false);
+                        toast.error('An error occured while trying to update the ceo. Please try again later')
+                    }
+    
+                    return
+                }
+    
+                if (!copyOfStructureData.ceo || copyOfStructureData?.ceo?.length < 1) return toast.info('Please enter the ceo name');
+    
+                try {
+    
+                    setDataLoading(true);
+                    const res = (await updateCompanyStructure('add_ceo', { ...initialCeoData, ceo: copyOfStructureData.ceo})).data;
+                    toast.success(changeToTitleCase(res?.message));
+    
+                    const updatedStructure = {
+                        ...copyOfStructureData,
+                        company_id: initialCeoData.company_id,
+                        project_leads: [],
+                    }
+    
+                    setCopyOfStructureData(updatedStructure);
+                    setCompanyStructure(updatedStructure);
+                    setDataLoading(false);
+                    setCurrentModalPage(currentModalPage + 1);
+                } catch (error) {
+                    console.log(error?.response ? error?.response?.data : error?.message);
+                    setDataLoading(false);
+                    toast.error('An error occured while trying to configure the ceo. Please try again later');
+                }
+
+                break;
+
+            // CONFIGURING/UPDATING PROJECT LEADS
+            case 2:
+                const newProjectLeads = copyOfStructureData?.project_leads?.filter(item => item.is_new_project_lead);
+                const updatedProjectLeads = copyOfStructureData?.project_leads?.filter(item => !item.is_new_project_lead && item?.projects_managed?.length !== companyStructure?.project_leads?.find(project => project?.project_lead === item?.project_lead)?.projects_managed?.length);
+
+                try {
+
+                    setDataLoading(true);
+
+                    await Promise.all([
+                        ...newProjectLeads.map(item => updateCompanyStructure('add_project_leads', { project_lead: item.project_lead, projects_managed: item.projects_managed, company_id: currentUser?.portfolio_info[0]?.org_id})),
+                        ...updatedProjectLeads.map(item => updateCompanyStructure('update_project_leads', { project_lead: item.project_lead, projects_managed: item.projects_managed, company_id: currentUser?.portfolio_info[0]?.org_id})),
+                    ])
+
+                    const updatedStructure = structuredClone(copyOfStructureData);
+                    updatedStructure.project_leads = copyOfStructureData?.project_leads?.map(item => {
+                        if (item.is_new_project_lead) {
+                            const copyOfItem = structuredClone(item);
+                            delete copyOfItem.is_new_project_lead;
+                            return copyOfItem;
+                        }
+                        return item;
+                    })
+
+                    setCompanyStructure(updatedStructure);
+                    setCopyOfStructureData(updatedStructure);
+                    setDataLoading(false);
+                    if (newProjectLeads?.length > 0 || updatedProjectLeads?.length > 0) toast.success(`Successfully ${updatedProjectLeads?.length > 0 ? ' updated ' : ' configured '} project lead details!`);
+                    setCurrentModalPage(currentModalPage + 1);
+
+                } catch (error) {
+                    console.log(error?.response ? error?.response?.data : error?.message);
+                    setDataLoading(false);
+                    toast.error('An error occured while trying to update project leads. Please try again later');
+                }
+                break;
+            
+            // CONFIGURING/UPDATING PROJECT DETAILS
+            case 3:
+                if (selectedProject.length < 1) return
+
+                const projectExistsInStructure = companyStructure?.project_leads?.find(item => item?.projects?.find(structure => structure?.project === selectedProject));
+                const projectDetails = copyOfStructureData?.project_leads?.find(item => item?.projects?.find(structure => structure?.project === selectedProject))?.projects?.find(item => item?.project === selectedProject);
+                
+                try {
+                    setDataLoading(true);
+
+                    const res = (await updateCompanyStructure(
+                        projectExistsInStructure ? 'update_projects' : 'add_projects', 
+                        {...projectDetails, company_id: currentUser?.portfolio_info[0]?.org_id}
+                    )).data;
+                    console.log(res);
+
+                    setCompanyStructure(copyOfStructureData);
+                    setDataLoading(false);
+                    toast.success(`Successfully updated details for ${selectedProject}!`)
+
+                } catch (error) {
+                    console.log(error?.response ? error?.response?.data : error?.message);
+                    setDataLoading(false);
+                    toast.error('An error occured while trying to update projects. Please try again later');
+                }
+
+                break;
+            default:
+                console.log(`Case '${currentModalPage}' not defined`);
+                break;
+        }
+    }
+
+    const handleGoBackward = () => {
+        if (dataLoading || currentModalPage === 1) return;
+
+        setCurrentModalPage(currentModalPage - 1);
     }
 
     return <>
@@ -228,25 +355,36 @@ const CompanyStructurePage = () => {
                     showSearchResult && <>
                         <div className={styles.search__Project__Details__Item}>
                             <h4>Current Project: <span>{searchProjectVal}</span></h4>
-                            <p>Project Lead: <span>{copyOfStructureData?.projects?.find(item => item?.projects?.find(structure => structure?.project === searchProjectVal))?.project_lead}</span></p>
-                            <p>Team Lead: <span>{copyOfStructureData?.projects?.find(item => item?.projects?.find(structure => structure?.project === searchProjectVal))?.projects?.find(item => item.project === searchProjectVal)?.team_lead}</span></p>
-                            <p>Group Lead: <span>{copyOfStructureData?.projects?.find(item => item?.projects?.find(structure => structure?.project === searchProjectVal))?.projects?.find(item => item.project === searchProjectVal)?.group_leads?.join(', ')}</span></p>
-                            <p>Members: <span>{copyOfStructureData?.projects?.find(item => item?.projects?.find(structure => structure?.project === searchProjectVal))?.projects?.find(item => item.project === searchProjectVal)?.members?.join(', ')}</span></p>
+                            <p>Project Lead: <span>{copyOfStructureData?.project_leads?.find(item => item?.projects_managed?.includes(searchProjectVal))?.project_lead}</span></p>
+                            <p>Team Lead: <span>{copyOfStructureData?.project_leads?.find(item => item?.projects?.find(structure => structure?.project === searchProjectVal))?.projects?.find(item => item.project === searchProjectVal)?.team_lead}</span></p>
+                            <p>Group Lead: <span>{copyOfStructureData?.project_leads?.find(item => item?.projects?.find(structure => structure?.project === searchProjectVal))?.projects?.find(item => item.project === searchProjectVal)?.group_leads?.join(', ')}</span></p>
+                            <p>Members: <span>{copyOfStructureData?.project_leads?.find(item => item?.projects?.find(structure => structure?.project === searchProjectVal))?.projects?.find(item => item.project === searchProjectVal)?.members?.join(', ')}</span></p>
                         </div>
                     </>
                 }
 
+                {
+                    copyOfStructureData && Object.keys(copyOfStructureData || {}).length > 0 ?
+                    <button className={`${styles.result__Btn} ${styles.configure__Btn} ${styles.edit__Btn}`} onClick={handleEditStructureBtnClick}>
+                        <span>Edit structure</span>
+                    </button> 
+                    :
+                    <></>
+                }
+
                 <div className={styles.structure__Display}>
                     {
-                        !copyOfStructureData ?
+                        companyStructureLoading ? <LoadingSpinner 
+                            width={'2rem'}
+                            height={'2rem'}
+                            color={labelColors.ceo}
+                        /> :
+                        !copyOfStructureData || Object.keys(copyOfStructureData || {}).length < 1 ?
                             <button className={`${styles.result__Btn} ${styles.configure__Btn}`} onClick={handleEditStructureBtnClick}>
                                 <span>Configure structure</span>
                             </button>
                         :
                         <>
-                            <button className={`${styles.result__Btn} ${styles.configure__Btn} ${styles.edit__Btn}`} onClick={handleEditStructureBtnClick}>
-                                <span>Edit structure</span>
-                            </button>
                             <div className={styles.ceo__Item__Wrap}>
                                 <TitleItem 
                                     title={'Company CEO'}
@@ -264,7 +402,8 @@ const CompanyStructurePage = () => {
                                 {
                                     React.Children.toArray(
                                         projectsAdded[0]?.project_list?.map(projectItem => {
-                                            const matchingProjectFromCompanyStructure = copyOfStructureData?.projects?.find(item => item?.projects?.find(structure => structure?.project === projectItem))
+                                            const matchingProjectLeadFromCompanyStructure = copyOfStructureData?.project_leads?.find(item => item?.projects_managed?.includes(projectItem));
+                                            const matchingProjectFromCompanyStructure = copyOfStructureData?.project_leads?.find(item => item?.projects?.find(structure => structure?.project === projectItem));
                                             const foundTeamleadFromCompanyStructure = matchingProjectFromCompanyStructure?.projects?.find(item => item.project === projectItem)?.team_lead;
                                             const foundGroupleadsFromCompanyStructure = matchingProjectFromCompanyStructure?.projects?.find(item => item.project === projectItem)?.group_leads;
                                             const foundMembersFromCompanyStructure = matchingProjectFromCompanyStructure?.projects?.find(item => item.project === projectItem)?.members;
@@ -281,38 +420,38 @@ const CompanyStructurePage = () => {
                                                     />
                                                     <CardTile 
                                                         tileName={
-                                                            matchingProjectFromCompanyStructure ?
-                                                                onboardedUsers?.find(
+                                                            matchingProjectLeadFromCompanyStructure ?
+                                                                applications?.find(
                                                                     application => application.username ===
-                                                                        matchingProjectFromCompanyStructure?.project_lead
+                                                                    matchingProjectLeadFromCompanyStructure?.project_lead
                                                                 ) ?
-                                                                    onboardedUsers?.find(
+                                                                    applications?.find(
                                                                         application => application.username ===
-                                                                            matchingProjectFromCompanyStructure?.project_lead
+                                                                        matchingProjectLeadFromCompanyStructure?.project_lead
                                                                     )?.applicant
                                                                 :
-                                                                matchingProjectFromCompanyStructure?.project_lead
+                                                                matchingProjectLeadFromCompanyStructure?.project_lead
                                                             :
                                                             'No Project Lead'
                                                         }
                                                         tileDesignation={
-                                                            matchingProjectFromCompanyStructure ?
+                                                            matchingProjectLeadFromCompanyStructure ?
                                                                 'Project Lead'
                                                             :
                                                             'No user'
                                                         }
                                                         tileColor={
-                                                            matchingProjectFromCompanyStructure ?
+                                                            matchingProjectLeadFromCompanyStructure ?
                                                                 labelColors.projectLead
                                                             : 
                                                             null
                                                         }
                                                         hasTrailingDash={true}
-                                                        noUser={matchingProjectFromCompanyStructure ? false : true}
-                                                        isClickable={matchingProjectFromCompanyStructure ? true : false}
+                                                        noUser={matchingProjectLeadFromCompanyStructure ? false : true}
+                                                        isClickable={matchingProjectLeadFromCompanyStructure ? true : false}
                                                         handleCardTileClick={
                                                             () => handleTileClick(
-                                                                matchingProjectFromCompanyStructure?.project_lead,
+                                                                matchingProjectLeadFromCompanyStructure?.project_lead,
                                                                 'project lead',
                                                                 labelColors.projectLead,
                                                                 projectItem,
@@ -324,11 +463,11 @@ const CompanyStructurePage = () => {
                                                 <CardTile 
                                                     tileName={
                                                         foundTeamleadFromCompanyStructure ?
-                                                            onboardedUsers?.find(
+                                                            applications?.find(
                                                                 application => application.username ===
                                                                     foundTeamleadFromCompanyStructure
                                                             ) ?
-                                                                onboardedUsers?.find(
+                                                                applications?.find(
                                                                     application => application.username ===
                                                                         foundTeamleadFromCompanyStructure
                                                                 )?.applicant
@@ -365,18 +504,18 @@ const CompanyStructurePage = () => {
                                                 
                                                 <div className={styles.group_leads__Wrap}>
                                                     {
-                                                        foundGroupleadsFromCompanyStructure && Array.isArray(foundGroupleadsFromCompanyStructure) ?
+                                                        foundGroupleadsFromCompanyStructure && Array.isArray(foundGroupleadsFromCompanyStructure) && foundGroupleadsFromCompanyStructure.length > 0 ?
                                                             <>
                                                                 {
                                                                     React.Children.toArray(foundGroupleadsFromCompanyStructure.map(grouplead => {
                                                                         return <div className={styles.grouplead__Item}>
                                                                             <CardTile 
                                                                                 tileName={
-                                                                                    onboardedUsers?.find(
+                                                                                    applications?.find(
                                                                                         application => application.username ===
                                                                                             grouplead
                                                                                     ) ?
-                                                                                        onboardedUsers?.find(
+                                                                                        applications?.find(
                                                                                             application => application.username ===
                                                                                                 grouplead
                                                                                         )?.applicant
@@ -416,16 +555,16 @@ const CompanyStructurePage = () => {
 
                                                 <div className={styles.team__Members__Wrap}>
                                                     {   
-                                                        foundMembersFromCompanyStructure && Array.isArray(foundMembersFromCompanyStructure) ?
+                                                        foundMembersFromCompanyStructure && Array.isArray(foundMembersFromCompanyStructure) && foundMembersFromCompanyStructure.length > 0 ?
                                                         React.Children.toArray(foundMembersFromCompanyStructure.map(member => {
                                                             return <div className={styles.member__Item}>
                                                                 <CardTile 
                                                                     tileName={
-                                                                        onboardedUsers?.find(
+                                                                        applications?.find(
                                                                             application => application.username ===
                                                                             member
                                                                         ) ?
-                                                                            onboardedUsers?.find(
+                                                                            applications?.find(
                                                                                 application => application.username ===
                                                                                 member
                                                                             )?.applicant
@@ -439,12 +578,12 @@ const CompanyStructurePage = () => {
                                                         }))
                                                         :
                                                         <div className={styles.member__Item}>
-                                                                <CardTile 
-                                                                    tileName={'No member'}
-                                                                    tileDesignation={'No user'}
-                                                                    noUser={true}
-                                                                />
-                                                            </div>
+                                                            <CardTile 
+                                                                tileName={'No member'}
+                                                                tileDesignation={'No user'}
+                                                                noUser={true}
+                                                            />
+                                                        </div>
                                                     }
                                                 </div>
                                             </div>
@@ -460,92 +599,27 @@ const CompanyStructurePage = () => {
 
             {/* SINGLE USER DETAIL MODAL  */}
             {
-                showSelectedUser && <Overlay>
-                    <div className={styles.single__User__Detail}>
-                        <div 
-                            className={styles.close__User__Detail} 
-                            onClick={handleCloseSingleUserModal}
-                        >
-                            <AiOutlineClose fontSize={'1.5rem'} />
-                        </div>
-                        
-                        <div className={styles.top__user__Info}>
-                            <Avatar
-                                name={
-                                    onboardedUsers?.find(application => application.username === currentSelectedUser?.name)?.applicant ? 
-                                        onboardedUsers?.find(application => application.username === currentSelectedUser?.name)?.applicant
-                                    :
-                                    currentSelectedUser?.name
-                                }
-                                round={true}
-                                size='8rem'
-                            />
-                            <div>
-                                <h5>
-                                    {
-                                        onboardedUsers?.find(application => application.username === currentSelectedUser?.name)?.applicant ? 
-                                            onboardedUsers?.find(application => application.username === currentSelectedUser?.name)?.applicant
-                                        :
-                                        currentSelectedUser?.name
-                                    }
-                                </h5>
-                                <p className={styles.single__User__label} style={{ backgroundColor: currentSelectedUser?.labelColor}}>{currentSelectedUser?.title}</p>
-                            
-                            </div>
-                        </div>
-
-                        <div className={styles.user__Detail__Info__Wrap}>
-                            <div className={styles.user__Detail__Info}>
-                                <p>
-                                    Details
-                                    <div className={styles.highlight}></div>
-                                </p>
-                            </div>
-                            <div className={styles.user__Project__Details}>
-                                <p>Project: {currentSelectedUser?.project}</p>
-                                <p>Subprojects: {currentSelectedUser?.subprojects?.join(', ')}</p>
-                                <p>Team Members: {currentSelectedUser?.members?.join(', ')}</p>
-                            </div>
-                        </div>
-                    </div>
-                </Overlay>
+                showSelectedUser && 
+                <UserDetailModal
+                    currentSelectedUser={currentSelectedUser}
+                    handleCloseSingleUserModal={handleCloseSingleUserModal}
+                />
             }
 
             {/* COMPANY STRUCTURE CONFIGURATION MODAL */}
             {
-                showConfigurationModal && <Overlay>
-                    <div className={styles.structure__modal}>
-                        <div 
-                            className={styles.close__User__Detail} 
-                            onClick={handleCloseStructureModal}
-                        >
-                            <AiOutlineClose fontSize={'1.5rem'} />
-                        </div>
-                        <div>
-                            <h2>
-                                {
-                                    !companyStructure ? 'Configure Company Structure'
-                                    :
-                                    'Edit Structure'
-                                }
-                            </h2>
-                            <p>Step One: Configure CEO</p>
-                        </div>
-                        <div>
-
-                        </div>
-                        <div>
-                            
-                            <button>
-                                <HiMiniArrowLongLeft />
-                            </button>
-                            <button>
-                                <HiMiniArrowLongRight />
-                            </button>
-                            
-                        </div>
-                    </div>
-                </Overlay>
+                showConfigurationModal && 
+                <StructureConfigurationModal 
+                    copyOfExistingStructure={copyOfStructureData}
+                    updateCopyOfExistingStructure={setCopyOfStructureData}
+                    dataLoading={dataLoading}
+                    onboardedUsers={onboardedUsers}
+                    selectedProject={selectedProject}
+                    updateSelectedProject={setSelectedProject}
+                    handleGoForward={handleGoForward}
+                    handleGoBackward={handleGoBackward}
+                    handleCloseStructureModal={handleCloseStructureModal}
+                />
             }
 
         </StaffJobLandingLayout>

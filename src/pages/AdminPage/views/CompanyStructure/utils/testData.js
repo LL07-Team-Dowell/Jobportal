@@ -1,45 +1,47 @@
 export const testCompanyData = {
     "ceo": "Manish",
     "company_id": "63a2b3fb2be81449d3a30d3f",
-    "projects": [
+    "project_leads": [
         {
             "project_lead": "ayoolaa_",
+            "project_lead_id": "001",
             "projects": [
                 {
                     "project": "BD Team",
                     "members": ["oscaroguledo", "prajjwal", "ayesha", "isaac"],
                     "group_leads": ["mahnoor", 'oscar', 'isaac'],
                     "team_lead": "ayesha",
-                    "team_lead_reports_to": ""
+                    "teamlead_reports_to": ""
                 },
                 {
                     "project": "Team Management",
                     "members": ["oscaroguledo", "prajjwal", "ayesha", "isaac"],
                     "group_leads": ["mahnoor", "isaac"],
                     "team_lead": "oscaroguledo",
-                    "team_lead_reports_to": ""
+                    "teamlead_reports_to": ""
                 },
                 {
                     "project": "Workflow AI",
                     "members": ["oscaroguledo", "prajjwal", "ayesha", "isaac"],
                     "group_leads": ["mahnoor"],
                     "team_lead": "prajjwal",
-                    "team_lead_reports_to": ""
+                    "teamlead_reports_to": ""
                 },
             ],
         },
         {
             "project_lead": "edwin",
+            "project_lead_id": "002",
             "projects": [
                 {
                     "project": "Legalzard",
                     "members": ["oscaroguledo", "prajjwal", "ayesha", "isaac"],
                     "group_leads": ["mahnoor"],
                     "team_lead": "couzy",
-                    "team_lead_reports_to": ""
+                    "teamlead_reports_to": ""
                 },
             ]
-        }
+        },
     ]
 }
 
