@@ -1,3 +1,9 @@
+.search__project__Navigation__Bar {
+  --bg-grey-color: #f5f5f5;
+  --green-color: #005734;
+  --grey-color: #a3a1a1;
+}
+
 .wrapper {
   width: 87%;
   margin: 0 auto;
@@ -6,6 +12,36 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.search__bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.search__project__Navigation__Bar {
+  background-color: var(--bg-grey-color);
+  width: max-content;
+  padding: 1%;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search__project__Navigation__Bar input {
+  border: none;
+  outline: none;
+  font-family: "Poppins", sans-serif;
+  background-color: var(--bg-grey-color);
+  padding-left: 2%;
+  caret-color: var(--green-color);
+}
+
+.search__project__Navigation__Bar .search__project__icon {
+  width: 1.4rem;
+  font-size: 1.4rem;
+  color: var(--green-color);
 }
 
 .top__Nav__Content {
@@ -128,7 +164,7 @@
 }
 
 .job__details label {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #005734;
   margin-bottom: 0.8rem;
@@ -141,7 +177,7 @@
   border: 0.1rem solid #005734;
   background-color: #f4f4f4;
   font-weight: 400;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .editing__project {
@@ -152,14 +188,39 @@
 }
 
 .project__name__heading {
-  font-size: 1rem;
-  padding: 0.5rem;
+  padding: 0.875rem 1.7rem;
   margin-top: 1rem;
   font-weight: 600;
-  color: #005734;
+  color: #fff;
+  background-color: #005734;
+  /* border: 0.1rem solid #005734; */
+  border: none;
+  border-radius: 1.5rem;
+  outline: none;
+  margin-left: auto;
+  margin-bottom: 2.1rem;
+  display: block;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+.project__name__heading:hover {
+  filter: brightness(0.95);
+}
+
+.project__name__heading h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.project__details__bg {
+  margin: 1.9rem auto 10rem auto;
+  padding: 2rem;
   background-color: #fff;
-  border: 0.1rem solid #005734;
-  border-radius: 0.8rem;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  border-radius: 1.2rem;
+  width: 83%;
 }
 
 .is__active {
@@ -170,8 +231,8 @@
 .active__checkbox[type="checkbox"] {
   position: relative;
   appearance: none;
-  width: 5rem;
-  height: 1rem;
+  width: 4rem;
+  height: 0.8rem;
   border-radius: 1rem;
   background-color: #d9d9d9;
   margin: 0;
@@ -185,8 +246,8 @@
 .active__checkbox[type="checkbox"]:before {
   content: "";
   position: absolute;
-  width: 2rem;
-  height: 2rem;
+  width: 1.8rem;
+  height: 1.8rem;
   border-radius: 50%;
   background-color: red;
   top: -0.5rem;
@@ -210,15 +271,22 @@
   position: absolute;
   color: #1f1f1f;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.875rem;
   top: 0;
   left: -9rem;
   letter-spacing: 0.05em;
   transition: 0.3s ease;
 }
 
+.project__btn {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .project__submit {
-  padding: 0.5rem 3rem 0.5rem 3rem;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  padding: 0.8rem 1rem;
   border-radius: 0.7rem;
   background-color: #005734;
   color: #fff;
@@ -237,4 +305,80 @@
   background-color: #7e7e7e;
   box-shadow: none;
   cursor: not-allowed;
+}
+
+.project__Time__Overview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin: 1.8rem 0;
+}
+
+.project__Time__lead__Display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.project__Team__Lead p {
+  font-size: 0.8rem;
+}
+
+.lead__Hightlight__Item {
+  display: block;
+  background-color: #005734;
+  color: #fff;
+  border-radius: 15px;
+  font-size: 0.65rem;
+  padding: 0.3rem 1rem;
+  margin-top: 0.25rem;
+}
+
+.project__Leads__Detail {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.project__Detail__Overview {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.userss__Wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.user__Member__Detail {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user__Member__Detail p {
+  font-size: 0.8rem;
+}
+
+@media screen and (max-width: 991px) {
+  .search__project__Navigation__Bar {
+    padding: 2%;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .search__project__Navigation__Bar {
+    max-width: 100%;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .search__project__Navigation__Bar input {
+    max-width: 80%;
+  }
 }

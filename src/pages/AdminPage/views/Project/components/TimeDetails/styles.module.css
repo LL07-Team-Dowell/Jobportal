@@ -1,0 +1,21 @@
+.time__Detail {
+    border: 1px solid #efefef;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+
+.hour__Info {
+    font-size: 1.2rem;
+}
+
+.hour__Label {
+    color: #808080;
+    font-size: 0.7rem;
+}
+
+.listing {
+    margin-left: 1.2rem;
+    font-size: 0.85rem;
+}
