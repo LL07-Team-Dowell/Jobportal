@@ -138,7 +138,8 @@ const ProjectEdit = () => {
     let newDocumentId;
 
     if (
-      copyOfProjectTimeDetail.lead_name.length < 1 ||
+      !copyOfProjectTimeDetail.lead_name ||
+      copyOfProjectTimeDetail?.lead_name?.length < 1 ||
       isNaN(copyOfProjectTimeDetail.total_time) ||
       Number(copyOfProjectTimeDetail) < 0.01
     ) return
