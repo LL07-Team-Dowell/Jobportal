@@ -54,7 +54,7 @@ import TeamScreenThreadCandidate from "./pages/CandidatePage/views/TeamScreenThr
 import JobLandingLayout from "./layouts/CandidateJobLandingLayout/LandingLayout";
 import TeamThread from "./pages/TeamleadPage/views/CreateMembersTask/views/compoonent/TeamThread/TeamThread";
 import UserDetailNotFound from "./pages/UserDetailNotFound/UserDetailNotFound";
-import Payment from "./pages/AccountPage/Payment";
+import Payment from "./pages/AccountPage/views/Payments/Payment";
 import TeamThreadScreen from "./pages/TeamleadPage/views/CreateMembersTask/views/compoonent/TeamThread/TeamThreadScreen";
 import GroupLeadTask from "./pages/GroupLeadPage/components/GroupLeadTask";
 import { PageUnderConstruction } from "./pages/UnderConstructionPage/ConstructionPage";
@@ -89,6 +89,9 @@ import useUpdateUserId from "./hooks/useUpdateUserId";
 import AttendanceLandingPage from "./pages/HrPage/views/AttendancePages/AttendanceLandingPage";
 import AttendanceUpdatePage from "./pages/HrPage/views/AttendanceReport/UpdateAttendance/UpdateAttendance";
 import { accountRoutesInfo } from "./routes/accountRoutes";
+import AgendaLandingPage from "./pages/HrPage/views/AgendaLandingPage/AgendaLandingPage";
+import HrAgendaReport from "./pages/HrPage/views/Agenda/HrAgendaReport/HrAgendaReport";
+import UsersLogsScreen from "./common/screens/UserLogsScreen/UserLogsScreen";
 
 function App() {
   console.log = () => { };
@@ -143,13 +146,13 @@ function App() {
   );
 
   useTitle(teamManagementProductName);
-  
+
   useUpdateUserId(
-    loading, 
-    currentUser, 
-    currentUserHiredApplications, 
+    loading,
+    currentUser,
+    currentUserHiredApplications,
     currentUserHiredApplicationsLoaded,
-    setCurrentUserHiredApplications, 
+    setCurrentUserHiredApplications,
     applicationsWithoutUserIdUpdated,
     setApplicationsWithoutUserIdUpdated,
   );
@@ -542,7 +545,7 @@ function App() {
       <Routes>
         {
           React.Children.toArray(subAdminRoutesInfo.map(info => {
-            return <Route 
+            return <Route
               path={info?.path}
               element={
                 <JobContextProvider>
@@ -580,7 +583,7 @@ function App() {
       <Routes>
         {
           React.Children.toArray(mainAdminRoutesInfo.map(info => {
-            return <Route 
+            return <Route
               path={info?.path}
               element={
                 <JobContextProvider>
@@ -643,7 +646,17 @@ function App() {
           }
         />
         <Route
-          path='/agenda-report'
+          path='/agenda'
+          element={
+            <HrJobScreenAllTasksContextProvider>
+              <ValuesProvider>
+                <AgendaLandingPage />
+              </ValuesProvider>
+            </HrJobScreenAllTasksContextProvider>
+          }
+        />
+        <Route
+          path='/agenda/track-agenda'
           element={
             <HrJobScreenAllTasksContextProvider>
               <ValuesProvider>
@@ -652,7 +665,16 @@ function App() {
             </HrJobScreenAllTasksContextProvider>
           }
         />
-
+        <Route
+          path='/agenda/agenda-report'
+          element={
+            <HrJobScreenAllTasksContextProvider>
+              <ValuesProvider>
+                <HrAgendaReport />
+              </ValuesProvider>
+            </HrJobScreenAllTasksContextProvider>
+          }
+        />
         <Route
           path='/all-users'
           element={
@@ -711,7 +733,7 @@ function App() {
             </Route>
           </Route>
         </Route>
-       
+
 
         <Route path='*' element={<ErrorPage />} />
       </Routes>
@@ -1192,12 +1214,9 @@ function App() {
           element={
             <CandidateTaskContextProvider>
               <StaffJobLandingLayout teamleadView={true} isGrouplead={true}>
-                <TaskScreen
-                  candidateAfterSelectionScreen={true}
-                  assignedProject={assignedProjects}
-                  showBackBtn={true}
-                  loadProjects={true}
-                  isGrouplead={true}
+                <UsersLogsScreen 
+                  className={'group__Lead__User__Logs'} 
+                  isLeadUser={true}
                 />
               </StaffJobLandingLayout>
             </CandidateTaskContextProvider>
@@ -1219,7 +1238,7 @@ function App() {
       <Routes>
         {
           React.Children.toArray(projectLeadRoutesInfo.map(item => {
-            return <Route 
+            return <Route
               path={item?.path}
               element={
                 <CandidateTaskContextProvider>

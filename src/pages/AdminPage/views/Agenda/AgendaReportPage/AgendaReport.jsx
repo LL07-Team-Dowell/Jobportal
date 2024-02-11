@@ -12,6 +12,7 @@ import { getWeeklyAgenda } from "../../../../../services/commonServices";
 import LoadingSpinner from "../../../../../components/LoadingSpinner/LoadingSpinner";
 import { getSubprojectAgendaAddedDates } from "../../../../../services/commonServices";
 import { Tooltip } from "react-tooltip";
+import Avatar from "react-avatar";
 
 const AgendaReport = () => {
     //dummy data
@@ -227,7 +228,9 @@ const AgendaReport = () => {
             setIsLoading(false);
             // console.log(">>>>>>>>>>>>>>>",agendaAddedDatesLength);
         }).catch(error => {
-            console.error('Errorrrrrrrrrrr:', error);
+            console.error('Errorrrrrrrrrrr:', error?.response?.data?.message);
+            setIsLoading(false);
+            toast.info(error?.response?.data?.message);
         }
         );
     }
@@ -277,7 +280,13 @@ const AgendaReport = () => {
                                     </select>
                                 </label>
                             </div>
-                            <button onClick={handleButtonsVisibilty}>{isloading ? <LoadingSpinner width={20} height={20} color="#fff" /> : 'Show Results'}</button>
+                            <button 
+                                style={{ cursor: 'pointer'}} 
+                                onClick={handleButtonsVisibilty}
+                                disabled={isloading ? true : false}
+                            >
+                                {isloading ? <LoadingSpinner width={20} height={20} color="#fff" /> : 'Show Results'}
+                            </button>
                         </div>
                     </div>
                     {
@@ -369,7 +378,16 @@ const AgendaReport = () => {
                                                             <td className={item.status.toLowerCase()}>{item.status}</td>
                                                             <td>{item.dueDate}</td>
                                                             <td>{item.hours}</td>
-                                                            <td><div className="table_profile"><p>{item.assignee[0]?.toUpperCase()}</p></div></td>
+                                                            <td><div className="assignee_name">
+                                                                <Avatar
+                                                                    name={item.assignee[0]}
+                                                                    round={true}
+                                                                    size="3.2rem"
+                                                                    color='#72b0f9'
+                                                                />
+                                                                <p>{item.assignee}</p>
+                                                            </div>
+                                                            </td>
                                                             {/* <td>{item.assignee}</td> */}
                                                         </tr>
                                                     ))}
