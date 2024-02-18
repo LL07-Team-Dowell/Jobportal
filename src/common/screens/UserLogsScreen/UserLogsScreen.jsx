@@ -514,9 +514,7 @@ const UsersLogsScreen = ({
                                             
                                             !checkIfDateIsToday(selectedDate) && 
 
-                                            logsToDisplay.filter(item => 
-                                                item.project === selectedProject    
-                                            ).length < 1
+                                            logsToDisplay.length < 1
                                         ) ? <>
                                             <Button
                                                 text={"Request to update"}
