@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Jobportal/static/css/main.a24ec3f1.css",
-    "main.js": "/Jobportal/static/js/main.3667d9ec.js",
+    "main.css": "/Jobportal/static/css/main.4ce3f60c.css",
+    "main.js": "/Jobportal/static/js/main.85cf74cc.js",
     "static/js/413.da7abf38.chunk.js": "/Jobportal/static/js/413.da7abf38.chunk.js",
     "static/js/566.a65d9560.chunk.js": "/Jobportal/static/js/566.a65d9560.chunk.js",
     "static/js/988.fb36b158.chunk.js": "/Jobportal/static/js/988.fb36b158.chunk.js",
@@ -26,6 +26,7 @@
     "static/media/frontend-image.png": "/Jobportal/static/media/frontend-image.4e31d567e39692434305.png",
     "static/media/lock.png": "/Jobportal/static/media/lock.1d03a885ef68a36812c2.png",
     "static/media/developr-img.png": "/Jobportal/static/media/developr-img.a10dc9e765d77a07b460.png",
+    "static/media/indiv_report.avif": "/Jobportal/static/media/indiv_report.44f324f02e71b6337d23.avif",
     "static/media/Socialmedia2.png": "/Jobportal/static/media/Socialmedia2.ad1874f592f3f8aa8e7b.png",
     "static/media/team-management-logo.png": "/Jobportal/static/media/team-management-logo.ad1874f592f3f8aa8e7b.png",
     "static/media/system3.svg": "/Jobportal/static/media/system3.4c89f2349cf48ce02680571d5675c613.svg",
@@ -41,14 +42,14 @@
     "static/media/one.svg": "/Jobportal/static/media/one.abdd2ec6e726dc94acbbd4cc0ed89714.svg",
     "static/media/arrowright.svg": "/Jobportal/static/media/arrowright.8a3c10467b0e2d35029396ceb599082d.svg",
     "static/media/selectorArrow.svg": "/Jobportal/static/media/selectorArrow.f38bb34f6d4cf04e456f542b92a487d0.svg",
-    "main.a24ec3f1.css.map": "/Jobportal/static/css/main.a24ec3f1.css.map",
-    "main.3667d9ec.js.map": "/Jobportal/static/js/main.3667d9ec.js.map",
+    "main.4ce3f60c.css.map": "/Jobportal/static/css/main.4ce3f60c.css.map",
+    "main.85cf74cc.js.map": "/Jobportal/static/js/main.85cf74cc.js.map",
     "413.da7abf38.chunk.js.map": "/Jobportal/static/js/413.da7abf38.chunk.js.map",
     "566.a65d9560.chunk.js.map": "/Jobportal/static/js/566.a65d9560.chunk.js.map",
     "988.fb36b158.chunk.js.map": "/Jobportal/static/js/988.fb36b158.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.a24ec3f1.css",
-    "static/js/main.3667d9ec.js"
+    "static/css/main.4ce3f60c.css",
+    "static/js/main.85cf74cc.js"
   ]
 }
