@@ -20,6 +20,7 @@ import {
 } from "../../../../../../services/adminServices";
 import { Link } from "react-router-dom";
 import useClickOutside from "../../../../../../hooks/useClickOutside";
+import { getDaysDifferenceBetweenDates } from "../../../../../../helpers/helpers";
 
 export default function FullApplicationCardItem({ application, activeStatus }) {
   const [showEditOptions, setShowEditOptions] = useState(false);
@@ -40,6 +41,7 @@ export default function FullApplicationCardItem({ application, activeStatus }) {
   const [leaveOverlayVisibility, setLeaveOverlayVisibility] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [noOfWeeks, setNoOfWeeks] = useState('');
   const [viewOverlayVisibility, setViewOverlayVisibility] = useState(false);
   const updateListingRef = useRef();
 
@@ -203,6 +205,7 @@ export default function FullApplicationCardItem({ application, activeStatus }) {
   const handleClosingLeaveItemClick = () => {
     setStartDate('');
     setEndDate('');
+    setNoOfWeeks('');
     setLeaveOverlayVisibility(false);
   };
   const handleSubmitClick = async () => {
@@ -213,10 +216,11 @@ export default function FullApplicationCardItem({ application, activeStatus }) {
       return toast.info('Please enter both start and end dates');
     }
 
-    if (start_Date >= end_Date) {
+    // console.log('days difference', getDaysDifferenceBetweenDates(startDate, endDate));
+    if (getDaysDifferenceBetweenDates(startDate, endDate) < 7) {
       setStartDate('');
       setEndDate('');
-      return toast.info('Start date should be less than end date');
+      return toast.info('Difference between start and end date should be greater than or equal to 7 days!');
     }
 
     const dataToPost = {
@@ -226,11 +230,34 @@ export default function FullApplicationCardItem({ application, activeStatus }) {
     };
 
     try {
-      const res = await (await adminLeaveApplication('approved_leave', dataToPost)).data;
-      console.log("set leave application responseeeeeeeeeeeeeeeeeeeee: ", res);
+      await (await adminLeaveApplication('approved_leave', dataToPost)).data;
+      toast.success('Leave assigned successfully.')
     } catch (error) {
-      console.log("err setting leave");
+      toast.error('Unable to set leave. Please try again.')
     }
+  }
+
+  const handleWeekChange = (e) => {
+    if (!startDate) {
+      return toast.error('Please select start date first!');
+    }
+    const selectedStartDate = new Date(startDate);
+    const numberOfWeeks = parseInt(e.target.value);
+    if (numberOfWeeks <= 0) {
+      setEndDate('');
+      setNoOfWeeks('');
+    }
+    if (numberOfWeeks > 0) {
+      const endDate = new Date(selectedStartDate.setDate(selectedStartDate.getDate() + (numberOfWeeks * 7)));
+      setEndDate(endDate.toISOString().split('T')[0]);
+      setNoOfWeeks(numberOfWeeks);
+    }
+  }
+
+  const handleStartDateChange = (e) => {
+    setStartDate(e.target.value);
+    setNoOfWeeks('');
+    setEndDate('');
   }
 
   return (
@@ -271,7 +298,7 @@ export default function FullApplicationCardItem({ application, activeStatus }) {
           </p>
           <p>Job: {application.job_title}</p>
           {application.project && Array.isArray(application.project) && (
-            <p>Project: {application.project[0]}</p>
+            <p>Project: {`${application.project.join(', ')}`}</p>
           )}
         </div>
         {showEditOptions && (
@@ -399,14 +426,24 @@ export default function FullApplicationCardItem({ application, activeStatus }) {
                 <span>Start Date:</span>
                 <input type='date'
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e) => handleStartDateChange(e)}
+                />
+              </label>
+              <label>
+                <span>Number of week(s):</span>
+                <input type='number'
+                  value={noOfWeeks}
+                  onChange={(e) =>
+                    handleWeekChange(e)
+                  }
                 />
               </label>
               <label>
                 <span>End Date:</span>
                 <input type='date'
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  // onChange={(e) => setEndDate(e.target.value)}
+                  disabled
                 />
               </label>
               <button className={styles.edit__Btn} onClick={handleSubmitClick}>Submit</button>
