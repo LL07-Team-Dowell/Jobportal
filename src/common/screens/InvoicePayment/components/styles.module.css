@@ -56,8 +56,9 @@
   width: 100%;
   display: flex;
   align-items: flex-start;
-  gap: 0.4rem;
+  gap: 0.7rem;
   flex-direction: column;
+  margin-top: 1rem;
 }
 
 .invoice_details_select {
@@ -113,6 +114,13 @@
   cursor: pointer;
 }
 
+.invoice_months {
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  margin-right: 1rem;
+}
+
 .process_btn {
   display: flex;
   justify-content: center;
@@ -135,4 +143,23 @@
 .generate_invoice:not(.disabled):hover,
 .generate_invoice:not([disabled]):hover {
   filter: brightness(0.8);
+}
+
+@media screen and (max-width: 768px) {
+  .edit_invoice {
+    width: 90%;
+  }
+
+  .invoice_months {
+    margin-bottom: 1rem;
+  }
+
+  .invoice_details_select {
+    flex-direction: column;
+  }
+
+  .invoice__select__date,
+  .invoice__select__year {
+    width: 80%;
+  }
 }

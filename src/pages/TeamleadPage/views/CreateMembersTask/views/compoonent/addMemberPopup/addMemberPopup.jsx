@@ -5,12 +5,9 @@ import { EditTeam } from "../../../../../../../services/createMembersTasks";
 import { toast } from "react-toastify";
 import { BsPlus } from "react-icons/bs";
 import { FaTimes } from "react-icons/fa";
-import LittleLoading from "../../../../../../CandidatePage/views/ResearchAssociatePage/littleLoading";
 import LoadingSpinner from "../../../../../../../components/LoadingSpinner/LoadingSpinner";
-import { teamManagementProductName } from "../../../../../../../utils/utils";
-import { testingRoles } from "../../../../../../../utils/testingRoles";
-import { getUserInfoFromLoginAPI } from "../../../../../../../services/authServices";
 import { AiOutlineClose } from "react-icons/ai";
+import { candidateStatuses } from "../../../../../../CandidatePage/utils/candidateStatuses";
 
 const returnMissingMember = (bigMember, smallMember) => {
   let data = bigMember;
@@ -33,67 +30,56 @@ const AddMemberPopup = ({
 }) => {
   const [name, setname] = useState(team_name);
   const [loading, setloading] = useState(false);
-  const [displaidMembers, setDesplaidMembers] = useState(
-    returnMissingMember(bigMember, members)?.map((member, index) => ({
-      id: index,
-      member,
-    }))
-  );
+  const [desplaidMembers, setDesplaidMembers] = useState([]);
   const [inputMembers, setInputMembers] = useState([]);
   const [query, setquery] = useState("");
   const {
-    currentUser,
-    setCurrentUser,
-    portfolioLoaded,
-    setPortfolioLoaded,
-    isNotOwnerUser,
-    setIsNotOwnerUser,
     allCompanyApplications,
   } = useCurrentUserContext();
 
   const AddedMember = (id) => {
     setInputMembers([
       ...inputMembers,
-      displaidMembers?.find((f) => f.id === id),
+      desplaidMembers?.find((f) => f.id === id),
     ]);
-    setDesplaidMembers(displaidMembers?.filter((f) => f.id !== id));
+    setDesplaidMembers(desplaidMembers?.filter((f) => f.id !== id));
   };
   const removeMember = (id) => {
     setInputMembers(inputMembers.filter((f) => f.id !== id));
     setDesplaidMembers([
-      ...displaidMembers,
+      ...desplaidMembers,
       inputMembers.find((f) => f.id === id),
     ]);
   };
 
   const EditTeamFunction = () => {
-    if (!loading) {
-      if (name && inputMembers.length > 0) {
-        setloading(true);
-        EditTeam(team._id, {
-          team_name,
-          team_description: team.team_description,
-          members: [...inputMembers.map((m) => m.member)],
-        })
-          .then((resp) => {
-            console.log(resp);
-            getElementToTeamState(name, [...inputMembers.map((m) => m.member)]);
-            setteam({
-              ...team,
-              members: [...inputMembers.map((m) => m.member)],
-            });
-            toast.success("Edit Team Successfully");
-            close();
-            setloading(false);
-          })
-          .catch((err) => {
-            console.log(name, [...inputMembers.map((m) => m.member)]);
-            setloading(false);
+    // if (!loading) {
+    // }
+    if (name && inputMembers.length > 0) {
+      setloading(true);
+      EditTeam(team._id, {
+        team_name,
+        team_description: team.team_description,
+        members: [...inputMembers.map((m) => m.member)],
+      })
+        .then((resp) => {
+          console.log(resp);
+          getElementToTeamState(name, [...inputMembers.map((m) => m.member)]);
+          setteam({
+            ...team,
+            members: [...inputMembers.map((m) => m.member)],
           });
-      } else {
-        toast.error("Complete all fields before submitting");
-        setloading(false);
-      }
+          toast.success("Edit Team Successfully");
+          close();
+          setloading(false);
+        })
+        .catch((err) => {
+          console.log(name, [...inputMembers.map((m) => m.member)]);
+          setloading(false);
+        });
+    } else {
+      toast.error("Complete all fields before submitting");
+      setloading(false);
     }
   };
 
@@ -101,117 +87,35 @@ const AddMemberPopup = ({
     const newMembers = members.map((v, i) => ({
       id: new Date().getTime() + i,
       member: v,
+      applicant: v,
     }));
+
     setInputMembers([...newMembers]);
-
-    if (portfolioLoaded) {
-      const membersFromUserPortfolio = isNotOwnerUser
-        ? currentUser?.selected_product?.userportfolio
-          .map((v) =>
-            v.username.length !== 0 && v.username[0] !== "owner"
-              ? Array.isArray(v.username)
-                ? v.username[0]
-                : v.username
-              : null
-          )
-          .filter((v) => v !== null)
-        : currentUser?.userportfolio
-          ?.filter((user) => user.member_type !== "owner")
-          .map((v) =>
-            v.username.length !== 0
-              ? Array.isArray(v.username)
-                ? v.username[0]
-                : v.username
-              : null
-          )
-          .filter((v) => v !== null);
-
-      setDesplaidMembers(
-        returnMissingMember(membersFromUserPortfolio, members)?.map(
-          (member, index) => ({ id: index, member })
-        )
-      );
-      return;
-    }
-
-    const currentSessionId = sessionStorage.getItem("session_id");
-    if (!currentSessionId) return;
-
-    const teamManagementProduct = currentUser?.portfolio_info.find(
-      (item) =>
-        item.product === teamManagementProductName &&
-        item.member_type === "owner"
+    setDesplaidMembers(
+      allCompanyApplications
+      ?.filter(application => application.status === candidateStatuses.ONBOARDING)
+      ?.filter(application => !members?.includes(application.username))
+      ?.map(
+        (application) => ({ 
+          id: application?._id, 
+          member: application?.username, 
+          applicant: application?.applicant 
+        })
+      )
     );
 
-    if (
-      !(
-        (currentUser.settings_for_profile_info &&
-          currentUser.settings_for_profile_info.profile_info[
-            currentUser.settings_for_profile_info.profile_info.length - 1
-          ].Role === testingRoles.superAdminRole) ||
-        currentUser.isSuperAdmin
-      ) &&
-      !teamManagementProduct
-    ) {
-      console.log("No team management product found for current user");
-      const membersFromUserPortfolio = allCompanyApplications.map(application => {
-        return {
-          member: application.username,
-          id: application._id,
-        }
-      })
-
-      setDesplaidMembers(
-        returnMissingMember(membersFromUserPortfolio, members)?.map(
-          (member, index) => ({ id: index, member })
-        )
-      );
-      setIsNotOwnerUser(true);
-      return setPortfolioLoaded(true);
-    }
-
-    const dataToPost = {
-      session_id: currentSessionId,
-      product: teamManagementProduct?.product
-        ? teamManagementProduct?.product
-        : teamManagementProductName,
-    };
-
-    getUserInfoFromLoginAPI(dataToPost)
-      .then((res) => {
-        setCurrentUser(res.data);
-        const membersFromUserPortfolio = allCompanyApplications.map(application => {
-          return {
-            member: application.username,
-            id: application._id,
-          }
-        })
-
-        setDesplaidMembers(
-          returnMissingMember(membersFromUserPortfolio, members)?.map(
-            (member, index) => ({ id: index, member })
-          )
-        );
-        setPortfolioLoaded(true);
-        setIsNotOwnerUser(false);
-      })
-      .catch((err) => {
-        console.log("Failed to get user details from login API");
-        console.log(err.response ? err.response.data : err.message);
-        setPortfolioLoaded(true);
-      });
-  }, []);
+  }, [allCompanyApplications]);
 
   return (
-    <div className='overlay'>
-      <div className='add-member-popup' style={{ zIndex: 100 }}>
-        <button className='close-btn' onClick={close}>
+    <div className="overlay">
+      <div className="add-member-popup" style={{ zIndex: 100 }}>
+        <button className="close-btn" onClick={close}>
           <AiOutlineClose />
         </button>
         <h2>Edit Team Members</h2>
         <br />
-        <label htmlFor=''>Team Members</label>
-        <div className='added-members-input'>
+        <label htmlFor="">Team Members</label>
+        <div className="added-members-input">
           {inputMembers.map((v) => (
             <div key={v.id} onClick={() => removeMember(v.id)}>
               <p>{v.member}</p>
@@ -219,54 +123,52 @@ const AddMemberPopup = ({
             </div>
           ))}
           <input
-            type='text'
-            placeholder='search member'
+            type="text"
+            placeholder="search member"
             value={query}
             onChange={(e) => setquery(e.target.value)}
           />
         </div>
         <div></div>
         <br />
-        <label htmlFor='task_name'>Select Members</label>
-        {!portfolioLoaded ? (
-          <LoadingSpinner width={"1.5rem"} height={"1.5rem"} />
-        ) : (
-          <div className='members'>
-            {[
+        <label htmlFor="task_name">Select Members</label>
+        <div className="members">
+          {
+            [
               ...new Map(
-                displaidMembers?.map((member) => [member.member, member])
+                desplaidMembers?.map((member) => [member.member, member])
               ).values(),
             ].filter((f) =>
-              f.member.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+              f?.member?.toLocaleLowerCase()?.includes(query.toLocaleLowerCase()) ||
+              f?.applicant?.toLocaleLowerCase()?.includes(query.toLocaleLowerCase())
             ).length > 0 ? (
               [
                 ...new Map(
-                  displaidMembers?.map((member) => [member.member, member])
+                  desplaidMembers?.map((member) => [member.member, member])
                 ).values(),
               ]
-                .filter((f) =>
-                  f.member
-                    .toLocaleLowerCase()
-                    .includes(query.toLocaleLowerCase())
-                )
-                .map((element) => (
-                  <div
-                    className='single-member'
-                    onClick={() => AddedMember(element.id)}
-                  >
-                    <p>{element.member}</p>
-                    <BsPlus />
-                  </div>
-                ))
-            ) : (
+              .filter((f) =>
+                f?.member?.toLocaleLowerCase()?.includes(query.toLocaleLowerCase()) ||
+                f?.applicant?.toLocaleLowerCase()?.includes(query.toLocaleLowerCase())
+              )
+              .map((element) => (
+                <div
+                  className='single-member'
+                  onClick={() => AddedMember(element.id)}
+                >
+                  <p>{element.applicant}</p>
+                  <BsPlus />
+                </div>
+              ))) 
+            : (
               <h3>No More Members</h3>
-            )}
-          </div>
-        )}
+            )
+          }
+        </div>
 
-        <button className='edit-team' onClick={() => EditTeamFunction()}>
+        <button className="edit-team" onClick={() => EditTeamFunction()}>
           {loading ? (
-            <LoadingSpinner color={"white"} width='20px' height='20px' />
+            <LoadingSpinner color={"white"} width="20px" height="20px" />
           ) : (
             "Edit Team"
           )}

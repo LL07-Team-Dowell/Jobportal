@@ -11,6 +11,7 @@ import {
 } from "../../../../services/paymentService";
 import { useCurrentUserContext } from "../../../../contexts/CurrentUserContext";
 import {
+  calculateHoursOfLogs,
   formatDateForAPI,
   getDaysDifferenceBetweenDates,
   getMondayAndFridayOfWeek,
@@ -27,7 +28,10 @@ const GenerateInvoice = ({
   handleCloseModal,
   requiredLogCount,
   currentUserHiredApplications,
-  currentUserHiredApplicationsLoaded,
+  // currentUserHiredApplicationsLoaded,
+  isGrouplead,
+  isTeamlead,
+  options,
 }) => {
   const [dataProcessing, setDataProcessing] = useState(false);
   const [showInvoicePage, setShowInvoicePage] = useState(false);
@@ -48,7 +52,7 @@ const GenerateInvoice = ({
     if (!paymentFrom || !paymentTo)
       return toast.info("Select a both start and end dates");
 
-    if (getDaysDifferenceBetweenDates(paymentFrom, paymentTo) >= 7) {
+    if (getDaysDifferenceBetweenDates(paymentFrom, paymentTo) !== 7) {
       return toast.info(
         "Difference between start and end date should be equal to 7 days!"
       );
@@ -56,9 +60,6 @@ const GenerateInvoice = ({
 
     const { monday, friday } = getMondayAndFridayOfWeek(paymentFrom);
     console.log(monday, friday);
-
-    // if (paymentFrom && paymentTo !== selectedMonth)
-    //   return toast.info("Invoice must be within selected month");
 
     const attendanceProjects = currentUserHiredApplications
       .map((item) => {
@@ -75,7 +76,6 @@ const GenerateInvoice = ({
         user_id: currentUser.userinfo.userID,
         company_id: currentUser.portfolio_info[0].org_id,
       }),
-      getleaveDays(currentUser.userinfo.userID),
       // getInternetSpeedTest(currentUser.userinfo.email),
       attendanceProjects.map((project) => {
         return getUserWiseAttendance({
@@ -91,21 +91,46 @@ const GenerateInvoice = ({
     ])
       .then((res) => {
         console.log(res[0]?.data);
-        console.log(
-          res[1].data.response.filter((leave) =>
-            leave.Leave_Approval === "True" ? true : false
-          )
-        );
         // console.log(res[2]);
-        console.log(res[3]);
+        console.log(res[1]);
 
         const taskDetails = res[0]?.data?.task_details;
 
         const approvedLogs = taskDetails.filter((log) => log.approved === true);
+        const hours = calculateHoursOfLogs(approvedLogs);
 
-        const getUserOnLeave = res[1].data.response.filter((leave) =>
-          leave.Leave_Approval === "True" ? true : false
-        );
+        if ((isGrouplead || isTeamlead) && hours < 40) {
+          setDataProcessing(false);
+          return toast.info("Invoice failed as total hours less than 40 hours");
+        }
+
+        if ((!isGrouplead || !isTeamlead) && hours < 20) {
+          setDataProcessing(false);
+          return toast.info("Invoice failed as total hours less than 20 hours");
+        }
+
+        let allAttendanceData = [];
+
+        for (
+          let i = res[1];
+          i <= res[1 + (attendanceProjects.length - 1)];
+          i++
+        ) {
+          return allAttendanceData.push(
+            res[i]?.data?.data[`${currentUser.userinfo.username}`]
+          );
+        }
+
+        console.log(allAttendanceData);
+
+        if (
+          !allAttendanceData
+            .flat()
+            .find((item) => item.dates_present.length > 0)
+        ) {
+          setDataProcessing(false);
+          return toast.info("No attendance data found");
+        }
 
         const templateID = "64ece51ba57293efb539e5b7";
 
@@ -115,19 +140,9 @@ const GenerateInvoice = ({
           payment_year: selectedYear.label,
           payment_from: paymentFrom,
           payment_to: paymentTo,
-          user_was_on_leave: getUserOnLeave,
           approved_logs_count: approvedLogs.length,
           total_logs_required: requiredLogCount,
         };
-
-        if (
-          dataForInvoice.payment_from &&
-          dataForInvoice.payment_to === dataForInvoice.payment_month
-        ) {
-          setDataProcessing(false);
-
-          return toast.info("Invoice already created for this week");
-        }
 
         const dataForWorkflow = {
           company_id: currentUser.portfolio_info[0].org_id,
@@ -214,8 +229,27 @@ const GenerateInvoice = ({
               <>
                 <h2>New Invoice</h2>
                 <div>
+                  <label>
+                    <span>Select Payment From and To</span>
+                    <div className={styles.invoice_date_select}>
+                      <input
+                        type="date"
+                        value={formatDateForAPI(paymentFrom)}
+                        onChange={({ target }) => setPaymentFrom(target.value)}
+                        id="payment_from"
+                        className={styles.invoice_months}
+                      />
+                      <input
+                        type="date"
+                        value={formatDateForAPI(paymentTo)}
+                        onChange={({ target }) => setPaymentTo(target.value)}
+                        id="payment_to"
+                        className={styles.invoice_months}
+                      />
+                    </div>
+                  </label>
                   <label htmlFor="new_event">
-                    <span>Select Date</span>
+                    <span>Select Payment Month and Year</span>
                     <div className={styles.invoice_details_select}>
                       <Select
                         options={[
@@ -239,10 +273,7 @@ const GenerateInvoice = ({
                         placeholder="Select month"
                       />
                       <Select
-                        options={[
-                          { label: "2024", value: "2024" },
-                          { label: "2023", value: "2023" },
-                        ]}
+                        options={options}
                         onChange={(selectedOption) => {
                           setSelectedYear(selectedOption);
                         }}
@@ -250,24 +281,6 @@ const GenerateInvoice = ({
                         placeholder="Select year"
                       />
                     </div>
-                  </label>
-                  <label>
-                    <span>Payment From</span>
-                    <input
-                      type="date"
-                      value={formatDateForAPI(paymentFrom)}
-                      onChange={({ target }) => setPaymentFrom(target.value)}
-                      id="payment_from"
-                    />
-                  </label>
-                  <label>
-                    <span>Payment To</span>
-                    <input
-                      type="date"
-                      value={formatDateForAPI(paymentTo)}
-                      onChange={({ target }) => setPaymentTo(target.value)}
-                      id="payment_to"
-                    />
                   </label>
                 </div>
                 <div className={styles.process_btn}>
