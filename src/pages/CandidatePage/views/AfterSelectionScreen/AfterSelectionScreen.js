@@ -14,10 +14,13 @@ import AddIssueScreen from "../../../TeamleadPage/views/AddIssueScreen/AddIssueS
 import InvoicePayment from "../../../../common/screens/InvoicePayment/InvoicePayment";
 
 import "./style.css";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getAllTeams } from "../../../../services/createMembersTasks";
 import { getSettingUserProject } from "../../../../services/hrServices";
 import UsersLogsScreen from "../../../../common/screens/UserLogsScreen/UserLogsScreen";
+import InternalJobApply from "../../../../common/screens/InternalJobApply/InternalJobApply";
+import WorklogsLandingPage from "../WorklogsLandingPage/WorklogsLandingPage";
+import TitleNavigationBar from "../../../../components/TitleNavigationBar/TitleNavigationBar";
 
 const AfterSelectionScreen = ({ assignedProjects }) => {
   const { currentUser } = useCurrentUserContext();
@@ -35,6 +38,8 @@ const AfterSelectionScreen = ({ assignedProjects }) => {
   const [allProjects, setAllProjects] = useState([]);
   const [logRequestDate, setLogRequestDate] = useState(null);
   const { state } = useLocation();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (assignedProjects.length < 1) {
@@ -141,10 +146,21 @@ const AfterSelectionScreen = ({ assignedProjects }) => {
             hideSideNavigation={showAddTaskModal}
           >
             <div className="candidate__After__Selection__Screen">
+              <TitleNavigationBar 
+                className={'candidate__Back__Btnnn__Wrapp'}
+                handleBackBtnClick={() => navigate(-1)}
+                buttonWrapClassName={'candidate__Back__Btnnn'}
+              />
               <UsersLogsScreen />
+              {/* <WorklogsLandingPage /> */}
             </div>
           </JobLandingLayout>
         </>
+      ) : section === "worklogs" ? (
+        <JobLandingLayout user={currentUser} afterSelection={true}>
+          {/* <UsersLogsScreen /> */}
+          <WorklogsLandingPage />
+        </JobLandingLayout>
       ) : section === "teams" ? (
         <TeamsScreen />
       ) : section === "user" ? (
@@ -154,6 +170,10 @@ const AfterSelectionScreen = ({ assignedProjects }) => {
       ) : section === "invoice" ? (
         <JobLandingLayout user={currentUser} afterSelection={true}>
           <InvoicePayment />
+        </JobLandingLayout>
+      ) : section === "internal-job-apply" ? (
+        <JobLandingLayout user={currentUser} afterSelection={true}>
+          <InternalJobApply />
         </JobLandingLayout>
       ) : (
         <ErrorPage />

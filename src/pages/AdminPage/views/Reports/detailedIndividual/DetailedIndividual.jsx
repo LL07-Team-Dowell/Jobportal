@@ -24,6 +24,7 @@ import jsPDF from "jspdf";
 import { CSVLink } from "react-csv";
 import { candidateStatuses } from "../../../../CandidatePage/utils/candidateStatuses";
 import { indiv_report_img } from "../../../../../assets/assetsIndex";
+import { AiFillFilePdf } from "react-icons/ai";
 
 export const chartOptions = {
   responsive: true,
@@ -39,11 +40,11 @@ export default function DetailedIndividual({
   isProjectLead,
   subAdminView,
 }) {
-  const { 
-    currentUser, 
-    setCurrentUser, 
-    reportsUserDetails, 
-    allCompanyApplications 
+  const {
+    currentUser,
+    setCurrentUser,
+    reportsUserDetails,
+    allCompanyApplications
   } = useCurrentUserContext();
 
   const {
@@ -73,6 +74,7 @@ export default function DetailedIndividual({
   const csvLinkRef = useRef();
   const mainDivRef = useRef();
   const roleFilterRef = useRef();
+  const workLogRef = useRef();
 
   const date = new Date();
   const yesterdayDate = new Date(new Date().setDate(date.getDate() - 1));
@@ -125,7 +127,7 @@ export default function DetailedIndividual({
     );
     const currentUserSetting =
       foundUserSettingItem?.profile_info[
-        foundUserSettingItem?.profile_info?.length - 1
+      foundUserSettingItem?.profile_info?.length - 1
       ];
 
     console.log(foundCandidate);
@@ -152,52 +154,52 @@ export default function DetailedIndividual({
     }
 
     generateCommonAdminReport(payloadForIndividualReport)
-    .then((resp) => {
-      console.log({ id });
-      console.log(resp?.data?.response);
-      setCandidateData(resp?.data?.response?.tasks_details);
-      setPersonalInfo(resp?.data?.response?.personal_info);
-      setCandidateName(resp?.data?.response?.personal_info?.applicant);
+      .then((resp) => {
+        console.log({ id });
+        console.log(resp?.data?.response);
+        setCandidateData(resp?.data?.response?.tasks_details);
+        setPersonalInfo(resp?.data?.response?.personal_info);
+        setCandidateName(resp?.data?.response?.personal_info?.applicant);
 
-      setTaskReportData(resp?.data?.response?.task_report);
-      const dataForProjectGraph = {
-        labels: resp?.data?.response?.task_report?.map((item) => item.project),
-        datasets: [
-          {
-            label: "Hours",
-            data: resp?.data?.response?.task_report?.map((item) => item.total_hours),
-            backgroundColor: "blue",
-            maxBarThickness: 40,
-          },
-          {
-            label: "Work logs",
-            data: resp?.data?.response?.task_report?.map((item) => item.total_tasks),
-            backgroundColor: "#005734",
-            maxBarThickness: 40,
-          },
-          {
-            label: "Work logs uploaded this week",
-            data: resp?.data?.response?.task_report?.map(
-              (item) => item.tasks_uploaded_this_week
-            ),
-            backgroundColor: "yellow",
-            maxBarThickness: 40,
-          },
-        ],
-      };
-      setTaskProjectReportData(dataForProjectGraph);
-      setProjectSelectedForSubprojectBox(resp?.data?.response?.task_report[0]?.project);
-      setProjectSelectedForTasksBox(null);
+        setTaskReportData(resp?.data?.response?.task_report);
+        const dataForProjectGraph = {
+          labels: resp?.data?.response?.task_report?.map((item) => item.project),
+          datasets: [
+            {
+              label: "Hours",
+              data: resp?.data?.response?.task_report?.map((item) => item.total_hours),
+              backgroundColor: "blue",
+              maxBarThickness: 40,
+            },
+            {
+              label: "Work logs",
+              data: resp?.data?.response?.task_report?.map((item) => item.total_tasks),
+              backgroundColor: "#005734",
+              maxBarThickness: 40,
+            },
+            {
+              label: "Work logs uploaded this week",
+              data: resp?.data?.response?.task_report?.map(
+                (item) => item.tasks_uploaded_this_week
+              ),
+              backgroundColor: "yellow",
+              maxBarThickness: 40,
+            },
+          ],
+        };
+        setTaskProjectReportData(dataForProjectGraph);
+        setProjectSelectedForSubprojectBox(resp?.data?.response?.task_report[0]?.project);
+        setProjectSelectedForTasksBox(null);
 
-      if (foundUserSettingItem) {
-        setSelectedUserRoleSetting(currentUserSetting);
-      }
-      setSecondLoadng(false);
-    })
-    .catch((err) => {
-      console.error(err);
-      setSecondLoadng(false);
-    });
+        if (foundUserSettingItem) {
+          setSelectedUserRoleSetting(currentUserSetting);
+        }
+        setSecondLoadng(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setSecondLoadng(false);
+      });
   };
   const handleSelectChange = (id) => {
     getIndividualData(id);
@@ -213,54 +215,54 @@ export default function DetailedIndividual({
         ),
         getSettingUserProfileInfo(),
       ])
-      .then((promiseRes) => {
-        const candidatesRes = promiseRes[0]?.data?.response?.data?.filter(
-          item => item.data_type === reportsUserDetails?.data_type &&
-            item.user_id
-        )?.reverse();
+        .then((promiseRes) => {
+          const candidatesRes = promiseRes[0]?.data?.response?.data?.filter(
+            item => item.data_type === reportsUserDetails?.data_type &&
+              item.user_id
+          )?.reverse();
 
-        setcandidates(candidatesRes);
-        setcandidates2(candidatesRes);
+          setcandidates(candidatesRes);
+          setcandidates2(candidatesRes);
 
-        const settingsInfo = promiseRes[1]?.data
-        ?.reverse()
-        ?.filter(
-          (item) => item.company_id === reportsUserDetails?.company_id
-        )
-        ?.filter(
-          (item) => item.data_type === reportsUserDetails?.data_type
-        );
-        
-        setSettingsUserList(settingsInfo);
-        setFirstLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setFirstLoading(false);
-      });
+          const settingsInfo = promiseRes[1]?.data
+            ?.reverse()
+            ?.filter(
+              (item) => item.company_id === reportsUserDetails?.company_id
+            )
+            ?.filter(
+              (item) => item.data_type === reportsUserDetails?.data_type
+            );
+
+          setSettingsUserList(settingsInfo);
+          setFirstLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setFirstLoading(false);
+        });
 
       return
     }
 
     getSettingUserProfileInfo().then(res => {
-  
+
       setcandidates(allCompanyApplications.filter(item => item.user_id));
       setcandidates2(allCompanyApplications.filter(item => item.user_id));
 
       const settingsInfo = res?.data
-      ?.reverse()
-      ?.filter(
-        (item) =>
-          item.company_id === currentUser.portfolio_info[0].org_id
-      )
-      ?.filter(
-        (item) =>
-          item.data_type === currentUser.portfolio_info[0].data_type
-      );
+        ?.reverse()
+        ?.filter(
+          (item) =>
+            item.company_id === currentUser.portfolio_info[0].org_id
+        )
+        ?.filter(
+          (item) =>
+            item.data_type === currentUser.portfolio_info[0].data_type
+        );
 
       setSettingsUserList(settingsInfo);
       setFirstLoading(false);
-        
+
     }).catch(err => {
       console.log(err);
       setFirstLoading(false);
@@ -271,13 +273,13 @@ export default function DetailedIndividual({
     setOptions(
       currentRoleFilter === "currently working"
         ? candidates
-            ?.filter((candidate) => candidate.status === candidateStatuses.ONBOARDING)
-            .map((v) => ({ value: v._id, label: v.applicant }))
+          ?.filter((candidate) => candidate.status === candidateStatuses.ONBOARDING)
+          .map((v) => ({ value: v._id, label: v.applicant }))
         : currentRoleFilter === "currently not working"
-        ? candidates
+          ? candidates
             ?.filter((candidate) => candidate.status === candidateStatuses.REMOVED)
             .map((v) => ({ value: v._id, label: v.applicant }))
-        : candidates.map((v) => ({ value: v._id, label: v.applicant }))
+          : candidates.map((v) => ({ value: v._id, label: v.applicant }))
     );
   }, [currentRoleFilter, candidates]);
 
@@ -292,9 +294,9 @@ export default function DetailedIndividual({
       ?.tasks?.filter(
         (task) =>
           new Date(task.task_created_date).getTime() >=
-            new Date(startDateSelectedForTasksBox).getTime() &&
+          new Date(startDateSelectedForTasksBox).getTime() &&
           new Date(task.task_created_date).getTime() <=
-            new Date(endDateSelectedForTasksBox).getTime() &&
+          new Date(endDateSelectedForTasksBox).getTime() &&
           task.project === projectSelectedForTasksBox &&
           task.is_active &&
           task.task_created_date
@@ -350,17 +352,17 @@ export default function DetailedIndividual({
   };
 
   const handleDownloadPDFData = (elemRef) => {
-    if (!elemRef.current) return;
+    if (!elemRef?.current) return;
 
     setPDFBtnDisabled(true);
 
-    html2canvas(elemRef.current).then((canvas) => {
+    html2canvas(elemRef?.current).then((canvas) => {
       let dataURL = canvas.toDataURL("image/png");
 
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "px",
-        format: [elemRef.current.scrollHeight, elemRef.current.scrollWidth],
+        format: [elemRef?.current?.scrollHeight, elemRef?.current?.scrollWidth],
       });
 
       doc.addImage(dataURL, "PNG", 1, 1);
@@ -471,6 +473,17 @@ export default function DetailedIndividual({
                 <div className="personal__Info__Wrapper">
                   {/* {candidateName && <h3>Current candidate: {candidateName}</h3>} */}
                   <div className="personal_info">
+                    <div className='download_btn_' onClick={PDFbtnDisabled ? () => { } : () => handleDownloadPDFData(mainDivRef)}>
+                      <div className='internal_content'>
+                        <p className='download_text'>
+                          {
+                            PDFbtnDisabled ? 'Please wait...'
+                              :
+                              'Download Report'
+                          }
+                        </p>
+                      </div>
+                    </div>
                     <h3>Candidate personal info</h3>
                     <div>
                       <p>
@@ -555,128 +568,128 @@ export default function DetailedIndividual({
                         labels: Object.keys(candidateData),
                         datasets:
                           selectedUserRoleSetting &&
-                          selectedUserRoleSetting?.Role ===
+                            selectedUserRoleSetting?.Role ===
                             rolesNamesDict.Teamlead
                             ? [
-                                {
-                                  label: "Work logs approved",
-                                  backgroundColor: "blue",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key].tasks_approved;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                                {
-                                  label: "Work logs you approved",
-                                  backgroundColor: "orange",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key]
-                                        .tasks_you_approved;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                                {
-                                  label: "Work logs added",
-                                  backgroundColor: "#005734",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key].task_added;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                                {
-                                  label: "Work logs uncompleted",
-                                  backgroundColor: "red",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key]
-                                        .tasks_uncompleted;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                                {
-                                  label: "Work logs you marked as incomplete",
-                                  backgroundColor: "indigo",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key]
-                                        .tasks_you_marked_as_incomplete;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
+                              {
+                                label: "Work logs approved",
+                                backgroundColor: "blue",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key].tasks_approved;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                              {
+                                label: "Work logs you approved",
+                                backgroundColor: "orange",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key]
+                                      .tasks_you_approved;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                              {
+                                label: "Work logs added",
+                                backgroundColor: "#005734",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key].task_added;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                              {
+                                label: "Work logs uncompleted",
+                                backgroundColor: "red",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key]
+                                      .tasks_uncompleted;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                              {
+                                label: "Work logs you marked as incomplete",
+                                backgroundColor: "indigo",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key]
+                                      .tasks_you_marked_as_incomplete;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
 
-                                {
-                                  label: "Work logs completed",
-                                  backgroundColor: "yellow",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key].tasks_completed;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                                {
-                                  label: "Work logs you marked as complete",
-                                  backgroundColor: "#be6464",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key]
-                                        .tasks_you_marked_as_complete;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                              ]
+                              {
+                                label: "Work logs completed",
+                                backgroundColor: "yellow",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key].tasks_completed;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                              {
+                                label: "Work logs you marked as complete",
+                                backgroundColor: "#be6464",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key]
+                                      .tasks_you_marked_as_complete;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                            ]
                             : [
-                                {
-                                  label: "Work logs approved",
-                                  backgroundColor: "blue",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key].tasks_approved;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                                {
-                                  label: "Work logs added",
-                                  backgroundColor: "#005734",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key].task_added;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                                {
-                                  label: "Work logs uncompleted",
-                                  backgroundColor: "red",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key]
-                                        .tasks_uncompleted;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                                {
-                                  label: "Work logs completed",
-                                  backgroundColor: "yellow",
-                                  data: Object.keys(candidateData).map(
-                                    (key) => {
-                                      return candidateData[key].tasks_completed;
-                                    }
-                                  ),
-                                  maxBarThickness: 40,
-                                },
-                              ],
+                              {
+                                label: "Work logs approved",
+                                backgroundColor: "blue",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key].tasks_approved;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                              {
+                                label: "Work logs added",
+                                backgroundColor: "#005734",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key].task_added;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                              {
+                                label: "Work logs uncompleted",
+                                backgroundColor: "red",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key]
+                                      .tasks_uncompleted;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                              {
+                                label: "Work logs completed",
+                                backgroundColor: "yellow",
+                                data: Object.keys(candidateData).map(
+                                  (key) => {
+                                    return candidateData[key].tasks_completed;
+                                  }
+                                ),
+                                maxBarThickness: 40,
+                              },
+                            ],
                       }}
                     />
                   </div>
@@ -742,12 +755,12 @@ export default function DetailedIndividual({
                                       projectSelectedForSubprojectBox
                                   )
                                     ? Object.keys(
-                                        taskReportData?.find(
-                                          (item) =>
-                                            item.project ===
-                                            projectSelectedForSubprojectBox
-                                        )?.subprojects || {}
-                                      )
+                                      taskReportData?.find(
+                                        (item) =>
+                                          item.project ===
+                                          projectSelectedForSubprojectBox
+                                      )?.subprojects || {}
+                                    )
                                     : [],
                                   datasets: [
                                     {
@@ -758,18 +771,18 @@ export default function DetailedIndividual({
                                           projectSelectedForSubprojectBox
                                       )
                                         ? Object.keys(
-                                            taskReportData?.find(
-                                              (item) =>
-                                                item.project ===
-                                                projectSelectedForSubprojectBox
-                                            )?.subprojects || {}
-                                          ).map((subproject) => {
-                                            return taskReportData?.find(
-                                              (item) =>
-                                                item.project ===
-                                                projectSelectedForSubprojectBox
-                                            )?.subprojects[subproject];
-                                          })
+                                          taskReportData?.find(
+                                            (item) =>
+                                              item.project ===
+                                              projectSelectedForSubprojectBox
+                                          )?.subprojects || {}
+                                        ).map((subproject) => {
+                                          return taskReportData?.find(
+                                            (item) =>
+                                              item.project ===
+                                              projectSelectedForSubprojectBox
+                                          )?.subprojects[subproject];
+                                        })
                                         : [],
                                       backgroundColor: taskReportData?.find(
                                         (item) =>
@@ -777,23 +790,23 @@ export default function DetailedIndividual({
                                           projectSelectedForSubprojectBox
                                       )
                                         ? Object.keys(
-                                            taskReportData?.find(
-                                              (item) =>
-                                                item.project ===
-                                                projectSelectedForSubprojectBox
-                                            )?.subprojects || {}
-                                          ).map((subproject) => {
-                                            if (
-                                              currentTrack >
-                                              colors.length - 1
-                                            ) {
-                                              currentTrack = 0;
-                                            } else {
-                                              currentTrack += 1;
-                                            }
+                                          taskReportData?.find(
+                                            (item) =>
+                                              item.project ===
+                                              projectSelectedForSubprojectBox
+                                          )?.subprojects || {}
+                                        ).map((subproject) => {
+                                          if (
+                                            currentTrack >
+                                            colors.length - 1
+                                          ) {
+                                            currentTrack = 0;
+                                          } else {
+                                            currentTrack += 1;
+                                          }
 
-                                            return colors[currentTrack];
-                                          })
+                                          return colors[currentTrack];
+                                        })
                                         : [],
                                     },
                                   ],
@@ -806,7 +819,7 @@ export default function DetailedIndividual({
                         )}
                       </div>
                     </div>
-                    <div className="task__item tasks">
+                    <div className="task__item tasks" ref={workLogRef}>
                       <h4>Work log details</h4>
                       <p className="project__Select">Select project</p>
                       <Select
@@ -838,6 +851,7 @@ export default function DetailedIndividual({
                             disabled={
                               !projectSelectedForTasksBox ? true : false
                             }
+                            min={`${new Date().getFullYear()}-01-01`}
                             max={
                               new Date(endDateSelectedForTasksBox)
                                 .toISOString()
@@ -893,17 +907,17 @@ export default function DetailedIndividual({
                                       new Date(
                                         task.task_created_date
                                       ).getTime() >=
-                                        new Date(
-                                          startDateSelectedForTasksBox
-                                        ).getTime() &&
+                                      new Date(
+                                        startDateSelectedForTasksBox
+                                      ).getTime() &&
                                       new Date(
                                         task.task_created_date
                                       ).getTime() <=
-                                        new Date(
-                                          endDateSelectedForTasksBox
-                                        ).getTime() &&
+                                      new Date(
+                                        endDateSelectedForTasksBox
+                                      ).getTime() &&
                                       task.project ===
-                                        projectSelectedForTasksBox &&
+                                      projectSelectedForTasksBox &&
                                       task.is_active
                                   ).length
                               }
@@ -914,29 +928,29 @@ export default function DetailedIndividual({
                               {
                                 calculateHoursOfLogs(
                                   taskReportData
-                                  .find(
-                                    (task) =>
-                                      task.project ===
-                                      projectSelectedForTasksBox
-                                  )
-                                  ?.tasks?.filter(
-                                    (task) =>
-                                      new Date(
-                                        task.task_created_date
-                                      ).getTime() >=
+                                    .find(
+                                      (task) =>
+                                        task.project ===
+                                        projectSelectedForTasksBox
+                                    )
+                                    ?.tasks?.filter(
+                                      (task) =>
+                                        new Date(
+                                          task.task_created_date
+                                        ).getTime() >=
                                         new Date(
                                           startDateSelectedForTasksBox
                                         ).getTime() &&
-                                      new Date(
-                                        task.task_created_date
-                                      ).getTime() <=
+                                        new Date(
+                                          task.task_created_date
+                                        ).getTime() <=
                                         new Date(
                                           endDateSelectedForTasksBox
                                         ).getTime() &&
-                                      task.project ===
+                                        task.project ===
                                         projectSelectedForTasksBox &&
-                                      task.is_active
-                                  )
+                                        task.is_active
+                                    )
                                 )
                               }
                             </b>
@@ -947,9 +961,9 @@ export default function DetailedIndividual({
                               startDateSelectedForTasksBox
                             ).toDateString()}</b>{" "}
                             and<b>{" "}
-                            {new Date(
-                              endDateSelectedForTasksBox
-                            ).toDateString()}</b>
+                              {new Date(
+                                endDateSelectedForTasksBox
+                              ).toDateString()}</b>
                           </p>
                           {reportDataToDownload.length > 0 && (
                             <>
@@ -970,30 +984,11 @@ export default function DetailedIndividual({
                               </button>
                             </>
                           )}
-                          <div className="cand__task__Wrap">
+                          <div className="cand__task__Wrap" >
                             {!taskReportData?.find(
                               (task) =>
                                 task.project === projectSelectedForTasksBox
                             ) ||
-                            taskReportData
-                              .find(
-                                (task) =>
-                                  task.project === projectSelectedForTasksBox
-                              )
-                              ?.tasks?.filter(
-                                (task) =>
-                                  new Date(task.task_created_date).getTime() >=
-                                    new Date(
-                                      startDateSelectedForTasksBox
-                                    ).getTime() &&
-                                  new Date(task.task_created_date).getTime() <=
-                                    new Date(
-                                      endDateSelectedForTasksBox
-                                    ).getTime() &&
-                                  task.project === projectSelectedForTasksBox &&
-                                  task.is_active
-                              ).length < 1 ||
-                            !Array.isArray(
                               taskReportData
                                 .find(
                                   (task) =>
@@ -1001,23 +996,42 @@ export default function DetailedIndividual({
                                 )
                                 ?.tasks?.filter(
                                   (task) =>
+                                    new Date(task.task_created_date).getTime() >=
                                     new Date(
-                                      task.task_created_date
-                                    ).getTime() >=
+                                      startDateSelectedForTasksBox
+                                    ).getTime() &&
+                                    new Date(task.task_created_date).getTime() <=
+                                    new Date(
+                                      endDateSelectedForTasksBox
+                                    ).getTime() &&
+                                    task.project === projectSelectedForTasksBox &&
+                                    task.is_active
+                                ).length < 1 ||
+                              !Array.isArray(
+                                taskReportData
+                                  .find(
+                                    (task) =>
+                                      task.project === projectSelectedForTasksBox
+                                  )
+                                  ?.tasks?.filter(
+                                    (task) =>
+                                      new Date(
+                                        task.task_created_date
+                                      ).getTime() >=
                                       new Date(
                                         startDateSelectedForTasksBox
                                       ).getTime() &&
-                                    new Date(
-                                      task.task_created_date
-                                    ).getTime() <=
+                                      new Date(
+                                        task.task_created_date
+                                      ).getTime() <=
                                       new Date(
                                         endDateSelectedForTasksBox
                                       ).getTime() &&
-                                    task.project ===
+                                      task.project ===
                                       projectSelectedForTasksBox &&
-                                    task.is_active
-                                )
-                            ) ? (
+                                      task.is_active
+                                  )
+                              ) ? (
                               <>
                                 <img
                                   src={indiv_report_img}
@@ -1067,17 +1081,17 @@ export default function DetailedIndividual({
                                           new Date(
                                             task.task_created_date
                                           ).getTime() >=
-                                            new Date(
-                                              startDateSelectedForTasksBox
-                                            ).getTime() &&
+                                          new Date(
+                                            startDateSelectedForTasksBox
+                                          ).getTime() &&
                                           new Date(
                                             task.task_created_date
                                           ).getTime() <=
-                                            new Date(
-                                              endDateSelectedForTasksBox
-                                            ).getTime() &&
+                                          new Date(
+                                            endDateSelectedForTasksBox
+                                          ).getTime() &&
                                           task.project ===
-                                            projectSelectedForTasksBox &&
+                                          projectSelectedForTasksBox &&
                                           task.is_active &&
                                           task.task_created_date
                                       )
@@ -1097,7 +1111,7 @@ export default function DetailedIndividual({
                                               <td
                                                 className={
                                                   task.is_active &&
-                                                  task.is_active === true
+                                                    task.is_active === true
                                                     ? ""
                                                     : "deleted"
                                                 }
@@ -1109,7 +1123,7 @@ export default function DetailedIndividual({
                                               <td
                                                 className={
                                                   task.is_active &&
-                                                  task.is_active === true
+                                                    task.is_active === true
                                                     ? ""
                                                     : "deleted"
                                                 }
@@ -1119,7 +1133,7 @@ export default function DetailedIndividual({
                                               <td
                                                 className={
                                                   task.is_active &&
-                                                  task.is_active === true
+                                                    task.is_active === true
                                                     ? ""
                                                     : "deleted"
                                                 }
@@ -1129,7 +1143,7 @@ export default function DetailedIndividual({
                                               <td
                                                 className={
                                                   task.is_active &&
-                                                  task.is_active === true
+                                                    task.is_active === true
                                                     ? ""
                                                     : "deleted"
                                                 }
@@ -1139,7 +1153,7 @@ export default function DetailedIndividual({
                                               <td
                                                 className={
                                                   task.is_active &&
-                                                  task.is_active === true
+                                                    task.is_active === true
                                                     ? ""
                                                     : "deleted"
                                                 }
@@ -1149,7 +1163,7 @@ export default function DetailedIndividual({
                                               <td
                                                 className={
                                                   task.is_active &&
-                                                  task.is_active === true
+                                                    task.is_active === true
                                                     ? (task?.approved === true || task?.approval === true)
                                                       ? "approved"
                                                       : "not__Approved"
@@ -1161,7 +1175,7 @@ export default function DetailedIndividual({
                                               <td
                                                 className={
                                                   task.is_active &&
-                                                  task.is_active === true
+                                                    task.is_active === true
                                                     ? ""
                                                     : "deleted"
                                                 }
@@ -1206,16 +1220,18 @@ export default function DetailedIndividual({
           )}
         </div>
       </div>
-      {reportCaptureModal && (
-        <ReportCapture
-          closeModal={() => closeReportCaptureModal()}
-          htmlToCanvaFunction={() => {}}
-          handleExcelItemDownload={handleDownloadExcelData}
-          htmlToPdfFunction={() => handleDownloadPDFData(mainDivRef)}
-          pdfBtnIsDisabled={PDFbtnDisabled}
-        />
-      )}
-    </StaffJobLandingLayout>
+      {
+        reportCaptureModal && (
+          <ReportCapture
+            closeModal={() => closeReportCaptureModal()}
+            htmlToCanvaFunction={() => { }}
+            handleExcelItemDownload={handleDownloadExcelData}
+            htmlToPdfFunction={() => handleDownloadPDFData(workLogRef)}
+            pdfBtnIsDisabled={PDFbtnDisabled}
+          />
+        )
+      }
+    </StaffJobLandingLayout >
   );
 }
 // {Object.keys(candidateData).map((data, index) => (

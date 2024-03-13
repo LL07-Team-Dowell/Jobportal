@@ -20,6 +20,8 @@ import { teamManagementProductName } from "../../utils/utils";
 import { testingRoles } from "../../utils/testingRoles";
 import useCheckCurrentAuthStatus from "../../hooks/useCheckCurrentAuthStatus";
 import AuthOverlay from "../../components/AuthOverlay/AuthOverlay";
+import { getDaysDifferenceBetweenDates } from "../../helpers/helpers";
+import { MdOutlineWorkHistory } from "react-icons/md";
 
 const JobLandingLayout = ({
   children,
@@ -36,10 +38,38 @@ const JobLandingLayout = ({
     currentUser,
     currentAuthSessionExpired,
     setCurrentAuthSessionExpired,
+    currentUserHiredApplications,
+    setCurrentUserHiredApplications,
+    currentUserHiredApplicationsLoaded,
+    setCurrentUserHiredApplicationsLoaded,
   } = useCurrentUserContext();
   const [isSuperUser, setIsSuperUser] = useState(false);
+  const [linkCopy, setLinkCopy] = useState(afterSelectionLinks);
 
   useCheckCurrentAuthStatus(currentUser, setCurrentAuthSessionExpired);
+
+  useEffect(() => {
+    if (!currentUserHiredApplicationsLoaded) {
+      try {
+        const savedHiredApplications = JSON.parse(sessionStorage.getItem("user-hired-applications"));
+        
+        setCurrentUserHiredApplications(savedHiredApplications);
+        setCurrentUserHiredApplicationsLoaded(true);
+
+      } catch (error) {
+        console.log("No 'user-hired-applications' saved in session storage");
+      }
+    }
+
+    console.log(currentUserHiredApplicationsLoaded, currentUserHiredApplications);
+    // if (currentUserHiredApplications.find(app => getDaysDifferenceBetweenDates(app.onboarded_on, new Date()) > 180)) {
+    //   setLinkCopy([...afterSelectionLinks, {
+    //     text: "Internal Job Apply",
+    //     icon: <MdOutlineWorkHistory />,
+    //     linkAddress: "/internal-job-apply?type=Group_Lead",
+    //   }])
+    // }
+  }, [currentUserHiredApplicationsLoaded])
 
   useEffect(() => {
     if (location.pathname.includes("teams")) return setScreenTitle("Teams");
@@ -49,6 +79,7 @@ const JobLandingLayout = ({
     if (location.pathname.includes("work-log-request"))
       return setScreenTitle("Work log requests");
     if (location.pathname.includes("invoice")) return setScreenTitle("");
+    if (location.pathname.includes("internal-job-apply")) return setScreenTitle("Internal Job Application");
 
     setScreenTitle("Work logs");
   }, [location]);
@@ -143,7 +174,7 @@ const JobLandingLayout = ({
           {!hideSideNavigation && user && (
             <NewSideNavigationBar
               links={
-                afterSelection ? afterSelectionLinks : loggedInCandidateNavLinks
+                afterSelection ? linkCopy : loggedInCandidateNavLinks
               }
               superUser={isSuperUser}
             />

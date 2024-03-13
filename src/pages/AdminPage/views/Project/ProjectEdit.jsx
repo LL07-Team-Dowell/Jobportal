@@ -31,7 +31,6 @@ const ProjectEdit = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { currentUser } = useCurrentUserContext();
-  const location = useLocation();
   const [params, setParams] = useSearchParams();
   // const urlParams = new URLSearchParams(location.search);
   // const project = urlParams.get("project");
@@ -49,6 +48,7 @@ const ProjectEdit = () => {
     project: params.get("project"),
     company_id: currentUser.portfolio_info[0].org_id,
     data_type: currentUser.portfolio_info[0].data_type,
+    is_continuous: false,
   });
 
   const [copyOfProjectTimeDetail, setCopyOfProjectTimeDetail] = useState({
@@ -60,6 +60,7 @@ const ProjectEdit = () => {
     project: params.get("project"),
     company_id: currentUser.portfolio_info[0].org_id,
     data_type: currentUser.portfolio_info[0].data_type,
+    is_continuous: false,
   });
 
   const { subProjectsAdded, applications } = useJobContext();
@@ -84,22 +85,20 @@ const ProjectEdit = () => {
   };
 
   useEffect(() => {
-    const foundProjectlead = companyStructure?.project_leads
-      ?.find((item) =>
-        item?.projects_managed?.includes(
-          params.get("project")
-        )
-      )?.project_lead;
+    const foundProjectlead = companyStructure?.project_leads?.find((item) =>
+      item?.projects_managed?.includes(params.get("project"))
+    )?.project_lead;
 
-      console.log('found project lead -> ', foundProjectlead);
+    console.log("found project lead -> ", foundProjectlead);
 
     const fetchProjectDetails = async () => {
       try {
         if (params.get("id") && params.get("id") !== "null") {
           setLoading(true);
 
-          // Find the specific proect time object based on passed id
-          const projectDetails = (await getSingleProjectTime(params.get("id"))).data?.data[0];
+          // Find the specific project time object based on passed id
+          const projectDetails = (await getSingleProjectTime(params.get("id")))
+            .data?.data[0];
 
           if (projectDetails) {
             setProjectTimeDetail((prevDetails) => {
@@ -157,10 +156,11 @@ const ProjectEdit = () => {
 
     try {
       if (params.get("id") && params.get("id") !== "null") {
-        Promise.all([
+        await Promise.all([
           updateProjectTime({
             total_time: Number(copyOfProjectTimeDetail.total_time),
             document_id: params.get("id"),
+            is_continuous: copyOfProjectTimeDetail.is_continuous,
           }),
           updateProjectTimeEnabled({
             editing_enabled: copyOfProjectTimeDetail.editing_enabled,
@@ -175,6 +175,7 @@ const ProjectEdit = () => {
               return {
                 ...prevProjectDetail,
                 total_time: copyOfProjectTimeDetail.total_time,
+                is_continuous: copyOfProjectTimeDetail.is_continuous,
                 editing_enabled: copyOfProjectTimeDetail.editing_enabled,
               };
             });
@@ -424,7 +425,8 @@ const ProjectEdit = () => {
                     />
                     <TimeDetails
                       title={"Total time"}
-                      time={projectTimeDetail.total_time}
+                      time={projectTimeDetail?.is_continuous === true ? '∞' : projectTimeDetail.total_time}
+                      isTimeStr={true}
                     />
                   </div>
 
@@ -623,23 +625,52 @@ const ProjectEdit = () => {
                           />
                         </div>
                         <br />
-                        <div className={styles.job__details}>
-                          <label htmlFor="total_time">
-                            Total Time Allocated (in hours)
+                        {
+                          copyOfProjectTimeDetail.is_continuous ? <></> 
+                          :
+                          <>
+                            <div className={styles.job__details}>
+                              <label htmlFor="total_time">
+                                Total Time Allocated (in hours)
+                              </label>
+                              <input
+                                type="text"
+                                id="total_time"
+                                name="total_time"
+                                placeholder="Enter total time"
+                                value={copyOfProjectTimeDetail.total_time}
+                                onChange={(e) =>
+                                  handleTotalTimeChange(
+                                    e.target.value,
+                                    e.target.name
+                                  )
+                                }
+                              />
+                            </div>
+                            <br />
+                          </>
+                        }
+                        <div className={styles.is_continious_edit}>
+                          <div>
+                            <input
+                              className={styles.is_continuous}
+                              type="checkbox"
+                              name={"is_continuous"}
+                              checked={copyOfProjectTimeDetail.is_continuous}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  e.target.checked,
+                                  e.target.name
+                                )
+                              }
+                            />
+                          </div>
+                          <label
+                            htmlFor="is_continuous"
+                            className={styles.is_continious_desc}
+                          >
+                            Project Is Continuous ?
                           </label>
-                          <input
-                            type="text"
-                            id="total_time"
-                            name="total_time"
-                            placeholder="Enter total time"
-                            value={copyOfProjectTimeDetail.total_time}
-                            onChange={(e) =>
-                              handleTotalTimeChange(
-                                e.target.value,
-                                e.target.name
-                              )
-                            }
-                          />
                         </div>
                       </>
                     ) : (
@@ -661,24 +692,54 @@ const ProjectEdit = () => {
                           />
                         </div>
                         <br />
-                        <div className={styles.job__details}>
-                          <label htmlFor="total_time">
-                            Total Time Allocated (in hours)
+                        {
+                          copyOfProjectTimeDetail.is_continuous ? <></> 
+                          :
+                          <>
+                            <div className={styles.job__details}>
+                              <label htmlFor="total_time">
+                                Total Time Allocated (in hours)
+                              </label>
+                              <input
+                                type="text"
+                                id="total_time"
+                                name="total_time"
+                                placeholder="Enter total time"
+                                value={copyOfProjectTimeDetail.total_time}
+                                onChange={(e) =>
+                                  handleTotalTimeChange(
+                                    e.target.value,
+                                    e.target.name
+                                  )
+                                }
+                                disabled
+                              />
+                            </div>
+                            <br />
+                          </>
+                        }
+                        <div className={styles.is_continious_edit}>
+                          <div>
+                            <input
+                              className={styles.is_continuous}
+                              type="checkbox"
+                              name={"is_continuous"}
+                              checked={copyOfProjectTimeDetail.is_continuous}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  e.target.checked,
+                                  e.target.name
+                                )
+                              }
+                              disabled
+                            />
+                          </div>
+                          <label
+                            htmlFor="is_continuous"
+                            className={styles.is_continious_desc}
+                          >
+                            Project Is Continuous ?
                           </label>
-                          <input
-                            type="text"
-                            id="total_time"
-                            name="total_time"
-                            placeholder="Enter total time"
-                            value={copyOfProjectTimeDetail.total_time}
-                            onChange={(e) =>
-                              handleTotalTimeChange(
-                                e.target.value,
-                                e.target.name
-                              )
-                            }
-                            disabled
-                          />
                         </div>
                       </>
                     )}
