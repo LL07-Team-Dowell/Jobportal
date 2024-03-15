@@ -75,7 +75,7 @@ const Add = () => {
       setShowProjectsPop(true);
 
       // RESET STATE TO PREVENT PROJECT MODAL FROM POPPING UP AFTER EVERY RELOAD
-      window.history.replaceState({}, "/Jobportal/#/add");
+      window.history.replaceState({}, document.title, "/Jobportal/#/add");
     }
 
     if (currentUser?.userportfolio?.length > 0) return;

@@ -10,10 +10,12 @@ import { calculateHoursOfLogs, formatDateForAPI } from "../../../helpers/helpers
 import { getAllCompanyUserSubProject, getSubprojectAgendaAddedDates, getWeeklyAgenda, getWorkLogsAddedUnderSubproject } from "../../../services/commonServices";
 import LoadingSpinner from "../../../components/LoadingSpinner/LoadingSpinner";
 import { getSettingUserProject } from "../../../services/hrServices";
+import { approveGroupLeadAgenda } from "../../../services/teamleadServices";
 
 
 const TrackAgendaPage = ({
     restrictProjects = false,
+    isTeamLead = false
 }) => {
     const navigate = useNavigate();
     const { currentUser } = useCurrentUserContext();
@@ -39,6 +41,7 @@ const TrackAgendaPage = ({
     const [startSelectedDate, setStartSelectedDate] = useState(new Date());
     const firstRender = useRef(true);
     const [datesFetched, setDatesFetched] = useState(true);
+    const [isAgendaApproving, setIsAgendaApproving] = useState(false);
 
     const handleAgendaDetailUpdate = (keyToUpdate, newVal) => {
         setAgendaDetails((prevDetails) => {
@@ -208,6 +211,18 @@ const TrackAgendaPage = ({
         }
     }
 
+    const approveAgenda = async (agenda_id, agendaSubproject) => {
+        setIsAgendaApproving(true);
+        await approveGroupLeadAgenda(agenda_id,agendaSubproject).then(() => {
+            toast.success('Agenda approved successfully');
+        setIsAgendaApproving(false);
+        }).catch(err => {
+            console.log(err);
+            toast.error('Failed to approve agenda, please try again later');
+        setIsAgendaApproving(false);
+        })
+    }
+    
     return <>
         <div className={styles.wrapper}>
 

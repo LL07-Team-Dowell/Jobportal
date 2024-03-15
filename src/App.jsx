@@ -131,10 +131,10 @@ function App() {
   const [assignedProjects, setAssignedProjects] = useState([]);
   const [shorlistedJob, setshorlistedJob] = useState([]);
 
-  // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
-  return <Routes>
-    <Route path="*" element={<PageUnderConstruction showProductView={true} />} />
-  </Routes>
+  // // USE ONLY WHEN APP IS BROKEN/UNDERGOING MAJOR CHANGES
+  // return <Routes>
+  //   <Route path="*" element={<PageUnderConstruction showProductView={true} />} />
+  // </Routes>
 
   // console.log(shorlistedJob);
   useDowellLogin(
@@ -1718,16 +1718,16 @@ function App() {
             </JobContextProvider>
           }
         />
-        <Route
+        {/*<Route
           exact
           path="c/research-associate"
           element={<ResearchAssociatePage />}
-        />
-        {/* <Route
+        />*/}
+        <Route
           exact
           path="c/research-associate-2"
           element={<ResearchAssociatePage2 />}
-        /> */}
+        />
         <Route
           exact
           path="c/employee"
