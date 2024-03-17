@@ -1718,16 +1718,16 @@ function App() {
             </JobContextProvider>
           }
         />
-        <Route
+        {/*<Route
           exact
           path="c/research-associate"
           element={<ResearchAssociatePage />}
-        />
-        {/* <Route
+        />*/}
+        <Route
           exact
           path="c/research-associate-2"
           element={<ResearchAssociatePage2 />}
-        /> */}
+        />
         <Route
           exact
           path="c/employee"
