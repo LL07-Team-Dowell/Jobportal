@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import Overlay from "../../../../components/Overlay";
 import { AiOutlineClose } from "react-icons/ai";
 import styles from "./styles.module.css";
-import Select from "react-select";
 import {
+  getInvoiceRequest,
   getLogsBetweenRange,
   getleaveDays,
   processPayment,
@@ -75,11 +75,50 @@ const GenerateInvoice = ({
       })
       .flat();
 
-    const { month, year } = extractMonthandYear(paymentTo);
+    const { month, year } = extractMonthandYear(paymentFrom);
     console.log(month, year);
 
     setDataProcessing(true);
 
+    // CHECK IF A VALID INVOICE REQUEST EXISTS FOR USER
+    try {
+      const invoiceResponse = (await getInvoiceRequest(currentUser.portfolio_info[0].org_id)).data;
+      const invoiceRequest = invoiceResponse?.response;
+      
+      const foundRequest = invoiceRequest.find(
+        (request) =>
+          request?.username === currentUser.userinfo.username &&
+          request?.portfolio_name ===
+            currentUser?.portfolio_info[0]?.portfolio_name &&
+          request?.user_id === currentUser.userinfo.userID &&
+          request?.company_id === currentUser?.portfolio_info[0]?.org_id &&
+          request?.payment_month === month &&
+          request?.payment_year === year &&
+          request?.payment_from === paymentFrom &&
+          request?.payment_to === paymentTo
+      );
+
+      console.log(foundRequest);
+
+      if (!foundRequest) {
+        setDataProcessing(false);
+        toast.info(
+          "Please contact HR to create an invoice request for you or reach out to the team for assistance"
+        );
+        return;
+      }
+
+    } catch (error) {
+      console.log(error?.response ? error?.response?.data : error?.message);
+      setDataProcessing(false);
+      toast.info(
+        "Please contact HR to create an invoice request for you or reach out to the team for assistance"
+      );  
+
+      return;
+    }
+
+    // REQUESTS TO CHECK APPROVED LOGS AND ATTENDANCE
     const requestsToMake = [
       getLogsBetweenRange({
         start_date: paymentFrom,
@@ -108,17 +147,17 @@ const GenerateInvoice = ({
 
         const taskDetails = res[0]?.data?.task_details;
 
-        const approvedLogs = taskDetails.filter((log) => log.approved === true);
+        const approvedLogs = taskDetails.filter((log) => log?.approved || log?.aprroval === true);
         const hours = calculateHoursOfLogs(approvedLogs);
 
         if ((isGrouplead || isTeamlead) && hours < 40) {
           setDataProcessing(false);
-          return toast.info("Invoice failed as total hours less than 40 hours");
+          return toast.info("Invoice creation failed: Total approved log hours is less than 40 hours");
         }
 
         if ((!isGrouplead || !isTeamlead) && hours < 20) {
           setDataProcessing(false);
-          return toast.info("Invoice failed as total hours less than 20 hours");
+          return toast.info("Invoice creation failed: Total approved log hours is less than 20 hours");
         }
 
         let allAttendanceData = [];
@@ -137,19 +176,25 @@ const GenerateInvoice = ({
             .find((item) => item.dates_present.length > 0)
         ) {
           setDataProcessing(false);
-          return toast.info("No attendance data found");
+          return toast.info("Invoice creation failed: No attendance data found for specified period");
         }
 
         const templateID = "64ece51ba57293efb539e5b7";
 
         const dataForInvoice = {
           user_id: currentUser.userinfo.userID,
+          company_id: currentUser.portfolio_info[0].org_id,
+          company_name: currentUser.portfolio_info[0].org_name,
+          created_by: currentUser.userinfo.username,
+          portfolio: currentUser.portfolio_info[0].portfolio_name,
+          data_type: currentUser.portfolio_info[0].data_type,
           payment_month: month,
           payment_year: year,
           payment_from: paymentFrom,
           payment_to: paymentTo,
           approved_logs_count: approvedLogs.length,
           total_logs_required: requiredLogCount,
+          user_was_on_leave: false,
         };
 
         const dataForWorkflow = {
@@ -170,20 +215,30 @@ const GenerateInvoice = ({
         Promise.all([
           processPayment(dataForInvoice),
           workFlowdetails(dataForWorkflow),
-        ]).then((res) => {
-          const masterQrCodeDetails = res[1]?.data?.created_process.master_code;
-          const masterLinkDetails = res[1]?.data?.created_process.master_link;
+        ])
+          .then((res) => {
+            const masterQrCodeDetails =
+              res[1]?.data?.created_process.master_code;
+            const masterLinkDetails = res[1]?.data?.created_process.master_link;
 
-          setShowMasterCode(masterQrCodeDetails);
-          setShowMasterLink(masterLinkDetails);
+            setShowMasterCode(masterQrCodeDetails);
+            setShowMasterLink(masterLinkDetails);
 
-          setDataProcessing(false);
-          setShowInvoicePage(true);
-        });
+            setDataProcessing(false);
+            setShowInvoicePage(true);
+          })
+          .catch((err) => {
+            console.log(err?.response ? err?.response?.data : err?.message);
+            setDataProcessing(false);
+            toast.error(
+              "Invoice creation not successful. Please try again or contact the team for assistance"
+            );
+          });
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err?.response ? err?.response?.data : err?.message);
         setDataProcessing(false);
+        toast.error("Invoice creation failed. Please try again");
       });
   };
 
@@ -237,9 +292,10 @@ const GenerateInvoice = ({
               <>
                 <h2>New Invoice</h2>
                 <div>
-                  <label>
-                    <span>Select Payment From and To</span>
-                    <div className={styles.invoice_date_select}>
+                  <span>Select Dates</span>
+                  <div className={styles.invoice_date_select}>
+                    <label htmlFor="payment_from">
+                      <span>Payment from</span>
                       <input
                         type="date"
                         value={formatDateForAPI(paymentFrom)}
@@ -247,6 +303,9 @@ const GenerateInvoice = ({
                         id="payment_from"
                         className={styles.invoice_months}
                       />
+                    </label>
+                    <label htmlFor="payment_to">
+                      <span>Payment to</span>
                       <input
                         type="date"
                         value={formatDateForAPI(paymentTo)}
@@ -255,8 +314,8 @@ const GenerateInvoice = ({
                         min={formatDateForAPI(paymentFrom)}
                         className={styles.invoice_months}
                       />
-                    </div>
-                  </label>
+                    </label>
+                  </div>
                 </div>
                 <div className={styles.process_btn}>
                   {dataProcessing ? (

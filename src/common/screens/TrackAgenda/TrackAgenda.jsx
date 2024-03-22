@@ -41,7 +41,7 @@ const TrackAgendaPage = ({
     const [startSelectedDate, setStartSelectedDate] = useState(new Date());
     const firstRender = useRef(true);
     const [datesFetched, setDatesFetched] = useState(true);
-    const [isAgendaApproving, setIsAgendaApproving] = useState(false);
+    const [agendasBeingApproved, setAgendasBeingApproved] = useState([]);
 
     const handleAgendaDetailUpdate = (keyToUpdate, newVal) => {
         setAgendaDetails((prevDetails) => {
@@ -172,12 +172,12 @@ const TrackAgendaPage = ({
             const res = await Promise.all([
                 getWeeklyAgenda(copyOfApiLimits.start, copyOfApiLimits.end, agendaDetails.sub_project.replaceAll(' ', '-'), agendaDetails.project, {}),
                 getWorkLogsAddedUnderSubproject(
-                    currentUser.portfolio_info[0].org_id,
-                    agendaDetails.project,
-                    agendaDetails.sub_project,
                     {
                         start_date: agendaDetails.week_start,
-                        end_date: agendaDetails.week_end
+                        end_date: agendaDetails.week_end,
+                        project: agendaDetails.project,
+                        subproject: agendaDetails.sub_project,
+                        company_id: currentUser.portfolio_info[0].org_id,
                     }
                 )
             ])
@@ -212,15 +212,41 @@ const TrackAgendaPage = ({
     }
 
     const approveAgenda = async (agenda_id, agendaSubproject) => {
-        setIsAgendaApproving(true);
-        await approveGroupLeadAgenda(agenda_id,agendaSubproject).then(() => {
+        const [
+            copyOfAgendasBeingApproved,
+            copyOfAgendas,
+        ] = [
+            agendasBeingApproved.slice(),
+            agendasFetched.slice()
+        ];
+
+        if (copyOfAgendasBeingApproved.find(item => item === agenda_id)) return;
+
+        copyOfAgendasBeingApproved.push(agenda_id);
+        setAgendasBeingApproved(copyOfAgendasBeingApproved);
+
+        try {
+            const res = (await approveGroupLeadAgenda(agenda_id, agendaSubproject)).data;
+            console.log(res);
             toast.success('Agenda approved successfully');
-        setIsAgendaApproving(false);
-        }).catch(err => {
-            console.log(err);
+
+            const foundUpdatedAgendaIndex = copyOfAgendas.findIndex(agenda => agenda._id === agenda_id);
+            if (foundUpdatedAgendaIndex !== -1) {
+                const currentAgendaItem = copyOfAgendas[foundUpdatedAgendaIndex];
+                copyOfAgendas[foundUpdatedAgendaIndex] = {
+                    ...currentAgendaItem,
+                    lead_approval: true,
+                }
+
+                setAgendasFetched(copyOfAgendas);
+            }
+
+            setAgendasBeingApproved(copyOfAgendasBeingApproved.filter(item => item !== agenda_id));
+        } catch (error) {
+            console.log(error?.response ? error?.response?.data : error?.message);
             toast.error('Failed to approve agenda, please try again later');
-        setIsAgendaApproving(false);
-        })
+            setAgendasBeingApproved(copyOfAgendasBeingApproved.filter(item => item !== agenda_id));
+        }
     }
     
     return <>
@@ -379,20 +405,58 @@ const TrackAgendaPage = ({
                                 </div>
                             </div>
                             <div style={{ width: '100%' }}>
-                                <div className={styles.track__Agenda__Item}>
-                                    <div>
-                                        <p className={styles.date__Title}>
-                                            {new Date(agenda.week_start).getDate()} {new Date(agenda.week_start).toLocaleString('en-us', { month: 'short' })}, {`${new Date(agenda.week_start).getFullYear()}`.slice(-2)}
-                                        </p>
-                                        <p className={styles.stat__Subtitle}>Start</p>
+                                <div style={{ display: 'flex' }}>
+                                    <div className={styles.track__Agenda__Item}>
+                                        <div>
+                                            <p className={styles.date__Title}>
+                                                {new Date(agenda.week_start).getDate()} {new Date(agenda.week_start).toLocaleString('en-us', { month: 'short' })}, {`${new Date(agenda.week_start).getFullYear()}`.slice(-2)}
+                                            </p>
+                                            <p className={styles.stat__Subtitle}>Start</p>
+                                        </div>
+                                        <div>
+                                            <p className={styles.item__Title}>{agenda.agenda_title}</p>
+                                            <p className={styles.item__Subtitle}>{agenda.sub_project} . 0/{agenda.total_time} hrs</p>
+                                        </div>
+
                                     </div>
-                                    <div>
-                                        <p className={styles.item__Title}>{agenda.agenda_title}</p>
-                                        <p className={styles.item__Subtitle}>{agenda.sub_project} . 0/{agenda.total_time} hrs</p>
+                                    <div className={styles.approve_btn_}>
+                                        {
+                                            (isTeamLead && !agenda.lead_approval) ?
+                                                <button 
+                                                    className={styles.track__Btn}
+                                                    onClick={
+                                                        () => approveAgenda(agenda._id, agenda.sub_project)
+                                                    }
+                                                    disabled={
+                                                        agendasBeingApproved.find(item => item === agenda._id) ?
+                                                            true
+                                                        :
+                                                        false
+                                                    }
+                                                >
+                                                    {
+                                                        agendasBeingApproved.find(item => item === agenda._id) ?
+                                                            <LoadingSpinner width={20} height={20} /> 
+                                                        :
+                                                        'Approve'
+                                                    }
+                                                </button>
+                                            :
+                                            <></>
+                                        }
                                     </div>
                                 </div>
                                 {
                                     React.Children.toArray(agenda.timeline.map(item => {
+                                        const hourFromWorklogs = calculateHoursOfLogs(
+                                            taskDetailsForPeriod
+                                                .filter(
+                                                    log =>
+                                                        formatDateForAPI(log.task_created_date) === formatDateForAPI(item.timeline_start) ||
+                                                        formatDateForAPI(log.task_created_date) === formatDateForAPI(item.timeline_end)
+                                                )
+                                        );
+
                                         return <>
                                             <div className={styles.track__Agenda__Item}>
                                                 <div>
@@ -402,27 +466,20 @@ const TrackAgendaPage = ({
                                                     <p className={styles.stat__Subtitle}>
                                                         {
                                                             formatDateForAPI(item.timeline_start) === formatDateForAPI(new Date()) ? <>
-                                                                <span className={styles.agenda__in__Progress}>In progress</span>
+                                                                <span className={styles.agenda__in__Progress}>In progress ({hourFromWorklogs} hours of logs/{item.hours} estimated hours)</span>
                                                             </>
                                                             :
                                                             new Date().getTime() < new Date(item.timeline_start).getTime() ? <>
-                                                                <span className={styles.agenda__To__Do}>To do</span>
+                                                                <span className={styles.agenda__To__Do}>To do ({hourFromWorklogs} hours of logs/{item.hours} estimated hours)</span>
                                                             </>
                                                             :
-                                                            calculateHoursOfLogs(
-                                                                taskDetailsForPeriod
-                                                                    .filter(
-                                                                        log =>
-                                                                            log.task_created_date === item.timeline_start ||
-                                                                            log.task_created_date === item.timeline_end
-                                                                    )
-                                                            ) <= item.hours ?
+                                                            hourFromWorklogs <= Number(item.hours) ?
                                                                 <>
-                                                                    <span className={styles.agenda__On__time}>On time</span>
+                                                                    <span className={styles.agenda__On__time}>On time ({hourFromWorklogs} hours of logs/{item.hours} estimated hours)</span>
                                                                 </>
                                                             :
                                                             <>
-                                                                <span className={styles.agenda__Overdue}>Over Due</span>
+                                                                <span className={styles.agenda__Overdue}>Over Time ({hourFromWorklogs} hours of logs/{item.hours} estimated hours)</span>
                                                             </>
                                                         }
                                                     </p>

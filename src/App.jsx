@@ -25,9 +25,7 @@ import AfterSelectionScreen from "./pages/CandidatePage/views/AfterSelectionScre
 import AlertScreen from "./pages/CandidatePage/views/AlertsScreen/AlertScreen";
 import UserScreen from "./pages/CandidatePage/views/UserScreen/UserScreen";
 import AppliedScreen from "./pages/CandidatePage/views/AppliedPageScreen/AppliedScreen";
-import HrJobScreen from "./pages/HrPage/views/JobScreen/HrJobScreen";
 import Teamlead from "./pages/TeamleadPage/Teamlead";
-import AccountPage from "./pages/AccountPage/AccountPage";
 import { JobContextProvider } from "./contexts/Jobs";
 import AdminReports from "./pages/AdminPage/views/Reports/Reports";
 import RedirectPage from "./pages/Redirectpage/redirect";
@@ -53,7 +51,6 @@ import TeamScreenThreadCandidate from "./pages/CandidatePage/views/TeamScreenThr
 import JobLandingLayout from "./layouts/CandidateJobLandingLayout/LandingLayout";
 import TeamThread from "./pages/TeamleadPage/views/CreateMembersTask/views/compoonent/TeamThread/TeamThread";
 import UserDetailNotFound from "./pages/UserDetailNotFound/UserDetailNotFound";
-import Payment from "./pages/AccountPage/views/Payments/Payment";
 import TeamThreadScreen from "./pages/TeamleadPage/views/CreateMembersTask/views/compoonent/TeamThread/TeamThreadScreen";
 import GroupLeadTask from "./pages/GroupLeadPage/components/GroupLeadTask";
 import { PageUnderConstruction } from "./pages/UnderConstructionPage/ConstructionPage";
@@ -76,27 +73,22 @@ import NewGroupleadAgenda from "./pages/GroupLeadPage/views/Agenda/NewAgenda";
 import GroupleadTrackAgenda from "./pages/GroupLeadPage/views/Agenda/TrackAgenda";
 import CandidateRenewContract from "./pages/CandidatePage/views/CandidateRenewContract/CandidateRenewContract";
 import TeamLeadAgendaPage from "./pages/TeamleadPage/views/Agenda/TeamLeadAgendaPage";
-import AttendanceReport from "./pages/HrPage/views/AttendanceReport/AttendanceReport";
-import HrAllApplicationsScreen from "./pages/HrPage/views/AllApplicationsScreen/AllApplicationsScreen";
 import CompanyStructureContextProvider from "./contexts/CompanyStructureContext";
 import { mainAdminRoutesInfo } from "./routes/adminRoutes";
 import { projectLeadRoutesInfo } from "./routes/projectLeadRoutes";
-import HrAgendaPage from "./pages/HrPage/views/Agenda/HrTrackAgenda";
 import { subAdminRoutesInfo } from "./routes/subAdminRoutes";
 import useUpdateUserId from "./hooks/useUpdateUserId";
-import AttendanceLandingPage from "./pages/HrPage/views/AttendancePages/AttendanceLandingPage";
-import AttendanceUpdatePage from "./pages/HrPage/views/AttendanceReport/UpdateAttendance/UpdateAttendance";
 import { accountRoutesInfo } from "./routes/accountRoutes";
-import AgendaLandingPage from "./pages/HrPage/views/AgendaLandingPage/AgendaLandingPage";
-import HrAgendaReport from "./pages/HrPage/views/Agenda/HrAgendaReport/HrAgendaReport";
 import UsersLogsScreen from "./common/screens/UserLogsScreen/UserLogsScreen";
 import TeamleadLogApprovalScreen from "./pages/TeamleadPage/views/LogApprovalScreen/TeamleadLogApprovalScreen";
 import GroupleadLogApprovalScreen from "./pages/GroupLeadPage/views/LogApprovalScreen/GroupleadLogApprovalScreen";
-import HRCompanyStructure from "./pages/HrPage/views/CompanyStructure/HrCompanyStructure";
-import PaymentLandingPage from "./pages/AccountPage/views/PaymentLandingPage/PaymentLandingPage";
-import AccountsInvoicePage from "./pages/AccountPage/views/Payments/AccountsInvoicePage";
 import ResearchAssociatePage2 from "./pages/CandidatePage/views/ResearchAssocatiePage2/ResearchAssociatePage2";
 import { publicUserRoutes } from "./routes/publicUserRoutes";
+import {
+  productUserRoutes,
+  singleCategoryProductUserRoutes,
+} from "./routes/productUserRoutes";
+import { hrRoutesInfo } from "./routes/hrRoutes";
 
 function App() {
   console.log = () => { };
@@ -169,10 +161,10 @@ function App() {
   if (!currentUser && isPublicUser) {
     return (
       <Routes>
-        {
-          React.Children.toArray(
-            publicUserRoutes.map(route => {
-              return <Route 
+        {React.Children.toArray(
+          publicUserRoutes.map((route) => {
+            return (
+              <Route
                 path={route.path}
                 element={
                   <JobContextProvider>
@@ -182,9 +174,9 @@ function App() {
                   </JobContextProvider>
                 }
               />
-            })
-          )
-        }
+            );
+          })
+        )}
       </Routes>
     );
   }
@@ -194,173 +186,57 @@ function App() {
     if (productUserDetails.onlySingleJobCategoryPermitted) {
       return (
         <Routes>
-          {/* <Route
-            path={`c/${productUserDetails.categoryAllowed}`}
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <>
-                    {
-                      React.Children.toArray(categoriesForScreen.map(item => {
-                        if (item.category === productUserDetails.categoryAllowed) return <item.component />
-                        return <></>
-                      }))
-                    }
-                  </>
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          /> */}
-          <Route
-            path={`/jobs`}
-            element={
-              <JobContextProvider>
-                <CandidateJobsContextProvider>
-                  <JobScreen />
-                </CandidateJobsContextProvider>
-              </JobContextProvider>
-            }
-          />
-          <Route
-            path="/apply/job/:id"
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <JobApplicationScreen />
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          >
-            <Route
-              path=":section"
-              element={
-                <JobContextProvider>
-                  <NewApplicationContextProvider>
-                    <JobApplicationScreen />
-                  </NewApplicationContextProvider>
-                </JobContextProvider>
-              }
-            />
-          </Route>
-          <Route path="*" element={<>Page Not found</>} />
+          {React.Children.toArray(
+            singleCategoryProductUserRoutes.map((productRoute) => {
+              return (
+                <Route
+                  path={productRoute.path}
+                  element={
+                    <JobContextProvider>
+                      <NewApplicationContextProvider>
+                        <CandidateJobsContextProvider>
+                          <productRoute.component />
+                        </CandidateJobsContextProvider>
+                      </NewApplicationContextProvider>
+                    </JobContextProvider>
+                  }
+                />
+              );
+            })
+          )}
         </Routes>
       );
     }
 
     return (
       <Routes>
-        <Route
-          path="/"
-          element={
-            <JobContextProvider>
-              <NewApplicationContextProvider>
-                <CandidateHomeScreen
-                  setHired={setCandidateHired}
-                  setAssignedProjects={setAssignedProjects}
-                  setCandidateShortListed={setCandidateShortListed}
-                  setshorlistedJob={setshorlistedJob}
-                  setRemoved={setCandidateRemoved}
-                />
-              </NewApplicationContextProvider>
-            </JobContextProvider>
-          }
-        >
-          <Route
-            path=":section"
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <CandidateHomeScreen />
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          />
-        </Route>
-
-        <Route path="/jobs">
-          <Route
-            index
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <JobScreen />
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          />
-          <Route
-            path=":jobTitle"
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <SingleJobScreen />
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          />
-          <Route
-            exact
-            path="c/research-associate"
-            element={<ResearchAssociatePage />}
-          />
-          <Route
-            exact
-            path="c/employee"
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <EmployeeJobScreen />
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          />
-          <Route
-            exact
-            path="c/intern"
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <InternJobScreen />
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          />
-          <Route
-            exact
-            path="c/freelancer"
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <FreelancerJobScreen />
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          />
-        </Route>
-
-        <Route
-          path="/apply/job/:id"
-          element={
-            <JobContextProvider>
-              <NewApplicationContextProvider>
-                <JobApplicationScreen />
-              </NewApplicationContextProvider>
-            </JobContextProvider>
-          }
-        >
-          <Route
-            path=":section"
-            element={
-              <JobContextProvider>
-                <NewApplicationContextProvider>
-                  <JobApplicationScreen />
-                </NewApplicationContextProvider>
-              </JobContextProvider>
-            }
-          />
-        </Route>
-
-        <Route path="*" element={<ErrorPage />} />
+        {React.Children.toArray(
+          productUserRoutes.map((productRoute) => {
+            return (
+              <Route
+                path={productRoute.path}
+                element={
+                  <JobContextProvider>
+                    <NewApplicationContextProvider>
+                      {
+                        productRoute?.hasProps === true ?
+                          <productRoute.component
+                            setHired={setCandidateHired}
+                            setAssignedProjects={setAssignedProjects}
+                            setCandidateShortListed={setCandidateShortListed}
+                            setshorlistedJob={setshorlistedJob}
+                            setRemoved={setCandidateRemoved}
+                          /> 
+                        :
+                        <productRoute.component />
+                      }
+                    </NewApplicationContextProvider>
+                  </JobContextProvider>
+                }
+              />
+            );
+          })
+        )}
       </Routes>
     );
   }
@@ -493,7 +369,7 @@ function App() {
   ) {
     return (
       <Routes>
-        {/* {
+        {
           React.Children.toArray(accountRoutesInfo.map(info => {
             return <Route 
               path={info?.path}
@@ -506,27 +382,7 @@ function App() {
               }
             />
           }))
-        } */}
-
-        <Route path="/logout" element={<Logout />} />
-        <Route path="/payments" element={<PaymentLandingPage />} />
-        <Route path="/payments/payment-records" element={<Payment />} />
-        <Route path="/payments/invoice" element={<AccountsInvoicePage />} />
-
-        <Route
-          path="/"
-          element={
-            <NavigationContextProvider>
-              <CandidateContextProvider>
-                <AccountPage />
-              </CandidateContextProvider>
-            </NavigationContextProvider>
-          }
-        >
-          <Route path=":section" element={<AccountPage />} />
-        </Route>
-
-        <Route path="*" element={<ErrorPage />} />
+        }
       </Routes>
     );
   }
@@ -618,138 +474,26 @@ function App() {
   ) {
     return (
       <Routes>
-        <Route path="/logout" element={<Logout />} />
-        <Route
-          path="/attendance-"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <ValuesProvider>
-                <AttendanceLandingPage />
-              </ValuesProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        />
-        <Route
-          path="/attendance-/attendance-report"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <ValuesProvider>
-                <AttendanceReport />
-              </ValuesProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        />
-        <Route
-          path="/attendance-/attendance-update"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <ValuesProvider>
-                <AttendanceUpdatePage />
-              </ValuesProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        />
-        <Route
-          path="/agenda"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <ValuesProvider>
-                <AgendaLandingPage />
-              </ValuesProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        />
-        <Route
-          path="/agenda/track-agenda"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <ValuesProvider>
-                <HrAgendaPage />
-              </ValuesProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        />
-        <Route
-          path="/agenda/agenda-report"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <ValuesProvider>
-                <HrAgendaReport />
-              </ValuesProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        />
-        <Route
-          path="/all-users"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <ValuesProvider>
-                <HrAllApplicationsScreen />
-              </ValuesProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        />
-
-        <Route
-          path="/company-structure"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <ValuesProvider>
-                <HRCompanyStructure />
-              </ValuesProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        />
-
-        <Route
-          path="/"
-          element={
-            <HrJobScreenAllTasksContextProvider>
-              <NavigationContextProvider>
-                <HrCandidateContextProvider>
-                  <CandidateTaskContextProvider>
-                    <HrJobScreen />
-                  </CandidateTaskContextProvider>
-                </HrCandidateContextProvider>
-              </NavigationContextProvider>
-            </HrJobScreenAllTasksContextProvider>
-          }
-        >
-          <Route
-            path=":section"
-            element={
-              <HrJobScreenAllTasksContextProvider>
-                <NavigationContextProvider>
-                  <HrJobScreen />
-                </NavigationContextProvider>
-              </HrJobScreenAllTasksContextProvider>
-            }
-          >
-            <Route
-              path=":sub_section"
+        {
+          React.Children.toArray(hrRoutesInfo.map(route => {
+            return <Route
+              path={route?.path}
               element={
-                <HrJobScreenAllTasksContextProvider>
-                  <NavigationContextProvider>
-                    <HrJobScreen />
-                  </NavigationContextProvider>
-                </HrJobScreenAllTasksContextProvider>
-              }
-            >
-              <Route
-                path=":path"
-                element={
+                <NavigationContextProvider>
                   <HrJobScreenAllTasksContextProvider>
-                    <NavigationContextProvider>
-                      <HrJobScreen />
-                    </NavigationContextProvider>
+                    <ValuesProvider>
+                        <HrCandidateContextProvider>
+                          <CandidateTaskContextProvider>
+                            <route.component />
+                          </CandidateTaskContextProvider>
+                        </HrCandidateContextProvider>
+                    </ValuesProvider>
                   </HrJobScreenAllTasksContextProvider>
-                }
-              />
-            </Route>
-          </Route>
-        </Route>
-
-        <Route path="*" element={<ErrorPage />} />
+                </NavigationContextProvider>
+              }
+            />
+          }))
+        }
       </Routes>
     );
   }

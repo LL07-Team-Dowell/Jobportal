@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import TitleNavigationBar from "../../components/TitleNavigationBar/TitleNavigationBar";
 import {
   afterSelectionLinks,
+  candidateInternalJobRoute,
   loggedInCandidateNavLinks,
 } from "../../pages/CandidatePage/utils/afterSelectionLinks";
 import { dowellLoginUrl } from "../../services/axios";
@@ -21,7 +22,6 @@ import { testingRoles } from "../../utils/testingRoles";
 import useCheckCurrentAuthStatus from "../../hooks/useCheckCurrentAuthStatus";
 import AuthOverlay from "../../components/AuthOverlay/AuthOverlay";
 import { getDaysDifferenceBetweenDates } from "../../helpers/helpers";
-import { MdOutlineWorkHistory } from "react-icons/md";
 
 const JobLandingLayout = ({
   children,
@@ -49,6 +49,8 @@ const JobLandingLayout = ({
   useCheckCurrentAuthStatus(currentUser, setCurrentAuthSessionExpired);
 
   useEffect(() => {
+    if (!currentUser) return;
+
     if (!currentUserHiredApplicationsLoaded) {
       try {
         const savedHiredApplications = JSON.parse(sessionStorage.getItem("user-hired-applications"));
@@ -62,14 +64,10 @@ const JobLandingLayout = ({
     }
 
     console.log(currentUserHiredApplicationsLoaded, currentUserHiredApplications);
-    // if (currentUserHiredApplications.find(app => getDaysDifferenceBetweenDates(app.onboarded_on, new Date()) > 180)) {
-    //   setLinkCopy([...afterSelectionLinks, {
-    //     text: "Internal Job Apply",
-    //     icon: <MdOutlineWorkHistory />,
-    //     linkAddress: "/internal-job-apply?type=Group_Lead",
-    //   }])
+    // if (currentUserHiredApplications?.find(app => getDaysDifferenceBetweenDates(app?.onboarded_on, new Date()) > 180)) {
+    //   setLinkCopy([...afterSelectionLinks, candidateInternalJobRoute])
     // }
-  }, [currentUserHiredApplicationsLoaded])
+  }, [currentUser, currentUserHiredApplicationsLoaded])
 
   useEffect(() => {
     if (location.pathname.includes("teams")) return setScreenTitle("Teams");
@@ -79,7 +77,7 @@ const JobLandingLayout = ({
     if (location.pathname.includes("work-log-request"))
       return setScreenTitle("Work log requests");
     if (location.pathname.includes("invoice")) return setScreenTitle("");
-    if (location.pathname.includes("internal-job-apply")) return setScreenTitle("Internal Job Application");
+    if (location.pathname.includes("internal-job-apply")) return setScreenTitle("Internal Jobs");
 
     setScreenTitle("Work logs");
   }, [location]);
