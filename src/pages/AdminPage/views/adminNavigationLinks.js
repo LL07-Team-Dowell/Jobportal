@@ -66,11 +66,11 @@ export const adminNavigationLinks = [
         icon: <MdOutlineWorkOutline />,
         text: "Jobs",
       },
-      // {
-      //   linkAddress: "/leave",
-      //   icon: <MdOutlineCoPresent />,
-      //   text: "Leave",
-      // },
+      {
+        linkAddress: "/leave",
+        icon: <MdOutlineCoPresent />,
+        text: "Leave",
+      },
       {
         linkAddress: "/projects",
         icon: <GoTasklist />,
