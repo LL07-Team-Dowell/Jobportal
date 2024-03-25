@@ -1,46 +1,36 @@
 import React, { useState } from "react";
 import StaffJobLandingLayout from "../../../../layouts/StaffJobLandingLayout/StaffJobLandingLayout";
-import {
-  useNavigate,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import styles from "./styles.module.css";
 import { MdArrowBackIosNew } from "react-icons/md";
 import { useEffect } from "react";
 import {
   addProjectTime,
-  getCommits,
-  getProjectTime,
   getSingleProjectTime,
   updateProjectTime,
   updateProjectTimeEnabled,
 } from "../../../../services/projectTimeServices";
 import { useCurrentUserContext } from "../../../../contexts/CurrentUserContext";
+import { useGithubContext } from "../../../../contexts/GithubReportContext";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import LoadingSpinner from "../../../../components/LoadingSpinner/LoadingSpinner";
 import TimeDetails from "./components/TimeDetails/TimeDetails";
 import Avatar from "react-avatar";
 import { useJobContext } from "../../../../contexts/Jobs";
 import { toast } from "react-toastify";
-import SearchBar from "../../../../components/SearchBar/SearchBar";
 import { useCompanyStructureContext } from "../../../../contexts/CompanyStructureContext";
 import { labelColors } from "../../../../common/screens/CompanyStructure/utils/utils";
 import Select from "react-select";
+import CommitDetails from "./components/commitsDetails/CommitDetails";
 
 const ProjectEdit = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { currentUser } = useCurrentUserContext();
   const [params, setParams] = useSearchParams();
-  // const urlParams = new URLSearchParams(location.search);
-  // const project = urlParams.get("project");
-  // const id = urlParams.get("id");
-  // const { id } = useParams();
   const [showEditView, setShowEditView] = useState(false);
   const [dataPosting, setDataPosting] = useState(false);
-  const [repository, setRepository] = useState([]);
+  const { githubReports } = useGithubContext();
   const [selectedRepository, setSelectedRepository] = useState("");
 
   const [projectTimeDetail, setProjectTimeDetail] = useState({
@@ -97,13 +87,6 @@ const ProjectEdit = () => {
 
     console.log("found project lead -> ", foundProjectlead);
 
-    //Getting the commits from secure repository api
-    getCommits().then((res) => {
-      const repos = res.data?.data;
-      setRepository(repos);
-      console.log(repository);
-    });
-
     const fetchProjectDetails = async () => {
       try {
         if (params.get("id") && params.get("id") !== "null") {
@@ -148,7 +131,7 @@ const ProjectEdit = () => {
     fetchProjectDetails();
   }, [params]);
 
-  const options = repository.map((repo) => ({
+  const options = githubReports.map((repo) => ({
     label: repo.repository_name,
     value: repo.repository_name,
   }));
@@ -336,7 +319,34 @@ const ProjectEdit = () => {
                       </div>
                       <div className={styles.project__Time__lead__Display}>
                         <Avatar
-                          name={projectTimeDetail.lead_name}
+                          name={
+                            applications?.find(
+                              (application) =>
+                                application.username ===
+                                  companyStructure?.project_leads
+                                  ?.find(item => item?.projects?.find(structure => structure?.project === params.get('project')))
+                                  ?.projects?.find(item => item.project === params.get('project'))
+                                  ?.team_lead
+                            )
+                            ? 
+                              applications?.find(
+                                (application) =>
+                                  application.username ===
+                                    companyStructure?.project_leads
+                                    ?.find(item => item?.projects?.find(structure => structure?.project === params.get('project')))
+                                    ?.projects?.find(item => item.project === params.get('project'))
+                                    ?.team_lead
+                              )?.applicant
+                            : 
+                            applications?.find(
+                              (application) =>
+                                application.username ===
+                                  companyStructure?.project_leads
+                                  ?.find(item => item?.projects?.find(structure => structure?.project === params.get('project')))
+                                  ?.projects?.find(item => item.project === params.get('project'))
+                                  ?.team_lead
+                            )
+                          }
                           round={true}
                           size="3.2rem"
                         />
@@ -345,14 +355,29 @@ const ProjectEdit = () => {
                             {applications?.find(
                               (application) =>
                                 application.username ===
-                                projectTimeDetail.lead_name
+                                  companyStructure?.project_leads
+                                  ?.find(item => item?.projects?.find(structure => structure?.project === params.get('project')))
+                                  ?.projects?.find(item => item.project === params.get('project'))
+                                  ?.team_lead
                             )
                               ? applications?.find(
                                   (application) =>
                                     application.username ===
-                                    projectTimeDetail.lead_name
+                                      companyStructure?.project_leads
+                                      ?.find(item => item?.projects?.find(structure => structure?.project === params.get('project')))
+                                      ?.projects?.find(item => item.project === params.get('project'))
+                                      ?.team_lead
                                 )?.applicant
-                              : projectTimeDetail.lead_name}
+                              : 
+                                applications?.find(
+                                  (application) =>
+                                    application.username ===
+                                      companyStructure?.project_leads
+                                      ?.find(item => item?.projects?.find(structure => structure?.project === params.get('project')))
+                                      ?.projects?.find(item => item.project === params.get('project'))
+                                      ?.team_lead
+                                )
+                              }
                           </p>
                           <span
                             className={styles.lead__Hightlight__Item}
@@ -439,10 +464,14 @@ const ProjectEdit = () => {
                       title={"Spent time"}
                       time={projectTimeDetail.spent_time}
                     />
-                    <TimeDetails
-                      title={"Left time"}
-                      time={projectTimeDetail.left_time}
-                    />
+                    {projectTimeDetail?.is_continuous === true ? (
+                      <></>
+                    ) : (
+                      <TimeDetails
+                        title={"Left time"}
+                        time={projectTimeDetail.left_time}
+                      />
+                    )}
                     <TimeDetails
                       title={"Total time"}
                       time={
@@ -573,6 +602,14 @@ const ProjectEdit = () => {
                       )}
                     </TimeDetails>
                   </div>
+                  {!projectTimeDetail?.repository_name || projectTimeDetail?.repository_name?.length < 1 ? (
+                    <></>
+                  ) : (
+                    <CommitDetails
+                      title={"Commits"}
+                      projectTimeDetail={projectTimeDetail}
+                    />
+                  )}
                 </>
               ) : (
                 <>
@@ -671,7 +708,7 @@ const ProjectEdit = () => {
                             <br />
                           </>
                         )}
-                        {/* <div className={styles.job__details}>
+                        <div className={styles.job__details}>
                           <label
                             htmlFor="repository_name"
                             className={styles.is_continious_desc}
@@ -690,7 +727,7 @@ const ProjectEdit = () => {
                             placeholder="Select project repository"
                           />
                         </div>
-                        <br /> */}
+                        <br />
                         <div className={styles.is_continious_edit}>
                           <div>
                             <input
@@ -759,7 +796,7 @@ const ProjectEdit = () => {
                             <br />
                           </>
                         )}
-                        {/* <div className={styles.job__details}>
+                        <div className={styles.job__details}>
                           <label
                             htmlFor="repository_name"
                             className={styles.is_continious_desc}
@@ -779,7 +816,7 @@ const ProjectEdit = () => {
                             disabled
                           />
                         </div>
-                        <br /> */}
+                        <br />
                         <div className={styles.is_continious_edit}>
                           <div>
                             <input

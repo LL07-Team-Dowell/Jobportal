@@ -30,11 +30,11 @@ export const afterSelectionLinks = [
     icon: <AiOutlineTeam />,
     linkAddress: "/teams",
   },
-  // {
-  //   text: "Invoice",
-  //   icon: <LiaFileInvoiceSolid />,
-  //   linkAddress: "/invoice",
-  // },
+  {
+    text: "Invoice",
+    icon: <LiaFileInvoiceSolid />,
+    linkAddress: "/invoice",
+  },
   // {
   //   text: "User",
   //   icon: <FiUser />,

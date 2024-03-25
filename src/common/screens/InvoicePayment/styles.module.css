@@ -51,12 +51,22 @@
   margin-left: 1.2rem;
 }
 
+.get_invoice_section.accounts {
+  flex-direction: row;
+  gap: 3.5rem;
+}
+
 .invoice_details_select {
   display: flex;
   gap: 1.3rem;
   justify-content: space-between;
   width: 100%;
   margin-top: 0.8rem;
+}
+
+.invoice_details_select .invoice_details {
+  display: flex;
+  gap: 1.3rem;
 }
 
 .invoice_popup_details {
@@ -123,7 +133,7 @@
   background-color: white;
   border-radius: 20px;
   padding: 1.3%;
-  margin: 2rem;
+  margin: 1rem;
 }
 
 .report_agenda_list h3 {
@@ -150,7 +160,7 @@
   background-color: white;
   border-bottom: 1px solid #ddd;
   color: #000;
-  min-width: 12rem;
+  min-width: 10rem;
   /* padding: 2%; */
 }
 
@@ -195,7 +205,30 @@
   max-width: 14rem;
 }
 
-@media screen and (max-width: 767px) {
+.title__Wrap__H {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.approve__Btn {
+  border: 1px solid #005734;
+  background: none;
+  outline: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  transition: 0.3s ease-in-out;
+}
+
+.approve__Btn:not(:disabled):hover {
+  background-color: #005734;
+  color: #fff;
+}
+
+@media screen and (max-width: 920px) {
   .wrapper_invoice {
     padding: 1.4rem 0rem 14rem;
   }
@@ -216,8 +249,12 @@
   }
 
   .invoice_details_select {
-    width: 170%;
+    width: 100%;
     flex-direction: column;
+  }
+
+  .invoice_details_select .invoice_details {
+    gap: 0.8rem;
   }
 
   .weekly_agenda_list_table_div {
